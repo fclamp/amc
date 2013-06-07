@@ -1,0 +1,20 @@
+{
+    "name": "fclamp/imu",
+    "description": "",
+    "authors": [
+        {
+            "name": "fc_lamp",
+            "email": ""
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.0.x"
+    },
+    "autoload": {
+        "psr-0": {
+            "Fclamp\\Imu": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
