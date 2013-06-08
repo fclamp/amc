@@ -45,115 +45,63 @@
 ** REPLACEMENT, REPAIR OR RESUPPLY OF THE RELEVANT GOODS OR SERVICES
 ** (INCLUDING BUT NOT LIMITED TO SOFTWARE) OR THE PAYMENT OF THE COST OF SAME.
 */
-require_once dirname(__FILE__) . '/IMu.php';
-require_once IMu::$lib . '/Document.php';
+namespace Fclamp\Imu;
+use Fclamp\Imu\IMu;
+use Fclamp\Imu\IMuTrace;
+use Exception;
 
-class IMuRSS
+class IMuException extends Exception
 {
-	public $category;
-	public $copyright;
-	public $description;
-	public $encoding;
-	public $language;
-	public $link;
-	public $title;
-
+	/* Constructor */
 	public function
-	__construct()
+	__construct($id)
 	{
-		$this->category = '';
-		$this->copyright = '';
-		$this->description = '';
-		$this->encoding = 'UTF-8';
-		$this->language = '';
-		$this->link = '';
-		$this->title = '';
+		parent::__construct();
+		$this->code = 500;
+		$this->_id = $id;
+		$args = func_get_args();
+		array_shift($args);
+		$this->_args = $args;
+		IMuTrace::write(2, 'exception: %s', $this->__toString());
+	}
 
-		$this->items = array();
+	/* Properties */
+	public function
+	getArgs()
+	{
+		return $this->_args;
 	}
 
 	public function
-	addItem()
+	setArgs($args)
 	{
-		$item = new IMuRSSItem;
-		$this->items[] = $item;
-		return $item;
+		$this->_args = $args;
 	}
 
 	public function
-	createXML()
+	setCode($code)
 	{
-		$date = date('r');
-
-		$xml = new IMuDocument($this->encoding);
-		$root = $xml->startElement('rss');
-		$root->setAttribute('version', '2.0');
-		$xml->startElement('channel');
-		$xml->writeElement('category', $this->category);
-		$xml->writeElement('copyright', $this->copyright);
-		$xml->writeElement('description', $this->description);
-		$xml->writeElement('language', $this->language);
-		$xml->writeElement('lastBuildDate', $date);
-		$xml->writeElement('link', $this->link);
-		$xml->writeElement('pubDate', $date);
-		$xml->writeElement('title', $this->title);
-		foreach ($this->items as $item)
-			$item->createXML($xml);
-		$xml->endDocument();
-
-		return $xml->saveXML();
-	}
-
-	private $items;
-}
-
-class IMuRSSItem
-{
-	public $author;
-	public $category;
-	public $description;
-	public $length;
-	public $link;
-	public $mimeType;
-	public $pubDate;
-	public $title;
-	public $url;
-
-	public function
-	__construct()
-	{
-		$this->author = '';
-		$this->category = '';
-		$this->description = '';
-		$this->length = '';
-		$this->link = '';
-		$this->mimeType = '';
-		$this->pubDate = '';
-		$this->title = '';
-		$this->url = '';
+		$this->code = $code;
 	}
 
 	public function
-	createXML($xml)
+	getID()
 	{
-		$xml->startElement('item');
-
-		$xml->writeElement('author', $this->author);
-		$xml->writeElement('category', $this->category);
-		$xml->writeElement('description', $this->description);
-
-		$enclosure = $xml->startElement('enclosure');
-		$enclosure->setAttribute('url', $this->url);
-		$enclosure->setAttribute('length', $this->length);
-		$enclosure->setAttribute('type', $this->mimeType);
-		$xml->endElement();
-
-		$xml->writeElement('guid', $this->link);
-		$xml->writeElement('link', $this->link);
-		$xml->writeElement('pubDate', $this->pubDate);
-		$xml->writeElement('title', $this->title);
-
-		$xml->endElement();
+		return $this->_id;
 	}
+
+	/* Methods */
+	public function
+	__toString()
+	{
+		$str = $this->_id;
+		if ($this->_args != null && count($this->_args) > 0)
+			$str .= ' (' . implode(',', $this->_args) . ')';
+		$str .= ' [' . $this->getCode() . ']';
+		return $str;
+	}
+
+	private $_id;
+	private $_args;
 }
 ?>

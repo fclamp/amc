@@ -45,8 +45,14 @@
 ** REPLACEMENT, REPAIR OR RESUPPLY OF THE RELEVANT GOODS OR SERVICES
 ** (INCLUDING BUT NOT LIMITED TO SOFTWARE) OR THE PAYMENT OF THE COST OF SAME.
 */
+namespace Fclamp\Imu;
 class IMuTrace
 {
+	private static $_file = 'STDOUT';
+	private static $_handle = STDOUT;
+	private static $_level = 1;
+	private static $_prefix = '%D %T: ';
+		
 	/* Static Properties */
 	public static function
 	getFile()
@@ -116,7 +122,7 @@ class IMuTrace
 	public static function
 	writeArgs($level, $format, $args)
 	{
-		if (self::$_handle == null)
+		if (@self::$_handle == null)
 			return;
 		if ($level > self::$_level)
 			return;
@@ -213,10 +219,5 @@ class IMuTrace
 		if (self::$_handle != STDOUT)
 			flock(self::$_handle, LOCK_UN);
 	}
-
-	private static $_file = 'STDOUT';
-	private static $_handle = STDOUT;
-	private static $_level = 1;
-	private static $_prefix = '%D %T: ';
 }
 ?>

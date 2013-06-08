@@ -30,10 +30,21 @@ class ImuServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app ['imu'] = $this->app->share ( function ($app)
+		$this->app ['IMu'] = $this->app->share ( function ($app)
 		{
-			return new Imu;
+			return new Imu ();
 		} );
+		
+		$this->app ['IMuSession'] = $this->app->share ( function ($app)
+		{
+			return new IMuSession ();
+		} );
+		
+		$this->app ['IMuModule'] = $this->app->share ( function ($app)
+		{
+			return new IMuModule;
+		} );
+	
 	}
 	
 	/**
@@ -43,7 +54,7 @@ class ImuServiceProvider extends ServiceProvider
 	 */
 	public function provides()
 	{
-		 return array('imu');
+		return array ('imu' );
 	}
 
 }

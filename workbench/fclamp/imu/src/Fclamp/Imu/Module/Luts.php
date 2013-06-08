@@ -45,14 +45,31 @@
 ** REPLACEMENT, REPAIR OR RESUPPLY OF THE RELEVANT GOODS OR SERVICES
 ** (INCLUDING BUT NOT LIMITED TO SOFTWARE) OR THE PAYMENT OF THE COST OF SAME.
 */
-class IMu
+namespace Fclamp\Imu\Module;
+use Fclamp\Imu\Imu;
+use Fclamp\Imu\IMuModule;
+
+class IMuLuts extends IMuModule
 {
-	const VERSION = '1.0.03';
+	public function
+	__construct($session = false)
+	{
+		parent::__construct('eluts', $session);
 
-	public static $lib;
-	public static $language;
+		$this->name = 'Module::Luts';
+		unset($this->create);
+	}
+
+	public function
+	lookup($name, $langid, $level, $keys = false)
+	{
+		$params = array();
+		$params['name'] = $name;
+		$params['langid'] = $langid;
+		$params['level'] = $level;
+		if ($keys !== false)
+			$params['keys'] = $keys;
+		return $this->call('lookup', $params);
+	}
 }
-
-IMu::$lib = dirname(__FILE__);
-IMu::$language = 'en';
 ?>

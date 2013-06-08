@@ -45,27 +45,50 @@
 ** REPLACEMENT, REPAIR OR RESUPPLY OF THE RELEVANT GOODS OR SERVICES
 ** (INCLUDING BUT NOT LIMITED TO SOFTWARE) OR THE PAYMENT OF THE COST OF SAME.
 */
-require_once dirname(__FILE__) . '/IMu.php';
-require_once IMu::$lib . '/Handler.php';
+namespace Fclamp\Imu;
+use Fclamp\Imu\IMu;
+use Fclamp\Imu\IMuHandler;
 
-class IMuModules extends IMuHandler
+class IMuModule extends IMuHandler
 {
 	/* Constructor */
 	public function
-	__construct($session = null)
+	__construct($table, $session = null)
 	{
 		parent::__construct($session);
 
-		$this->_name = 'Modules';
+		$this->_name = 'Module';
+		$this->_create = $table;
+
+		$this->_table = $table;
+	}
+
+	/* Properties */
+	public function
+	getTable()
+	{
+		return $this->_table;
+	}
+
+	public function
+	__get($name)
+	{
+		switch ($name)
+		{
+		  case 'table':
+		  	return $this->getTable();
+		  default:
+		  	return parent::__get($name);
+		}
 	}
 
 	/* Methods */
 	public function
-	addFetchSet($name, $set)
+	addFetchSet($name, $columns)
 	{
 		$args = array();
 		$args['name'] = $name;
-		$args['set'] = $set;
+		$args['columns'] = $columns;
 		return $this->call('addFetchSet', $args) + 0;
 	}
 
@@ -76,11 +99,11 @@ class IMuModules extends IMuHandler
 	}
 
 	public function
-	addSearchAlias($name, $set)
+	addSearchAlias($name, $columns)
 	{
 		$args = array();
 		$args['name'] = $name;
-		$args['set'] = $set;
+		$args['columns'] = $columns;
 		return $this->call('addSearchAlias', $args) + 0;
 	}
 
@@ -91,11 +114,11 @@ class IMuModules extends IMuHandler
 	}
 
 	public function
-	addSortSet($name, $set)
+	addSortSet($name, $columns)
 	{
 		$args = array();
 		$args['name'] = $name;
-		$args['set'] = $set;
+		$args['columns'] = $columns;
 		return $this->call('addSortSet', $args) + 0;
 	}
 
@@ -108,164 +131,116 @@ class IMuModules extends IMuHandler
 	public function
 	fetch($flag, $offset, $count, $columns = null)
 	{
-		$params = array();
-		$params['flag'] = $flag;
-		$params['offset'] = $offset;
-		$params['count'] = $count;
+		$args = array();
+		$args['flag'] = $flag;
+		$args['offset'] = $offset;
+		$args['count'] = $count;
 		if ($columns != null)
-			$params['columns'] = $columns;
-		$data = $this->call('fetch', $params);
-
-		$result = new IMuModulesFetchResult;
-		$result->count = $data['count'] + 0;
-		$result->modules = array();
-		foreach ($data['modules'] as $item)
-		{
-			$module = new IMuModulesFetchModule;
-			$module->hits = $item['hits'] + 0;
-			$module->index = $item['index'] + 0;
-			$module->name = $item['name'];
-			$module->rows = $item['rows'];
-
-			$result->modules[] = $module;
-		}
-		if (array_key_exists('current', $data))
-			$result->current = $this->makePosition($data['current']);
-		if (array_key_exists('next', $data))
-			$result->next = $this->makePosition($data['next']);
-		if (array_key_exists('prev', $data))
-			$result->prev = $this->makePosition($data['prev']);
-
-		return $result;
+			$args['columns'] = $columns;
+		return $this->makeResult($this->call('fetch', $args));
 	}
 
 	public function
-	findAttachments($table, $column, $key)
+	findKey($key)
+	{
+		return $this->call('findKey', $key) + 0;
+	}
+
+	public function
+	findKeys($keys)
+	{
+		return $this->call('findKeys', $keys) + 0;
+	}
+
+	public function
+	findTerms($terms)
+	{
+		return $this->call('findTerms', $terms) + 0;
+	}
+
+	public function
+	findWhere($where)
+	{
+		return $this->call('findWhere', $where) + 0;
+	}
+
+	public function
+	insert($values, $columns = null)
 	{
 		$args = array();
-		$args['table'] = $table;
-		$args['column'] = $column;
-		$args['key'] = $key;
-		return $this->call('findAttachments', $args) + 0;
+		$args['values'] = $values;
+		if ($columns != null)
+			$args['columns'] = $columns;
+		return $this->call('insert', $args);
 	}
 
 	public function
-	findKeys($keys, $include = null)
+	remove($flag, $offset, $count = null)
 	{
 		$args = array();
-		$args['keys'] = $keys;
-		if ($include != null)
-			$args['include'] = $include;
-		return $this->call('findKeys', $args);
+		$args['flag'] = $flag;
+		$args['offset'] = $offset;
+		if ($count != null)
+			$args['count'] = $count;
+		return $this->call('remove', $args) + 0;
 	}
 
 	public function
-	findTerms($terms, $include = null)
-	{
-		$args = array();
-		$args['terms'] = $terms;
-		if ($include != null)
-			$args['include'] = $include;
-		return $this->call('findTerms', $args);
-	}
-
-	public function
-	getHits($module = null)
-	{
-		return $this->call('getHits', $module) + 0;
-	}
-
-	public function
-	restoreFromFile($file, $module = null)
+	restoreFromFile($file)
 	{
 		$args = array();
 		$args['file'] = $file;
-		if ($module != null)
-			$args['module'] = $module;
-		return $this->call('restoreFromFile', $args);
+		return $this->call('restoreFromFile', $args) + 0;
 	}
 
 	public function
-	restoreFromTemp($file, $module = null)
+	restoreFromTemp($file)
 	{
 		$args = array();
 		$args['file'] = $file;
-		if ($module != null)
-			$args['module'] = $module;
-		return $this->call('restoreFromTemp', $args);
+		return $this->call('restoreFromTemp', $args) + 0;
 	}
 
 	public function
-	setModules($list)
-	{
-		return $this->call('setModules', $list) + 0;
-	}
-
-	public function
-	sort($set, $flags = null)
+	sort($columns, $flags = null)
 	{
 		$args = array();
-		$args['set'] = $set;
-		if ($flags !== null)
+		$args['columns'] = $columns;
+		if ($flags != null)
 			$args['flags'] = $flags;
 		return $this->call('sort', $args);
 	}
 
-	protected function
-	makePosition($array)
+	public function
+	update($flag, $offset, $count, $values, $columns = null)
 	{
-		$flag = $array['flag'];
-		$offset = $array['offset'] + 0;
-		return new IMuModulesFetchPosition($flag, $offset);
+		$args = array();
+		$args['flag'] = $flag;
+		$args['offset'] = $offset;
+		$args['count'] = $count;
+		$args['values'] = $values;
+		if ($columns != null)
+			$args['columns'] = $columns;
+		return $this->makeResult($this->call('update', $args));
+	}
+
+	protected $_table;
+
+	protected function
+	makeResult($data)
+	{
+		$result = new IMuModuleFetchResult;
+		$result->hits = $data['hits'];
+		$result->rows = $data['rows'];
+		$result->count = count($result->rows);
+		return $result;
 	}
 }
 
-class IMuModulesFetchResult
+class IMuModuleFetchResult
 {
 	public $count;
-	public $current;
-	public $modules;
-	public $next;
-	public $prev;
-
-	public function
-	__construct()
-	{
-		$this->count = 0;
-		$this->current = null;
-		$this->modules = null;
-		$this->next = null;
-		$this->prev = null;
-	}
-}
-
-class IMuModulesFetchModule
-{
 	public $hits;
-	public $index;
-	public $name;
 	public $rows;
-
-	public function
-	__construct()
-	{
-		$this->hits = 0;
-		$this->index = -1;
-		$this->name = null;
-		$this->rows = null;
-	}
-}
-
-class IMuModulesFetchPosition
-{
-	public $flag;
-	public $offset;
-
-	public function
-	__construct($flag, $offset)
-	{
-		$this->flag = $flag;
-		$this->offset = $offset;;
-	}
 }
 ?>

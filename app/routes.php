@@ -18,5 +18,16 @@ Route::get('/', function()
 
 Route::get('imu', function()
 {
-	return App::make('imu')->echoTest();
+	$im = App::make('IMu');
+	#return $im::VERSION;
+	$imSession = App::make('IMuSession');
+	$imSession->host='server.com';
+	$imSession->port = 12345; 
+	try
+	{
+		return $imSession->connect();	
+	}catch (Exception $e)
+	{
+		var_dump((string)$e);
+	}
 });
