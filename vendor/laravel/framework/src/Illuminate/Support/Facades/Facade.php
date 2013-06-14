@@ -167,7 +167,6 @@ abstract class Facade {
 	public static function __callStatic($method, $args)
 	{
 		$instance = static::resolveFacadeInstance(static::getFacadeAccessor());
-
 		switch (count($args))
 		{
 			case 0:

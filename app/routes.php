@@ -11,23 +11,34 @@
 |
 */
 
-Route::get('/', function()
+Route::get ( '/', function ()
 {
-	return View::make('hello');
-});
+	return View::make ( 'hello' );
+} );
 
-Route::get('imu', function()
+Route::get ( 'imu', function ()
 {
-	$im = App::make('IMu');
-	#return $im::VERSION;
-	$imSession = App::make('IMuSession');
-	$imSession->host='server.com';
-	$imSession->port = 12345; 
 	try
 	{
-		return $imSession->connect();	
-	}catch (Exception $e)
+		$mySession = App::make ( 'IMuSession' );
+		$mySession->host = '203.22.224.29';
+		$mySession->port = 40000;
+		$mySession->connect ();
+		
+		Config::set ( 'imu.module_table', 'eparties' );
+		$parties = App::make ( 'IMuModule' );
+		$search = array('NamLast','Smith');
+		$hits = $parties->findTerms($search);
+		$columns = array(
+			'irn',
+			'NamFirst',
+			'NamLast'
+		);
+		$result = $parties->fetch('start',0,3,$columns);
+		var_dump($result);
+	} catch ( Exception $e )
 	{
-		var_dump((string)$e);
+		var_dump($e);
 	}
-});
+
+} );
