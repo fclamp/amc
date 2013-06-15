@@ -29,12 +29,9 @@ Route::get ( 'imu', function ()
 		$parties = App::make ( 'IMuModule' );
 		$search = array('NamLast','Smith');
 		$hits = $parties->findTerms($search);
-		$columns = array(
-			'irn',
-			'NamFirst',
-			'NamLast'
-		);
-		$result = $parties->fetch('start',0,3,$columns);
+
+		$result = $parties->fetch('start',0,10);
+		echo '<Pre>';
 		var_dump($result);
 	} catch ( Exception $e )
 	{
