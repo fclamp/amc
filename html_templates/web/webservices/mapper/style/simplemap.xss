@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!DOCTYPE stylesheet 
+	[<!ENTITY nbsp "&#160;">
+	<!ENTITY rtrif "&#x25B8;">
+	<!ENTITY deg   "&#xB0;" >]
+>
+
+<!-- take internal portal xml and create html output
+-->
+
+<xsl:stylesheet version="1.0" 
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >
+
+<xsl:output method="html" indent='yes' disable-output-escaping="no"/>
+
+<xsl:template match="/">
+<html>
+	<head>
+		<title>
+			<xsl:text>Test Mapper Page</xsl:text>
+		</title>
+	</head>
+	<body style='background-color: #7f7f9f;'>
+		<xsl:apply-templates select='//mapper/map' />
+		<br />
+		<xsl:apply-templates select='//mapper/scalebar' />
+		<br />
+		<xsl:apply-templates select='//mapper/referenceMap' />
+		<br />
+		<xsl:apply-templates select='//mapper/legend' />
+		<br />
+	</body>
+</html>
+</xsl:template>
+
+
+<xsl:template match="map|referenceMap|scalebar">
+	<img>
+		<xsl:attribute name='src'>
+			<xsl:value-of select='.'/>
+		</xsl:attribute>
+	</img>
+</xsl:template> 
+
+<xsl:template match="legend">
+	<xsl:apply-templates select='legendEntry' />
+</xsl:template> 
+
+<xsl:template match="legendEntry">
+	<input>
+		<xsl:attribute name='type'>checkbox</xsl:attribute>
+		<xsl:attribute name='name'>
+			<xsl:value-of select='./layerName' />
+		</xsl:attribute>
+		<xsl:attribute name='value'>on</xsl:attribute>
+		<xsl:attribute name='onClick'>javascript:ChangeLayers()</xsl:attribute>
+		<xsl:if test='@selected = "yes"'>
+			<xsl:attribute name='checked'>1</xsl:attribute>
+		</xsl:if>
+	</input>	
+	<img>
+		<xsl:attribute name='src'>
+			<xsl:value-of select='./icon'/>
+		</xsl:attribute>
+	</img>
+	<xsl:value-of select='./displayName'/>
+	<br />
+</xsl:template> 
+
+
+<xsl:template match="*">
+</xsl:template> 
+
+</xsl:stylesheet>

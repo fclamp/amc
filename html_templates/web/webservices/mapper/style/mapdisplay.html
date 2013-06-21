@@ -1,0 +1,193 @@
+<html>
+
+<head>
+     	    <!-- (c)2000-2007 KE Software -->
+            <meta http-equiv="pragma" content="no-cache">
+            <meta http-equiv="cache-control" content="no-cache">
+            <meta http-equiv="imagetoolbar" content="no">
+
+	<title>Distribution Map</title>
+
+	<link rel="stylesheet" type="text/css" href="mapper/style/kemapper.css" />
+
+    	<script type='text/javascript'>
+
+		// globals need by javascript.
+		// Values for these set from the XML when processed by the HTML
+		// template mechanism
+		var ImgHeight = [imgHeight];
+		var ImgWidth = [imgWidth];
+		var Map = "[map]";
+		var ReferenceMap = "[referenceMap]";
+		var Scalebar = "[scalebar]";
+		var MapProjection = "[mapProjection]";
+		var MapUnits = "[projectionUnits]";
+		var Referer = "[displayParameters/referer]";
+		var MapperUrl = "[mapperUrl]?instance=[instance]&referer="+ Referer;
+		var MapExtent = "[extent]".split(" ");
+		var Passive = [passive];
+		var ActionRequested = "[displayParameters/actionRequested]";
+		var QueryDataStylesheet = "[displayParameters/queryDataStylesheet]";
+		var ReferredArguments = "[displayParameters/referredArguments]";
+
+		var Sources = new Array();
+
+		<repeatableBlock foreach='dataSource'>
+			Sources.push("[dataSource]");
+		</repeatableBlock>
+    	</script>
+
+    	<script type='text/javascript'  src="mapper/style/scripts/kemapdisplay.js">
+	</script>
+
+    </head>
+
+<body  onLoad='init();'>
+
+
+	<form id='form' method='post' action='' />
+		<table id="MapTable">
+			<tr>
+				<td id="HeaderCell" colspan="2">Distribution Map</td>
+				<td rowspan="3" id="MapSmallCell">
+					<img src='[referenceMap]' border="1"/>
+				</td>
+				
+		    </tr>
+			<tr>
+				<td id="ButtonsCell" colspan="2">
+					<p class="NewSearchLink"><a href='#' id='refererLinkTop'>New Search</a></p>
+						<img
+							src='mapper/images/zoomin.gif'
+							id='ZoomIn'  name='ZoomIn' value='Zoom In'
+							alt='Zoom In'
+							title='Zoom In'
+							onClick='javascript:selectTool("ZoomIn");'/>
+						<img
+							src='mapper/images/zoomout.gif'
+							id='ZoomOut'  name='ZoomOut' value='Zoom Out'
+							alt='Zoom Out'
+							title='Zoom Out'
+							onClick='javascript:selectTool("ZoomOut");'/>
+						<img
+							src='mapper/images/pan.gif'
+							id='Pan'  name='Pan' value='Pan'
+							alt='Pan'
+							title='Pan'
+							onClick=' javascript:selectTool("Pan");'/>
+						<img
+							src='mapper/images/query.gif'
+							id='Query'  name='Query' value='Query'
+							alt='Query Items'
+							title='Query'
+							onClick='javascript:selectTool("Query");'/>
+						<img
+							src='mapper/images/redraw.gif'
+							id='ReDraw'  name='ReDraw' value='Re Draw'
+							alt='Redraw'
+							title='Apply new settings'
+							onClick='javascript:selectTool("ReDraw"); mSubmit("ReDraw");'/>
+						<img
+							src='mapper/images/first.gif'
+							id='Initial'  name='Initial' value='Initial Map'
+							alt='First Map'
+							title='Reset map'
+							onClick='javascript:selectTool("Initial"); mSubmit("First");'/>
+						<!--<img
+							src='mapper/images/back.gif'
+							id='Back'  name='Back' value='Search Again'
+							alt='Search Again'
+							title='Search Again'
+							onClick='javascript:mSubmit("Return");'/>-->
+					</td>					
+			</tr>
+			<tr>
+				<td id="ButtonHelpCell">&nbsp;</td>
+				<td id="LatLongCell"></td>
+
+			</tr>
+			<tr>
+				<td colspan="2">
+					<div id="MapCell"></div>
+					<div id='xHairH'></div>
+					<div id='xHairV'></div>
+					<div id="rubberBand"></div>
+				</td>
+				
+				<td id="LayersCell" rowspan="3" onClick='selectTool("ReDraw");'>
+					<span class="labels">Show by:</span> <br/>
+					&nbsp;<input type='radio' name='showby' id='sortby_ScientificName' value='ScientificName'/>Scientific Name<br/>
+					&nbsp;<input type='radio' name='showby' id='sortby_Family' value='Family'/>Family<br/>
+					&nbsp;<input type='radio' name='showby' id='sortby_Genus' value='Genus'/>Genus<br/>
+					&nbsp;<input type='radio' name='showby' id='sortby_Species' value='Species'/>Species<br/>
+					&nbsp;<input type='radio' name='showby' id='sortby_Source' value='source'/>Source<br/>
+					<br/>&nbsp;<input type='radio' name='labels' id='labels' value='on' 
+					onClick='selectTool("ReDraw");'/> Show<input type='radio' name='labels' id='labelsoff' value='off' checked='true'
+					onClick='selectTool("ReDraw");'/>Hide&nbsp; Scientific Name<br/>
+					<br/>
+					<span class="labels">Map Layers:</span><br/>
+						<repeatableBlock foreach='staticLayer'>
+						<input type='checkbox' name='[staticLayer/layerName]'value='on' [staticLayer/status] />[staticLayer/name]  
+						<span class="FootnoteNumber">[staticLayer/noteId]</span>
+						<br/>
+					</repeatableBlock>
+				</td>	
+					
+					
+					
+					
+					
+				
+			</tr>
+			<tr>
+				<td id="ScaleBarCell" colspan="2"><img src='[scalebar]'/></td>
+			</tr>
+			<tr>
+				
+				<td id="Legend" colspan="2" >
+						<span class="labels"> [recordsPassed] specimens mapped</span><br/><span class='labels'> [missingLatLongs] have no geo-reference</span><br/>
+							<repeatableBlock foreach='warning'><br/><span class='alert'>[warning]</span>
+								<br/>
+							</repeatableBlock>
+							<br/>
+							<repeatableBlock foreach='dynamicLayer'>
+								<a href="http://www.google.com/scholar?q=[dynamicLayer/name]"><img src='images/info.png' border='0'/></a> 
+								<input type='checkbox' name='[dynamicLayer/layerName]' value='on' [dynamicLayer/status]  onClick='selectTool("ReDraw");' style="vertical-align: top; letter-spacing: 0"/>
+								<img src='[dynamicLayer/icon]'/>
+								<span class="ScientificNames"><a href='#' class='pseudoAnchor' onclick='javascript:getInfoOn("[dynamicLayer/name]","[showby]","[emuBackendType]")'>[dynamicLayer/name]</a></span>
+								<br/>
+							</repeatableBlock>	
+							<p class="NewSearchLink"><a href='#' id='refererLinkBottom'>New Search</a></td>				
+				
+				
+				
+				
+			</tr>
+			<tr>
+				<td id="CopyrightCell" colspan="3"><p>
+					Powered by:
+					<img border="0" alt="KE EMu" src="../webservices/images/productlogo.gif" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<img border="0" alt="KE Software" src="../webservices/images/companylogo.gif" />
+					© 2000-2007 KE Software
+				</td>  
+			</tr>
+			<tr>
+				<td id="FooterCell" colspan="3">
+					<repeatableBlock foreach='layerNotes'>
+						<div style= 'position:relative; width: 780px; float: none; '> 
+							<span class="FootnoteNumber">[layerNotes/id]</span> [layerNotes/notes]
+						</div>
+					</repeatableBlock>
+				</td>
+
+			</tr>
+			</table>
+	</form>
+
+	<script type='text/javascript'>
+		document.getElementById('refererLinkTop').href = getReferer();
+		document.getElementById('refererLinkBottom').href = getReferer();
+	</script>
+
+</body>
+
+</html>

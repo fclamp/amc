@@ -1,0 +1,281 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseQueryForms.php');
+
+
+class
+NmnhMsBasicQueryForm extends BaseBasicQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'AdmWebMetadata|SummaryData',
+		'name' => 'MinName',
+		'place' => 'BioCountryLocal|BioProvinceStateLocal',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatDepartment = 'Mineral Sciences'";
+
+}  // end NmnhMsBasicQueryForm class
+
+class
+NmnhMsAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'AdmWebMetadata|SummaryData',
+		'name' => 'MinName',
+		'place' => 'BioCountryLocal|BioProvinceStateLocal',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatDepartment = 'Mineral Sciences'";
+
+}  // end NmnhMsAdvancedQueryForm class
+	
+
+class
+NmnhMsDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Restriction = "CatMuseum = 'NMNH' AND CatDepartment = 'Mineral Sciences'";
+
+	function
+	NmnhMsDetailedQueryForm()
+	{
+		$catNumber = new QueryField;
+		$catNumber->ColName = 'CatNumber';
+		$catNumber->ColType = 'integer';
+
+		$minWeight = new QueryField;
+		$minWeight->ColName = 'MinWeight';
+		$minWeight->ColType = 'integer';
+
+		$speciminCount = new QueryField;
+		$speciminCount->ColType = 'integer';
+		$speciminCount->ColName = 'CatSpecimenCount';
+
+		$expStartDate = new QueryField;
+		$expStartDate->ColName = 'ExpStartDate';
+		$expStartDate->ColType = 'date';
+
+		$dateIdentified = new QueryField;
+		$dateIdentified->ColType = 'date';
+		$dateIdentified->ColName = 'IdeDateIdentified0';
+
+		$this->Fields = array
+		(	
+			$catNumber,
+
+			//'IdeTaxonRef_tab',
+			//'IdeFiledAsName|MinName',
+			'IdeQualifiedName_tab',
+			'CitTypeStatus_tab',
+			'IdeScientificNameLocal_tab',
+			'IdeIdentifiedByRefLocal_tab',
+			$dateIdentified,
+			'CatCollectionName_tab',
+			$speciminCount,
+			'ZooPreparation_tab',
+			'BioOceanLocal',
+			'BioSeaGulfLocal',
+			'BioCountryLocal',
+			'BioProvinceStateLocal',
+			'BioRiverBasinLocal',
+			'BioDistrictCountyShireLocal',
+			'BioExpeditionNameLocal',
+			'BioParticipantLocal_tab',
+			$expStartDate,
+			'ColCollectionMethod',
+
+			//Minerals
+			'MinMineName',
+			'MinSynonyms_tab',
+			'MinAssociatedMinerals_tab',
+			'MinColor',
+			'MinCut',
+			//$minWeight,
+			'MinAssociatedMinerals_tab',
+
+			//Meteorites
+			'MetMeteoriteType',
+			'MetMeteoriteName',
+			'MetSynonym',
+			'MetRecordNumber',
+			'BioLiveSpecimen',
+			'MetConditionDetermination',
+
+			// Petrology
+			'PetLavaSource',
+			'PetFlowTephra',
+			'PetEruptionDate',
+			'PetFlowTephraDate',
+			'PetCommodityMetal_tab',
+			'AgeGeologicAgeSystem_tab',
+			'AgeGeologicAgeSeries_tab',
+		);
+
+		$this->BaseDetailedQueryForm();
+
+		$this->Hints = array
+		(	
+			'IdeQualifiedName_tab' 				=> '[e.g., Amphiblestrum osburni Powell]',
+			'CitTypeStatus_tab' 				=> '[Select from list]',
+			'IdeScientificNameLocal_tab' 			=> '[e.g. Cambarus sphenoides]',
+			'IdeIdentifiedByRefLocal_tab' 			=> '[eg. Bouchard]',
+			'IdeDateIdentified0'				=> '[e.g., format dd-mm-yyyy, partial entry works]',
+			'CatCollectionName_tab'				=> '[Select from list]',
+			'CatSpecimenCount'				=> '[e.g., 2]',
+			'ZooPreparation_tab' 				=> '[Select from list]',
+			'BioOceanLocal' 				=> '[e.g., North Atlantic, Pacific]',
+			'BioSeaGulfLocal' 				=> '[e.g., Gulf of Mexico]',
+			'BioCountryLocal' 				=> '[Select from list]',
+			'BioProvinceStateLocal' 			=> '[e.g., Florida]',
+			'BioRiverBasinLocal' 				=> '[e.g., Murray Darling]',
+			'BioDistrictCountyShireLocal'	 		=> '[e.g., Montgomery]',
+			'BioIslandGroupingLocal'			=> '[Select from list]',
+			'BioIslandNameLocal'				=> '[Select from list]',
+			'BioExpeditionNameLocal' 			=> '[e.g., U.S. Navy Expedition]',
+			'BioVesselNameLocal' 				=> '[e.g., Albatross]',
+			'BioSiteNumberLocal'				=> '[e.g., Z - 22, X054, B212, or 10A]',
+			'BioCruiseNumberLocal' 				=> '[e.g., III, VI, Y7102B, or 21]',
+			'BioParticipantLocal_tab' 			=> '[e.g., Bouchard]',
+			'ExpStartDate'					=> '[e.g., format dd-mm-yyyy, partial entry works]',
+			'ColCollectionMethod' 				=> '[e.g. Triangle Dredge]',
+
+			// Minerals
+			'CatNumber'					=> '[e.g., 3551]',
+			'MinMineName'					=> '[e.g., Eureka Mine]',
+			'MinSynonyms_tab'				=> '[e.g., Sapphire]',
+			'MinAssociatedMinerals_tab'			=> '[e.g., Quartz]',
+			'MinColor'					=> '[e.g., Purple]',
+			'BioCountryLocal'				=> '[e.g., Bolivia]',
+			'BioProvinceStateLocal'				=> '[e.g., New Mexico]',
+			'MinCut'					=> '[e.g., Cushion]',
+			'MinWeight'					=> '[e.g., 45.25]',
+			'MinAssociatedMinerals_tab'			=> '[e.g., Quartz]',
+
+			// Meteorite
+			'MetMeteoriteType'				=> '[e.g., CV3]',
+			'MetMeteoriteName'				=> '[e.g., Harry]',
+			'MetSynonym'					=> '[e.g., CV3]',
+			'MetRecordNumber'				=> '[e.g., 12]',
+			'BioLiveSpecimen'				=> '[e.g.,]',
+			'MetConditionDetermination'			=> '[e.g.,]',
+
+			// Petrology
+			'PetLavaSource' 				=> '[e.g.,]',
+			'PetFlowTephra' 				=> '[e.g.,]',
+			'PetEruptionDate' 				=> '[e.g.,]',
+			'PetFlowTephraDate' 				=> '[e.g.,]',
+			'PetCommodityMetal_tab' 			=> '[e.g.,]',
+			'AgeGeologicAgeSystem_tab' 			=> '[e.g.,]',
+			'AgeGeologicAgeSeries_tab' 			=> '[e.g.,]',
+		);
+
+		$this->DropDownLists = array
+		(	
+<<<<<<< QueryForms.php
+			'BioCountryLocal' 				=> 'eluts:Continent[2]',
+			//'BioCountryLocal' 			=> 'eluts:Continent[2]', 
+			'CitTypeStatus_tab' 				=> 'eluts:Type Status', 
+=======
+			'CatDivision' 					=> '|Gems & Minerals|Meteorites|Petrology & Volcanology', 
+			'CatCollectionName_tab' 			=> 'eluts:Collection Name[6]', 
+>>>>>>> 1.13
+			'ZooPreparation_tab' 				=> 'eluts:Zoology Preparation', 
+<<<<<<< QueryForms.php
+=======
+			'BioOceanLocal' 				=> 'eluts:Ocean', 
+			'BioCountryLocal' 				=> 'eluts:Continent[2]',
+			'BioProvinceStateLocal' 			=> 'eluts:Continent[3]',
+			'BioMiningDistrictLocal' 			=> 'eluts:Mining District', 
+			'MinCut' 					=> 'eluts:Mineral Cut', 
+			'MeaCurrentUnit' 				=> 'eluts:Standardized Unit', 
+			'MetMeteoriteType' 				=> 'eluts:Meteorite Type', 
+			'PetCommodityMetal_tab' 			=> 'eluts:Commodity Metal', 
+>>>>>>> 1.13
+		);
+
+		$this->LookupLists = array
+		(
+<<<<<<< QueryForms.php
+			//'CatCollectionName_tab' 			=> 'Collection Name[6]',
+			//'BioExpeditionNameLocal' 			=> 'Expedition Name',
+			//'ColCollectionMethod' 			=> 'Collection Method',
+			//'BioVesselNameLocal' 				=> 'Vessel Name',
+			'BioRiverBasinLocal' 				=> 'River Basin',
+=======
+			'BioVolcanoNameLocal' 				=> 'Volcano Region Name[3]', 
+			'BioMineNameLocal' 				=> 'Mine Name', 
+			'MinColor_tab' 					=> 'Minerals Color[2]', 
+>>>>>>> 1.13
+		);
+	}
+
+	function
+        generateDropDown($fld, $htmlFieldName)
+        {
+                print "&nbsp;&nbsp;<select class=\"WebSelect\" name=\"$htmlFieldName\">\n";
+
+                $matches = array();
+                if (preg_match('/^eluts:(.*?)\[?(\d*)\]?$/', $this->DropDownLists[$fld], $matches))
+                {
+                        $tablename = $matches[1];
+                        if (isset($matches[2]) && $matches[2] != '')
+                                $level = $matches[2];
+                        else
+                                $level = 1;
+                        $value = sprintf('Value%02d0', (int) ($level - 1));
+                        $qry = new ConfiguredQuery();
+                        $qry->SelectedLanguage = $this->LanguageData;
+
+                        $restriction = $this->getLookupRestriction($tablename);
+                        if ($restriction == "")
+                            $restriction = "true";
+
+                        //$qry->Texql = "distinct(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500}";
+                        $qry->Texql = "order(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) on $value asc";
+
+                        $recs = $qry->Fetch();
+                        $dropdownlisttmp = array();
+                        foreach ($recs as $rec)
+                        {
+                                $dropdownitem = preg_replace('/[\?\*\"]/', ' ', $rec->{$value});
+                                $dropdownitem = trim($dropdownitem);
+                                if ($dropdownitem == '')
+                                        continue;
+                                array_push($dropdownlisttmp, $dropdownitem);
+                        }
+                        $dropdownlist = array_unique($dropdownlisttmp);
+
+                        print "            <option></option>\n";
+                        $hasEntry = 0;
+                        foreach ($dropdownlist as $option)
+                        {
+                                if (strlen($option) > $this->MaxDropDownLength)
+                                        $option = $this->trimOption($option, $this->MaxDropDownLength);
+                                if ($option != '')
+                                {
+                                        print "            <option>$option</option>\n";
+                                        $hasEntry = 1;
+                                }
+                        }
+                        if (! $hasEntry)
+                                print "            <option>--- None Available ---</option>\n";
+                }
+                else
+                {
+                        foreach (split('\|', $this->DropDownLists[$fld]) as $option)
+                        {
+                                print "            <option>$option</option>\n";
+                        }
+                }
+        }
+} // End NmnhMsDetailedQueryForm class
+?>
+

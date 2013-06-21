@@ -1,0 +1,29 @@
+.header {
+	color: white;
+	background: #00527c;
+	font-size: 200%;
+	width: 100%;
+}
+.right {
+	color: white;
+	background: #00527c;
+	text-align: right;
+	float: right;
+}
+
+.status {
+	color: black;
+	background: #cccccc;
+	border: 0px solid black; 
+}
+
+.display {
+	color: black;
+	background: white; margin: 1px;
+	border: 0px solid black; 
+}
+.footer {
+	color: white;
+	background: #00527c; margin: 1px;
+	border: 0px solid black; 
+}

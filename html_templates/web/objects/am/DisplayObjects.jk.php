@@ -1,0 +1,1049 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2009
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseDisplayObjects.php');
+require_once ($COMMON_DIR . 'RecordExtractor.php');
+require_once ($WEB_ROOT . '/objects/am/media.php');
+
+/**
+ *
+ * These classes produce simplified, unstyled html, removing inline style of
+ * the older classes they inherit from.
+ *
+ **/
+
+class
+AmSimpleImageExtractor extends RecordExtractor
+{
+
+	function
+	ImageUrl($irn)
+	{
+		$url =  "";
+
+		$this->IRN = $irn;
+		$this->ExtractFields(array('MulMultiMediaRef:1', 'SummaryData'));
+		$mediaIrn = $this->_fields[0]->{'MulMultiMediaRef:1'};
+		if ($mediaIrn)
+		{
+			$url =  "/" . $GLOBALS['WEB_DIR_NAME'] . "/objects/am/webmedia.php?irn=$mediaIrn&thumb=yes";
+		}
+		return $url;
+	}
+}
+
+class
+AmStandardDisplay extends BaseStandardDisplay
+{
+	var $highlightTerms;			
+	var $historyDepth;
+	var $imagesHidden;
+	var $valuePrefix;
+	var $valueSuffix;
+	var $narDisplay;
+	var $stripHtml;
+	var $HiddenLabels;
+
+	function
+	AmStandardDisplay()
+	{
+
+		$this->stripHtml = true;
+		$this->narDisplay = "NarrativeDisplay.php"; # link to use going from a specimen to an object
+
+		// links to associated narratives
+                $narratives = new BackReferenceField;
+                $narratives->RefDatabase = "enarratives";
+                $narratives->RefField = "ObjObjectsRef_tab";
+                $narratives->ColName = "SummaryData";
+                $narratives->Label = "Narratives";
+                $narratives->LinksTo = "NarrativeDisplay.php";
+
+		#$this->HeaderField="QuiTaxonScientificName";
+		$this->HeaderField= "QuiTaxonQualifiedName";
+		$this->AlternateHeaderField="SumItemName"; #used if header field blank
+
+		$this->HiddenLabels = array();
+
+		# some hacks to get type status name which doesn't really exist in catalogue
+		$typeStatusNameField = new Field;
+		$typeStatusNameField->Database = 'etaxonomy';
+		$typeStatusNameField->ColName = "CitTaxonRef_tab->etaxonomy->ClaNameParts";
+		$typeStatusNameField->Label = "Type Names";
+		$typeStatusNameField->SpecialProcessing = "Taxonomy";
+
+		# some hacks to try and get field we can italicise for scientific name
+		$idItalicsField = new Field;
+		$idItalicsField->Database = 'etaxonomy';
+		$idItalicsField->ColName = "QuiTaxonRef->etaxonomy->ClaNameParts";
+		$idItalicsField->Label = "Current Name";
+		$idItalicsField->SpecialProcessing = "Taxonomy";
+
+		# items here will be returned (but not necessarily displayed - we 
+		# may just need the data to work out what to display)
+		$this->Fields = array(
+			'SummaryData',
+			'CatRegNumber',
+			'CatDateCatalogued',
+			'CatObjectForm',
+			#'QuiTaxonLocal',
+			'QuiTaxonQualifiedName',
+			'QuiTaxonomyPhylum',
+			'QuiTaxonomyClass',
+			'QuiTaxonomyOrder',
+			'QuiTaxonomyFamily',
+			'QuiTaxonomyGenus',
+			'QuiTaxonomySpecies',
+			'QuiTaxonomySubSpecies',
+			'CitTypeStatus_tab',
+			$typeStatusNameField,	# need for type status processing
+			$idItalicsField,	# tries to do italicising of name if available
+			'ConKindOfObject',
+			'ZooSex_tab',
+			'ZooStage_tab',
+			'IdeDateIdentified0',
+			'IdeCurrentId_tab',
+			'DeaDeaccessionMethod',
+			'LocSiteLocal',
+			'QuiLatitude0',
+			'QuiLongitude0',
+			'QuiLatLongDetermination',
+			'BioDateVisitedFromLocal',
+			'BioDateVisitedToLocal',
+			'QuiCollBottomDepthFromMet',
+			'QuiCollBottomDepthToMet',
+			'QuiHabitat_tab{1}',
+			'BioMicrohabitatDescription',
+			'LocSubstrate',
+			'MetName',
+			'MetClass',
+			'MetGroup',
+			'MetTypeSymbol',
+			'MetCurrentSpecimenWeight',
+			'MinClass',
+			'MinVariety',
+			'MinGroup',
+			'MinSpecies',
+			'MinCut',
+			'MinColor',
+			'RocClass',
+			'RocRockName',
+			'TekName',
+			'TekDescription',
+			'TekLengthCopy',
+			'TekShape',
+			'TekThicknessCopy',
+			'TekWeightCopy',
+			'TekWidthCopy',
+			'SumArchSiteName',
+			'SumItemName',
+			'ObjLabel',
+			'ObjKeywords_tab',
+			'ProPlace',
+			'ProRegion',
+			'ProStateProvince_tab',
+			'ProCountry_tab',
+			'ProCollectionArea',
+			'CatDiscipline',
+			'AcqRegDate',
+			'SumRegNum',
+			$narratives,
+		);
+
+		# items here will be displayed
+		$this->wantedFields = array(
+			'irn'	=> 1,
+			'CatDiscipline' => 1,
+			'SummaryData' => 1,
+			'QuiTaxonQualifiedName' => 1,
+			'QuiTaxonomyPhylum' => 1,
+			'QuiTaxonomyClass' => 1,
+			'QuiTaxonomyFamily' => 1,
+			'QuiTaxonomyGenus' => 1,
+			'QuiTaxonomyOrder' => 1,
+			'QuiTaxonomySpecies' => 1,
+			'QuiTaxonomySubSpecies' => 1,
+			'LocSiteLocal'	=> 1,
+			'QuiLatitude0' => 1,
+			'QuiLongitude0' => 1,
+			'BioDateVisitedFromLocal' => 1,
+			'BioDateVisitedToLocal' => 1,
+			'BioMicrohabitatDescription' => 1,
+			'CatDateCatalogued' => 1,
+			'AcqRegDate'	=> 1,
+			'CatObjectForm'	=> 1,
+			'CatRegNumber' => 1,
+			'CitTypeStatus_tab' => 1,
+			'ConKindOfObject' => 1,
+			'DeaDeaccessionMethod' => 1,
+			'DetRights' => 1,
+			'DetSubject_tab' => 1,
+			'EraAMStage' => 1,
+			'EraAge1' => 1,
+			'EraAge2' => 1,
+			'EraEra' => 1,
+			'IdeDatIdentification' => 1,
+			'IdeDateIdentified0' => 1,
+			'LatLongitude0' => 1,
+			'LocElevationASLFromMt' => 1,
+			'LocSubstrate' => 1,
+			'MetClass' => 1,
+			'MetCurrentSpecimenWeight' => 1,
+			'MetGroup' => 1,
+			'MetName' => 1,
+			'MetTypeSymbol' => 1,
+			'MinClass' => 1,
+			'MinColor' => 1,
+			'MinCut' => 1,
+			'MinGroup' => 1,
+			'MinSpecies' => 1,
+			'MinVariety' => 1,
+			'MulCreator_tab' => 1,
+			'ObjDescription' => 1,
+			'ObjKeywords_tab' => 1,
+			'ObjLabel' => 1,
+			'ProCollectionArea' => 1,
+			'ProCountry_tab' => 1,
+			'ProPlace' => 1,
+			'ProRegion' => 1,
+			'ProStateProvince_tab' => 1,
+			'QuiCollBottomDepthFromMet' => 1,
+			'QuiCollBottomDepthToMet' => 1,
+			'QuiHabitat_tab' => 1,
+			'QuiLatLongDetermination' => 1,
+			'QuiTaxonLocal' => 1,
+			'RocClass' => 1,
+			'RocRockName' => 1,
+			'SqsSiteName' => 1,
+			'SumArchSiteName' => 1,
+			'SumItemName' => 1,
+			'SumRegNum'	=> 1,
+			'TekDescription' => 1,
+			'TekLengthCopy' => 1,
+			'TekName' => 1,
+			'TekShape' => 1,
+			'TekThicknessCopy' => 1,
+			'TekWeightCopy' => 1,
+			'TekWidthCopy' => 1,
+			'ZooSex_tab' => 1,
+			'ZooStage_tab' => 1,
+
+
+		);
+		$this->Database = 'ecatalogue';
+		$this->BaseStandardDisplay();
+
+		global $ALL_REQUEST;
+		$this->preferredMMIrn = $ALL_REQUEST['preferred_mm_irn'];
+
+		$this->highlightTerms = $ALL_REQUEST['highlight_term'];
+
+		$this->valuePrefix = "";
+		$this->valueSuffix = "";
+		if (array_key_exists('history_depth', $ALL_REQUEST))
+			$this->historyDepth = $ALL_REQUEST['history_depth'];
+		else	
+			$this->historyDepth = -1;
+
+	}
+
+	function queryPageLink()
+	{
+		if ($this->QueryPage != '')
+		{
+			return $this->QueryPage;
+		}
+		else
+		{
+			return ".";
+		}
+	}
+
+	function wanted($item)
+	{
+		if (isset($this->wantedFields[$item->ColName]))
+			return true;
+		else	
+			return false;
+	}
+
+	function getAssociatedNarratives($irn)
+	{
+		# narratives that have this specimen 
+		$qry = new ConfiguredQuery;
+		$qry->Select = array(
+					'irn_1',
+					'SummaryData',
+				);
+		$qry->From = 'enarratives';
+		$qry->Where = "exists (ObjObjectsRef_tab where ObjObjectsRef = $irn)";
+		$r = $qry->Fetch();
+
+		$narratives = array();
+		foreach ($r as $record)
+		{
+			$narIrn = $record->irn_1;
+			$narratives[$narIrn] = $record->SummaryData;
+		}
+		return ($narratives);
+	}
+
+	function getMMCredits($mmIrn, $copyrightOnly)
+	{
+		$qry = new ConfiguredQuery;
+		$qry->Select = array(	'MulTitle',
+					'MulCreator_tab',
+					'MulDescription',
+					'DetPublisher',
+					'DetRights',
+				);
+		$qry->From = 'emultimedia';
+		$qry->Where = "irn=$mmIrn";
+		$r = $qry->Fetch();
+
+		$creator = "";
+		if ($r[0]->{"MulCreator:1"} != "")
+			$creator = "photographer: " . $r[0]->{"MulCreator:1"};
+
+		$rights = "(c) assumed Australian Museum.";
+		if ($r[0]->DetRights != "")
+			$rights = $r[0]->DetRights;
+
+		if ($copyrightOnly)
+			return
+				"<div class='emu-image-rights'>" .
+					$rights . 
+				"</div>";
+		else
+			return "<div class='emu-image-caption'>" . 
+					$r[0]->MulDescription .
+				"&nbsp;</div>" .
+				"<div class='emu-image-rights'>" .
+					$rights . 
+				"&nbsp;</div>" .
+				"<div class='emu-image-creator'>" .
+					$creator .
+				"</div>";	
+	}
+
+
+	function getMMIrns($preferredFirstIrn)
+	{
+		$preferredExists = false;
+		$irns = array();
+		$imNumber = 1;
+		$hasMedia = isset($this->record->{"MulMultiMediaRef:$imNumber"});
+		while ($hasMedia)
+		{
+			$mediaIrn = $this->record->{"MulMultiMediaRef:$imNumber"};
+			$irns[] = $mediaIrn;
+			$imNumber++;	
+			$hasMedia = isset($this->record->{"MulMultiMediaRef:$imNumber"});
+		}	
+
+		$searchClause = "( irn=" . implode($irns, " or irn=") . ") and AdmPublishWebNoPassword = 'Yes'";
+		$qry = new ConfiguredQuery;
+		$qry->Select = array( 'irn_1' );
+		$qry->From = 'emultimedia';
+		$qry->Where = $searchClause;
+		$r = $qry->Fetch();
+
+		$avaialbleIrns = array();
+		foreach ($r as $record)
+		{
+			$mediaIrn = $record->irn_1;
+			if ($this->preferredMMIrn == $mediaIrn)
+				$preferredExists = true;
+			$availableIrns[] = $mediaIrn;
+		}
+
+		$this->imagesHidden = count($irns) - count($availableIrns);
+
+		if (! $preferredExists)
+			$this->preferredMMIrn = false;
+
+		return $availableIrns;	
+	}
+
+	function showLabel($colName)
+	{
+		$colName = preg_replace("/.*?->/", "", $colName);
+		return (! array_key_exists($colName, $this->HiddenLabels));
+	}
+
+	function display()
+	{
+		if (! $this->record->{$this->HeaderField})
+		{
+			$this->HeaderField = $this->AlternateHeaderField;
+			$headerValue = $this->record->{$this->HeaderField};	
+		}
+		else
+			$headerValue = $this->specialTryToGetTaxonomyField($this->record->{$this->HeaderField});	
+
+		print "\t\t\t<h2>$headerValue</h2>\n";
+		print "<div class='emu-goback'><img src='./images/icon-backarrow.gif'/><a href='javascript:history.go($this->historyDepth)'>Previous Page</a></div>\n";
+
+		$redrawLink = $this->DisplayPage . "?irn=" . $this->record->{'irn_1'} .
+				"&QueryPage=" . $this->QueryPage .
+				"&history_depth=" . ($this->historyDepth - 1);
+
+		if ($this->DisplayImage)
+		{
+			$mmIrns = $this->getMMIrns($this->preferredMMIrn);
+
+			// Display the main image
+
+			// if we are on the multimedia module then the image IRN is the
+			//  irn of the current record.
+			if ($this->Database == "emultimedia")
+			{
+				$mediaIrn = $this->record->{'irn_1'};
+			}
+			else
+			{
+				if ($this->preferredMMIrn)
+					$mediaIrn = $this->preferredMMIrn;
+				else	
+				{
+					$mediaIrn = $mmIrns[0];
+					$this->preferredMMIrn = $mediaIrn;
+				}
+			}
+
+			$imageHeader = "";
+			$credits = "";
+
+			if ($mediaIrn)
+			{
+				$defaultName = $this->record->{$this->HeaderField};
+				$credits = $this->getMMCredits($mediaIrn, false);
+				$img = "/" . $GLOBALS['WEB_DIR_NAME'] . "/objects/am/webmedia.php?irn=$mediaIrn&size=220x2";
+				$imageHeader .= "\t\t\t\t\t<div>\n";	
+				$imageHeader .= "\t\t\t\t\t\t<img alt='$defaultName' src='$img' class='emu-main-image'/>\n";
+				$imageHeader .= "\t\t\t\t\t</div>\n";	
+			}
+			else
+			{
+				$imageHeader .= "\t\t\t\t<img src='/" .  $GLOBALS['WEB_DIR_NAME'] .  "/objects/am/images/noimage.gif'/>\n";
+			}
+
+			$imageHeader .= "\t\t\t<!-- Start a display of thumbnails -->\n";
+			$imageHeader .= "\t\t\t<div class='emu-thumbnail-row'>\n";
+
+			// Print the extra multimedia
+			if ($this->DisplayAllMedia && (count($mmIrns) > 1))
+			{
+				// Display Images
+				$addedCredits = array();
+				$imgcount = 0;
+				while (count($mmIrns))
+				{
+					$imgirn = array_shift($mmIrns);
+					if ($imgirn == $this->preferredMMIrn)
+						$hl = " emu-highlight-div";
+					else
+						$hl = "";
+					$imageHeader .= "<div class='emu-image-link'>\n";
+					$thumbNail = "/" . $GLOBALS['WEB_DIR_NAME'] . "/objects/am/webmedia.php?irn=$imgirn&thumb=yes";
+						
+					$mr = new AmMediaRetriever;
+					if ($mr->imageIsViewable($imgirn))
+					{
+						$imageLink = $redrawLink . "&preferred_mm_irn=$imgirn";
+						$imageHeader .= "<a  href='$imageLink'>" .
+							"<img class='thumbnailImage$hl' src='$thumbNail'/>" . 
+						"</a>\n";
+					}
+					else
+					{
+						$imageHeader .= "<img class='thumbnailImage' src='$thumbNail'/>\n";
+					}
+
+					$footNote = $imgcount + 1;
+					$imgcount++;
+					$imageHeader .= "<div class='emu-footnote-credits'>$footNote</div>\n";
+					$imageHeader .= "</div>\n";
+					$addedCredits[] = $this->getMMCredits($imgirn, false);
+				}
+
+			}
+			if ($this->imagesHidden > 0)
+			{
+				# warn if images not visible
+				/*$imageHeader .= "<span class='emu-image-credits
+					 emu-thumbnail-row'>images witheld from
+					 general display: " .  $this->imagesHidden .  "</span>";*/
+			}
+
+			if ($mediaIrn)
+			{
+				print "\t\t\t\t<div class='emu-item-images'>\n";	
+				print $imageHeader;
+				print "</div>";
+				print "\t\t\t\t\t<div class='emu-image-credits'>$credits</div>\n";
+				print "\t\t\t\t</div>\n";	
+			}
+		}
+
+		print "<div style='clear:both'>&nbsp;</div>";
+		print "\t\t<!-- Start Field Content -->\n";
+
+		print "\t\t\t<dl id='emu-dl'>\n";
+
+		// Foreach loop on each item in the $this->Fields var
+		$i = $fieldNum = 0;
+
+		foreach ($this->Fields as $item)
+		{
+			$fieldNum++;
+			if (is_string($item))
+			{
+				if (isset($this->_STRINGS[$item]))
+					$item = new Field($item, $this->_STRINGS[$item]);
+				else
+					$item = new Field($item, $item);
+			}
+
+			// Don't display if fields security doesn't allow
+			if (isset($item->ValidUsers) 
+				&& strtolower($item->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($item->ValidUsers))
+					continue;
+			}
+
+			// If it's a backreference item, then load data
+			$this->_loadBackReferenceField($item);
+
+			if (! $this->SuppressEmptyFields || $this->_hasData($item))
+			{
+				if ($this->wanted($item))
+				{
+					$zebra = 'zebraEven';
+					if (($i++ % 2) == 0)
+						$zebra = 'zebraOdd';
+	
+					if ($fieldNum == 1)
+						continue; // ignore first field as it's used in heading
+						
+					// Print field name
+					if ($item->Label != '')
+						$label = $item->Label;
+					elseif ($item->Name != '')
+					{
+						if (isset($this->_STRINGS[$item->Name]))
+							$label = $this->_STRINGS[$item->Name];
+						else
+							$label = $item->Name;
+					}
+					else
+					{
+						if (isset($this->_STRINGS[$item->ColName]))
+							$label = $this->_STRINGS[$item->ColName];
+						else
+							$label = $this->ColName;
+					}
+	
+					$colName = $item->ColName;
+					if ($this->DisplayLabels && $this->showLabel($colName))
+					{
+						print "\t\t\t\t<dt>$label:</dt>"; 
+					}
+					if (($colName == 'QuiTaxonomyGenus') || ($colName == 'QuiTaxonomySpecies'))
+					{
+						$item->Italics = 1;
+					}	
+	
+					$this->adjustOutput($item);
+				}
+			}
+		}
+
+		$associatedStories = $this->getAssociatedNarratives($this->record->{'irn_1'});
+		if (count($associatedStories) > 0)
+		{
+			print "\t\t\t\t<dt>Associated Stories:</dt>"; 
+			foreach ($associatedStories as $irn => $summaryData)
+			{
+				$narUrl = "./" . $this->narDisplay . "?irn=$irn&QueryPage=" . $this->QueryPage; 
+				print "<dd><a class='emu-text-link' href='$narUrl'>$summaryData</a></dd>";
+			}
+		}
+
+		print "\n\t\t\t</dl>\n";
+
+		// image credit for additional thumbnail images
+		if (count($addedCredits))
+		{
+			print "<div class='emu-footnotes'><div class='emu-footnote-header'>Images</div>";
+			for ($i = 0; $i < count($addedCredits); $i++)
+			{
+				print "<div class='emu-mini-image-credits'><div>" . ($i + 1) . ":</div>" . $addedCredits[$i] . "</div>";
+			}
+			print "</div>";
+		}
+		
+		print "<!-- End Field Content -->\n";
+
+	}
+
+	function
+	_hasData($item)
+	{
+		if (preg_match("/_tab{\d+}/", $item->ColName))
+		{
+			$colname = preg_replace('/_tab{(\d+)}/', ":$1", $item->ColName);
+			return($this->record->{$colname} != '');
+		}	
+		else
+			return parent::_hasData($item);
+	}
+
+	function
+	adjustOutput($item)
+	{
+		$colName = $item->ColName;
+		$closeDiv = false;
+		switch ($colName)
+		{
+			case 'QuiTaxonomyGenus':
+			case 'QuiTaxonomySpecies':
+				$item->Italics = 1;
+				break;
+			case 'SummaryData':
+			case 'ObjObjectsRef_tab->ecatalogue->SummaryData':
+			case 'AssMasterNarrativeRef->enarratives->SummaryData':
+			case 'AssAssociatedWithRef_tab->enarratives->SummaryData':
+				$closeDiv = true;
+				print "<h3>$item->Label</h3><div class='emu-associated-items'>\n";
+				break;
+			case 'NarTitle':
+			case 'ObjObjectsRef_tab':
+				return;
+		}
+		$this->_printItem($item);
+		if ($closeDiv)
+			print "</div>\n";
+	}
+
+	function
+	_printTabField($field)
+	{
+		if (strtolower(get_class($field)) != 'field')
+			return;
+
+		if (preg_match('/_tab{\d+}/',  $field->ColName))
+		{
+			$field->ColName = preg_replace("/_tab{(\d+)}/", ":$1", $field->ColName);
+			$this->_printField($field);
+			return;
+		}	
+
+		$field->_outputTruncated = false;
+		$row = 1;
+		while(1)
+		{
+			$origName = $field->ColName;
+
+			if (preg_match('/_tab/', $field->ColName))
+			{
+				$field->ColName = preg_replace('/_tab/', ":$row", $field->ColName);
+			}
+			elseif(preg_match('/[^:\d]0$/', $field->ColName))
+			{
+				$field->ColName = preg_replace('/0$/', ":$row", $field->ColName);
+			}
+
+			if (!isset($this->record->{$field->ColName}))
+			{
+				$refColumn = "";
+				if (preg_match("/Ref.*->/", $field->ColName))
+					$refColumn = preg_replace("/->.*/", "", $field->ColName);
+
+				if (!isset($this->record->{$refColumn}))
+					break;
+			}
+			$row++;
+			if ($row > 501)
+			{
+				print "<div>MORE RECORDS EXIST... list truncated due to size</div>";
+				break;
+			}
+			else
+				$this->_printField($field);
+			$field->ColName = $origName;
+		}
+	}
+
+	function
+	_printField($field)
+	{
+		if (strtolower(get_class($field)) != 'field')
+			return;
+
+		$dataName = $field->ColName;
+		$fielddata = $this->record->{$field->ColName};
+		$fielddata = $this->adjustData($field, $this->record, $fielddata);
+
+		if ($field->Bold)
+			print "<b>";
+		if ($field->Italics)
+			print "<i>";
+
+		if ($field->LinksTo != '')
+		{
+			$sections = split('->', $field->ColName);
+			if (count($sections) > 3)
+			{
+				$fieldName = $sections[0] . "->" . $sections[1] . "->" . $sections[2];
+			}
+			else
+			{
+				$fieldName = $sections[0];
+			}
+			$querypage = urlencode($this->QueryPage);
+
+			if($field->LocatorField == 1)
+			{
+				$link = $field->LinksTo 
+					. '?irn=' 
+					. $this->record->{irn_1};
+			}
+			else
+			{
+				$link = $field->LinksTo 
+					. '?irn=' 
+					. $this->record->$fieldName 
+					. "&amp;QueryPage=$querypage";
+			}
+
+			if ($this->UseAbsoluteLinks)
+			{
+				if(preg_match("/^\//", $link))
+				{
+					$link = "http://" 
+					   . $GLOBALS['HTTP_SERVER_VARS']['SERVER_NAME'] 
+					   . $link;
+				}
+				else
+					WebDie("You have requested absolute pages.  You'll need to an absolute path for the LinksTo properties");
+			}
+
+			# set wrappers around value
+			$this->valuePrefix = "";
+			$this->valueSuffix = "";
+			$e = new AmSimpleImageExtractor();
+			$url = $e->ImageUrl($this->record->$fieldName);
+
+			$credits = "";
+			if ($url)
+			{
+				$mediaIrn = $this->record->{'MulMultiMediaRef:1'};
+				$credits = "<span class='emu-tiny-image-credits'>" . 
+						$this->getMMCredits($mediaIrn, true) .
+						"</span>\n";
+				$this->valuePrefix =  "<img class='emu-image' src='$url'/>\n"; # use if no copyright concerns
+				#$this->valuePrefix =  "<img class='emu-icon-image' src='./images/image.gif'/>\n"; # use if copyright concerns
+			}	
+			else	
+				$this->valuePrefix =  "<img class='emu-icon-image' src='./images/noimage.gif'/>\n";
+
+			if ($credits != "")
+				$this->valuePrefix .=  "<br/>$credits<br/>";
+			$this->valuePrefix .= "<a class='emu-text-link' href=\"$link\">";
+			$this->valueSuffix .=  "</a>";
+
+			$this->_displayData($field, $fielddata);
+
+			# clear wrappers
+			$this->valuePrefix = "";
+			$this->valueSuffix = "";
+		}
+		else
+		{
+			$this->_displayData($field, $fielddata);
+		}
+		if ($field->Italics)
+			print "</i>";
+		if ($field->Bold)
+			print "</b>";
+	}
+
+	function
+	_printBackReferenceField($field)
+	{
+		if (strtolower(get_class($field)) != 'backreferencefield')
+			return;
+
+		$dataName = $field->ColName;
+		foreach($field->_Data as $backref)
+		{
+			if ($field->LinksTo != '')
+			{
+				$querypage = urlencode($this->QueryPage);
+				$link = $field->LinksTo 
+					. '?irn=' 
+					. $backref->IRN
+					. "&amp;QueryPage=$querypage";
+
+				print "\t<a href=\"$link\">";
+				$this->_displayData($field, $backref->Data);
+				print "</a>\n";
+			}
+			else
+				$this->_displayData($field, $backref->Data);
+
+		}
+	}
+
+	function specialItaliciseNames($fielddata)
+	{
+
+		$fielddata = preg_replace("/<(genus|species)>/", "<i>", $fielddata);
+		$fielddata = preg_replace("/<\/(genus|species)>/", "</i>", $fielddata);
+		$fielddata = preg_replace("/\s+/", " ", $fielddata);
+		return $fielddata;
+	}	
+
+	// this is really ugly - sorry - rush job to get project finished
+	function specialTypeStatusAssembly($field, $fielddata)
+	{
+		$i = 1;
+		$rows = array();
+		while (isset($this->record->{"CitTypeStatus:$i"}))
+		{
+			$name = $this->record->{"CitTaxonRef:" . $i . "->etaxonomy->ClaNameParts"};
+			if ($name == NULL)
+				$name = '<b>taxonomy data not released for this citation</b>';
+
+			$rows[] =  $this->record->{"CitTypeStatus:$i"} . ' - ' . $name;
+			$i++;
+		}
+		return $this->specialItaliciseNames(implode("<br/>\n", $rows));
+	}
+
+	// this is really ugly - sorry - rush job to get project finished
+	function specialDateIdentifiedAssembly($field, $fielddata)
+	{
+		$i = 1;
+		while (isset($this->record->{"IdeCurrentId:$i"}))
+		{
+			if ($this->record->{"IdeCurrentId:$i"} == 'Yes')
+			{
+				return $this->record->{"IdeDateIdentified:$i"};
+			}
+			$i++;
+		}
+		return "";
+	}
+
+	function specialTryToGetTaxonomyField($fielddata)
+	{
+		if (isset($this->record->{"QuiTaxonRef->etaxonomy->ClaNameParts"}))
+			return $this->specialItaliciseNames($this->record->{"QuiTaxonRef->etaxonomy->ClaNameParts"});
+		else
+			return $fielddata;
+	}
+
+	function
+	_displayData($field, $fielddata)
+	{
+		/* 
+		** This function is the final call before displaying data.
+		** do filtering and security here.
+		*/
+
+		// Security
+		if (strtolower($field->ValidUsers) != 'all')
+		{
+			if (! $this->SecurityTester->UserIsValid($field->ValidUsers))
+				return;
+		}
+
+		// issues with back quoted characters
+		$fielddata = preg_replace("/\\\\/", "", $fielddata);
+		$fielddata = preg_replace("/:\s*:/", ":", $fielddata);
+
+
+		// Filter
+		if ($field->EnablePublicPrivate)
+		{
+			// Remove any private text
+			$fielddata = preg_replace("/Private:.*?($|Public:)\s*/is", "", $fielddata);
+			$fielddata = preg_replace("/Public:\s*/is", "", $fielddata);
+		}
+		if ($field->Filter != '')
+		{
+			$matches = array();
+			preg_match($field->Filter, $fielddata, $matches); 
+			$fielddata = $matches[1];
+		}
+		elseif ($field->FilterPatt != '')
+		{
+			$fielddata = preg_replace($field->FilterPatt, 
+						$field->FilterReplace, 
+						$fielddata);
+		}
+
+		# this is a real kludge but desperate to get project across the line
+		if (preg_match("/CitTypeStatus/", $field->ColName))
+		{
+			if (preg_match("/CitTypeStatus:1/", $field->ColName))
+				$fielddata = $this->specialTypeStatusAssembly($field, $fielddata);
+			else
+				return;
+		}
+		else if (preg_match("/IdeDateIdentified/", $field->ColName))
+		{
+			if (preg_match("/IdeDateIdentified:1/", $field->ColName))
+				$fielddata = $this->specialDateIdentifiedAssembly($field, $fielddata);
+			else
+				return;
+		}
+		else if (preg_match("/QuiTaxonQualifiedName/", $field->ColName))
+		{
+			$fielddata = $this->specialTryToGetTaxonomyField($fielddata);
+		}
+		else if ($this->stripHtml)
+			$fielddata = strip_tags($fielddata);
+
+
+		if ($this->highlightTerms != "")
+			$fielddata = preg_replace("/\b($this->highlightTerms)\b/i", "<span class='emu-highlight-term'>$1</span>", $fielddata);
+
+
+		if ($this->showLabel($field->ColName))
+		{
+			$this->valuePrefix = "<dd>" . $this->valuePrefix;
+			$this->valueSuffix = $this->valueSuffix . "</dd>";
+		}
+		else
+		{
+			$this->valuePrefix = "<div>" . $this->valuePrefix;
+			$fielddata = preg_replace("/\n/", "<br/>\n", $fielddata);
+			$this->valueSuffix = $this->valueSuffix . "</div>";
+		}
+		print($this->valuePrefix . " " . $fielddata . " " . $this->valueSuffix . "\n"); 
+		$this->valuePrefix = "";
+		$this->valueSuffix = "";
+	}
+}
+
+class
+AmNarrativeStandardDisplay extends AmStandardDisplay
+{
+	function
+	AmNarrativeStandardDisplay()
+	{
+		// master narratives
+		$master = new Field;
+		$master->Database = "enarratives";
+		$master->Field = "SummaryData";
+		$master->ColName = "AssMasterNarrativeRef->enarratives->SummaryData";
+		$master->Label = "Broader Stories";
+		$master->LinksTo = "NarrativeDisplay.php";
+
+		// associated narratives
+		$ass = new Field;
+		$ass->Database = "enarratives";
+		$ass->Field = "SummaryData";
+		$ass->ColName = "AssAssociatedWithRef_tab->enarratives->SummaryData";
+		$ass->Label = "Related Stories";
+		$ass->LinksTo = "NarrativeDisplay.php";
+
+		// sub narratives
+		$sub = new BackReferenceField;
+		$sub->RefDatabase = "enarratives";
+		$sub->RefField = "AssMasterNarrativeRef";
+		$sub->ColName = "SummaryData";
+		$sub->Label = "Narrower Stories";
+		$sub->LinksTo = "NarrativeDisplay.php";
+
+		// links to associated objects
+		$objects = new Field;
+		$objects->Database = "ecatalogue";
+		$objects->Field = "SummaryData";
+		$objects->ColName = "ObjObjectsRef_tab->ecatalogue->SummaryData";
+		$objects->Label = "Related Objects";
+		$objects->LinksTo = "Display.php";
+
+		$this->AmStandardDisplay();
+
+		$this->Fields = array(
+			'SummaryData',
+			#'DesGeographicLocation_tab',
+			#'NarAuthorsLocal',
+			'NarTitle',
+			'NarNarrative',
+			'ObjObjectsRef_tab',
+			$master,
+			$ass,
+			$sub,
+			$objects,
+		);
+
+		$this->HiddenLabels = array(
+			'NarTitle' => 1,
+			'NarNarrative' => 1,
+			'SummaryData' => 1,
+			'ecatalogue->SummaryData' => 1,
+			'enarratives->SummaryData' => 1,
+			'ObjObjectsRef_tab' => 1,
+		);
+
+		$this->Database = 'enarratives';
+
+		$this->HeaderField="NarTitle";
+	}
+
+	function wanted($item)
+	{
+		return true;
+	}
+}
+
+class
+AmPartyDisplay extends BaseStandardDisplay
+{
+
+	// Set default field in the constructor
+	function
+	AmPartyDisplay()
+	{
+		// Setup Birth and Death Date fields to be shown on
+		//	Party records
+		$bioBirthDate = new Field;
+		$bioBirthDate->ColName = 'BioBirthDate';
+		$bioBirthDate->Label = 'Born';
+		$bioBirthDate->ShowCondition = 'NamPartyType = Person';
+
+		$bioDeathDate = new Field;
+		$bioDeathDate->ColName = 'BioDeathDate';
+		$bioDeathDate->Label = 'Died';
+		$bioDeathDate->ShowCondition = 'NamPartyType = Person';
+
+		
+		$this->Fields = array(
+				'SummaryData',
+				'NamTitle',
+				'NamFirst',
+				'NamMiddle',
+				'NamLast',
+				'BioBirthPlace',
+				'BioDeathPlace',
+				$bioBirthDate,
+				$bioDeathDate,
+				'BioEthnicity',
+				'NotNotes',
+				);
+		$this->Database = 'eparties';
+
+		$this->BaseStandardDisplay();
+	}
+}
+?>

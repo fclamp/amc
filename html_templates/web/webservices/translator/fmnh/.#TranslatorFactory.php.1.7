@@ -1,0 +1,371 @@
+<?php
+
+/*
+ *  Copyright (c) 2005 - KE Software Pty Ltd
+ */
+
+// NB this file probably best viewed with tabspace=3 if using 80
+// character line terminal
+
+if (!isset($WEB_ROOT))
+        $WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($WEB_ROOT . '/webservices/translator/DigirTranslator.php');
+require_once ($WEB_ROOT . '/webservices/translator/EMuTranslator.php');
+require_once ($WEB_ROOT . '/webservices/translator/TexxmlTranslator.php');
+require_once ($WEB_ROOT . '/webservices/translator/OzcamTranslator.php');
+
+
+
+/**
+*
+* Translation Factory class
+*
+* used to create right instance of client
+* specific Translator from common program
+* interface
+*
+* to add new translator:
+* 1. add require_once (translator-source.php)
+* 2. add case matching it in switch statement
+*
+*
+* Copyright (c) 2005 - KE Software Pty Ltd
+*
+* @package EMuWebServices
+*
+*/
+
+
+class TranslatorFactory
+{
+	function TranslatorFactory($backendType='',$webRoot='',$webDirName='',$debugOn=0)
+	{
+		$this->backendType = $backendType;
+		$this->webRoot = $webRoot;
+		$this->webDirName = $webDirName;
+		$this->debugOn = $debugOn;
+	}
+
+	function getInstance($type='Generic')
+	{
+		switch (strtoupper($type))
+		{
+			case 'EMU'  :
+				$translator = new FmnhEMuTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'TEXXML'  :
+				$translator = new FmnhTexxmlTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'DIGIR':
+				$translator = new FmnhDigirTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'OZCAM':
+				$translator = new OzcamTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'GENERIC':
+				$translator = new GenericTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			default:
+				WebServiceObject::errorResponse("Error: creation of type: '$type' not implemented in TranslatorFactory.php");
+				break;
+		}
+		return $translator;
+	}
+}
+
+class FmnhEMuTranslator extends EMuTranslator 
+{
+	var $serviceName = "FmnhEMuTranslator";
+	var $recordElement = 'tuple';
+	var $potentialGroups = array (
+			'ScientificName' => '0',
+			'Class' => '1', 
+			'Family' => '2', 
+			'Genus' => '3', 
+			'Species' => '4', 
+			#'TypeStatus' => '5',
+		);	
+
+	var $translations = array (
+		# catalogue translations
+		'ecatalogue.atom[name=DarScientificName]' => 'ScientificName',
+		'ecatalogue.atom[name=DarLatitude]' => 'latitude',
+		'ecatalogue.atom[name=DarLongitude]' => 'longitude',
+		'ecatalogue.atom[name=DarClass]' => 'Class',
+		'ecatalogue.atom[name=DarFamily]' => 'Family',
+		'ecatalogue.atom[name=DarGenus]' => 'Genus',
+		'ecatalogue.atom[name=DarSpecies]' => 'Species',
+		'ecatalogue.atom[name=DarSubSpecies]' => 'SubSpecies',
+		#'ecatalogue.atom[name=DarTypeStatus]' => 'TypeStatus',
+
+		# esites translations
+		'esites.atom[name=LatCentroidLatitudeDec]' => 'latitude',
+		'esites.atom[name=LatCentroidLongitudeDec]' => 'longitude',
+	);
+
+	function describe()
+	{
+		return	
+			"A FmnhEMuTranslator is a FMNH specific EMuTranslator\n\n".
+			parent::describe();
+	}
+
+	function makeTestPage()
+	{
+		$args = array();
+		$args['EMu XML Record (enter 1 or more EMu xml records)'] = "<textarea cols='120' rows='15' name='data'>". <<<XML
+		<results>
+		 <!-- Data --> 
+		 <table name='esites'> 
+		  <!-- Row 1 --> 
+		  <tuple>
+		   <atom name='SummaryData'>Echo Beach, Far Away In Time</atom> 
+		   <atom name='LatCentroidLatitudeDec'>38.076667</atom> 
+		   <atom name='LatCentroidLongitudeDec'>-74.028333</atom> 
+		  </tuple>
+		 </table>
+		 <table name='ecatalogue'> 
+		  <!-- Row 1 --> 
+		  <tuple>
+		   <atom name='DarScientificName'>Mysella ovata (Jeffreys, 1881)</atom> 
+		   <atom name='DarLatitude'> 38.076667</atom> 
+		   <atom name='DarLongitude'>-74.028333</atom> 
+		   <atom name='DarLocality'></atom>
+		  </tuple>
+		 </table>
+		</results>
+XML
+			. "</textarea>";
+		$vars = array("type" => "emu");
+		$submission = "<input type='submit' name='action' value='translate' />";
+
+		return $this->makeDiagnosticPage(
+					'Test EMu Translator',
+					'simple test',
+					'',
+					'./TranslatorFactory.php',
+					$args,
+					$submission,
+					$vars,
+					$this->describe()
+				);
+	}
+
+}
+
+class FmnhDigirTranslator extends DigirTranslator 
+{
+	var $serviceName = "FmnhDigirTranslator";
+	var $potentialGroups = array (
+		'ScientificName' => '0',
+		'Class' => '1',
+		'Family' => '2',
+		'Genus' => '3',
+		'Species' => '4',
+		'Collector Number' => '4',
+		'TypeStatus' => '6',
+	);
+
+	function configure()
+	{
+		$this->setTranslation('darwin.FieldNumber','Collector Number','integer');
+	}
+
+	function describe()
+	{
+		return
+		"A DigirTranslator is an FMNH specific DigirTranslator\n\n".
+		parent::describe();
+	}
+
+
+
+	function makeTestPage()
+	{
+		$args = array();
+		$args['DiGIR Record (enter 1 or more DiGIR xml records)'] = "<textarea cols='120' rows='15' name='data'>".<<<XML
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet  type="text/xsl" href="digir/style/digir.xsl" ?>
+<?suggestedQuery Species=minullus?>
+<?suggestedResource NMNH-VZBirds?>
+<response xmlns='http://digir.net/schema/protocol/2003/1.0'>
+  <header>
+    <version>2</version>
+    <sendTime>2007-11-09 10:19:13.00Z</sendTime>
+    <source resource=''>
+    http://kenya.mel.kesoftware.com//emuwebnmnh-izdigir/webservices/digir.php</source>
+    <destination>kenya.mel.kesoftware.com</destination>
+    <type>search</type>
+  </header>
+  <content
+  xmlns:darwin='http://digir.net/schema/conceptual/darwin/2003/1.0'
+  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+    <record>
+      <darwin:DateLastModified>2005-7-20T9:56:33.000Z</darwin:DateLastModified>
+      <darwin:InstitutionCode>USNM</darwin:InstitutionCode>
+      <darwin:CollectionCode>Invertebrate Zoology:Crustacea</darwin:CollectionCode>
+      <darwin:CatalogNumber>126240.90457</darwin:CatalogNumber>
+      <darwin:ScientificName>Taeniastrotoscaliforniensis</darwin:ScientificName>
+      <darwin:BasisOfRecord>S</darwin:BasisOfRecord>
+      <darwin:Kingdom>Animalia</darwin:Kingdom>
+      <darwin:Phylum>Arthropoda</darwin:Phylum>
+      <darwin:Class>Maxillopoda</darwin:Class>
+      <darwin:Order>Poecilostomatoida</darwin:Order>
+      <darwin:Family>Taeniacanthidae</darwin:Family>
+      <darwin:Genus>Taeniastrotos</darwin:Genus>
+      <darwin:Species>californiensis</darwin:Species>
+      <darwin:ScientificNameAuthor>Cressey</darwin:ScientificNameAuthor>
+      <darwin:IdentifiedBy>Cressey, Roger F.</darwin:IdentifiedBy>
+      <darwin:YearIdentified>1968</darwin:YearIdentified>
+      <darwin:MonthIdentified>10</darwin:MonthIdentified>
+      <darwin:DayIdentified>2</darwin:DayIdentified>
+      <darwin:TypeStatus>Holotype</darwin:TypeStatus>
+      <darwin:Collector>E. Hobson</darwin:Collector>
+      <darwin:FieldNumber>12345</darwin:FieldNumber>
+      <darwin:YearCollected>1968</darwin:YearCollected>
+      <darwin:MonthCollected>10</darwin:MonthCollected>
+      <darwin:DayCollected>2</darwin:DayCollected>
+      <darwin:JulianDay>276</darwin:JulianDay>
+      <darwin:ContinentOcean>North Pacific Ocean</darwin:ContinentOcean>
+      <darwin:Country>United States</darwin:Country>
+      <darwin:StateProvince>California</darwin:StateProvince>
+      <darwin:Locality>La Jolla</darwin:Locality>
+      <darwin:Sex>female</darwin:Sex>
+      <darwin:PreparationType>Alcohol (Ethanol)</darwin:PreparationType>
+      <darwin:IndividualCount>1</darwin:IndividualCount>
+    </record>
+  </content>
+  </diagnostics>
+</response>
+XML
+.
+
+			"</textarea>";
+		$vars = array("type" => "digir");
+		$submission = "<input type='submit' name='action' value='translate' />";
+		return $this->makeDiagnosticPage(
+					'Test Digir Translator',
+					'Simple Test',
+					'',
+					'./TranslatorFactory.php',
+					$args,
+					$submission,
+					$vars,
+					$this->describe()
+				);
+	}
+
+}
+
+class FmnhTexxmlTranslator extends TexxmlTranslator 
+{
+	var $serviceName = "FmnhTexxmlTranslator";
+	var $potentialGroups = array (
+			'ScientificName' => '0',
+			'Class' => '1', 
+			'Family' => '2', 
+			'Genus' => '3', 
+			'Species' => '4', 
+			#'TypeStatus' => '5',
+			#'Latitude' => '6',
+			#'Longitude' => '7',
+			'irn' => '8',
+			'Summary' => '9',
+		);	
+
+	var $latitudeElement = 'Latitude';
+	var $longitudeElement = 'Longitude';
+
+	function configure()
+	{
+		$this->setTranslation('ecatalogue.irn_1','irn','integer');
+		$this->setTranslation('ecatalogue.DarLatitude','Latitude','float');
+		$this->setTranslation('ecatalogue.DarLongitude','Longitude','float');
+		$this->setTranslation('ecatalogue.DarScientificName','ScientificName','string');
+		$this->setTranslation('ecatalogue.DarFamily','Family','string');
+		$this->setTranslation('ecatalogue.DarGenus','Genus','string');
+		$this->setTranslation('ecatalogue.DarSpecies','Species','string');
+		$this->setTranslation('ecatalogue.DarCatalogNumberNumeric','CatalogNumberNumeric','integer');
+		$this->setTranslation('ecatalogue.SummaryData','Summary','string');
+	}
+
+	function makeTestPage()
+	{
+		$args = array();
+		$args['EMu XML Record (enter 1 or more EMu xml records)'] = "<textarea cols='120' rows='15' name='data'>". <<<XML
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<results status="success" matches="1">
+  <record>
+    <irn>
+      <irn_1>1</irn_1>
+    </irn>
+    <SummaryData>Somegenus (Somesubgenus) somespecies subsp. somesubspecies, Canada</SummaryData>
+    <DarDateLastModified>2007-4-29T22:29:32.000CMT</DarDateLastModified>
+    <DarInstitutionCode>F</DarInstitutionCode>
+
+    <DarCollectionCode>Botany</DarCollectionCode>
+    <DarCatalogNumber />
+    <DarScientificName>Somegenus (Somesubgenus) somespecies subsp. somesubspecies</DarScientificName>
+    <DarBasisOfRecord>Specimen</DarBasisOfRecord>
+    <DarKingdom>Somekingdom</DarKingdom>
+    <DarPhylum />
+    <DarClass />
+
+    <DarFamily>Somefamily</DarFamily>
+    <DarGenus>Somegenus</DarGenus>
+    <DarSpecies>somespecies</DarSpecies>
+    <DarSubspecies>somesubspecies</DarSubspecies>
+    <DarIdentifiedBy>D. Kennedy</DarIdentifiedBy>
+
+    <DarContinentOcean>North America, Pacific Ocean</DarContinentOcean>
+    <DarCountry>Canada</DarCountry>
+    <DarStateProvince>BC</DarStateProvince>
+    <DarCounty>GVRD</DarCounty>
+
+    <DarLocality>Vancouver, downtown westend</DarLocality>
+    <DarLongitude>-123</DarLongitude>
+    <DarLatitude>49.5</DarLatitude>
+  </record>
+</results>
+
+XML
+		."</textarea>";
+		$vars = array("type" => "texxml");
+		$submission = "<input type='submit' name='action' value='translate' />";
+
+		return $this->makeDiagnosticPage(
+					'Test EMu Translator',
+					'simple test',
+					'',
+					'./TranslatorFactory.php',
+					$args,
+					$submission,
+					$vars,
+					$this->describe()
+				);
+	}
+}
+
+
+if (isset($_REQUEST['test']))
+{
+	if (basename($_SERVER['PHP_SELF']) == 'TranslatorFactory.php')
+	{
+		$factory = new TranslatorFactory();
+		if (isset($_REQUEST['type']))
+		{
+			$translator = $factory->getInstance($_REQUEST['type']);
+		}
+		else
+		{
+			$translator = $factory->getInstance('Texxml');
+		}
+		$translator->test(true);
+	}
+}
+
+
+?>

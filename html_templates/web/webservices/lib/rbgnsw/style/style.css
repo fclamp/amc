@@ -1,0 +1,45 @@
+h3 {font-family:arial;color:#333399;font-size:18}
+h4 {font-family:arial;color:#333399;font-size:16}
+h5 {font-family:arial;color:#333399;font-size:12}
+h6 {font-family:verdana;color:#333399;font-size:10}
+a {text-decoration:none}
+a:hover {font-weight:bold}
+
+.pagemargins {background:#FFFFFF;margin-top:0px;margin-right: 0px;margin-bottom: 0px;margin-left: 0px;margin: 0px;}
+.style1 {background:white url(images/ausmap2.jpg) no-repeat center center}
+
+.desc {font-family:verdana;color:#455B89;font-size:120%;font-weight:bold}
+.desc:hover{text-decoration:underline}
+.lnk {font-family:sanserif;color:#468154;font-size:110%}
+.lnk:hover{color:#377445;text-decoration:underline}
+
+.lnk1 {font-family:verdana;color:#FFFFFF;font-size:10}
+.lnk1:hover {color:#76B01D}
+.lnk2 {color:#BD0004; font: 8pt/10pt arial; }
+.lnk2:hover {color:#336699; font-weight:normal}
+.txt1 {font-family:verdana;color:#051889;font-size:10}
+
+.white {color:black;font-size:10;font-weight:bold}
+.white:hover {color:#FFFFFF}
+.darkgrey {color:#303030;font-family:Arial;font-size:14}
+
+.menu {color:#FFFFFF;font-family:Arial;font-size:14;font-weight:bold}
+.menu1 {color:black;font-family:Arial;font-size:14}
+.menu2 {color:black;font-family:Arial;font-size:10}
+.menu3 {color:#FFFFFF;font-family:Arial;font-size:10;font-weight:bold}
+
+
+body {font-family:arial;font-size:12;bgcolor:#000000; margin:0px;}
+
+.normal {color:black;font-size:12}
+.tabletext {color:black;font-size:12}
+.label {color:black;font-size:12;font-weight:bold}
+.inform {FONT: 10pt/18pt arial, sans-serif;font-weight:bold}
+.head2 {font-family:arial;color:#333399;font-size:150%}
+.head1 {font-family:arial;font-size:130%}
+
+.Wmenu {color:#003300;font-family:Arial;font-size:12;font-weight:bold}
+.Wmenu:hover {color:#FF6600}
+.Wlnk {color:#000099}
+.Wlnk:visited {color:#993300}
+

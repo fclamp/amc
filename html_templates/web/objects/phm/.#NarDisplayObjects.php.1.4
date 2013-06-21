@@ -1,0 +1,691 @@
+<?php
+
+/*
+*  Copyright (c) KE Software Pty Ltd - 2004
+*/
+
+/* 
+Created By: Martin Jujou
+Creation Date: 09/12/2004
+*/
+
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseDisplayObjects.php');
+require_once ($WEB_ROOT . '/objects/common/PreConfiguredQuery.php');
+
+
+
+
+// displays narrative information
+class
+NarPhmMasterDisplay extends BaseStandardDisplay
+{
+
+	// Set default in the constructor
+	function
+	NarPhmMasterDisplay()
+	{
+		
+
+
+		// links to associated objects
+		$objects = new Field;
+		$objects->Database = "enarratives";
+		$objects->Field = "SpecialObjectLink";
+		$objects->ColName = "irn_1";
+		$objects->LinksTo = "NarDisplayObject.php";
+
+		// object table
+		$objTable = new Table();
+		$objTable->Name = "Associated Objects:";
+		$objTable->Columns = array($objects);
+
+
+		// sub narratives
+		$sub = new Field;
+		$sub->Database = "enarratives";
+		$sub->Field = "SummaryData";
+		$sub->ColName = "irn_1"; 
+
+		// narrative table
+		$narTable = new Table();
+		$narTable->Name = "Sub Narratives:";
+		$narTable->Columns = array($sub);
+
+		
+
+		$this->Fields = array(
+
+				'NarTitle',
+				'NarNarrative',
+				$narTable,
+				$objTable,
+
+				);
+
+
+		$this->HeaderField = 'SummaryData';
+		$this->BaseStandardDisplay();
+		$this->Database = 'enarratives';
+
+	}
+
+
+	
+
+
+	function
+	_printTable($table)
+	{
+		if (strtolower(get_class($table)) != 'table')
+			return;
+		elseIf( ! $this->_tableHasData($table, 1) )
+			return;
+
+		$flag = 1;
+		$row = 1;
+		$search = "";
+		$masterIrn = "";
+		$searchType = "";
+
+		while(1)
+		{
+			if (! $this->_tableHasData($table, $row))
+				break;
+			if ($row == 1)
+			{
+				for($i = 0; $i < count($table->Columns); $i++)
+				{
+					if (isset($table->Headings[$i]))
+						$heading = $table->Headings[$i];
+					else
+						$heading = $this->_STRINGS[$table->Columns[$i]->ColName];
+
+
+				}
+			}
+
+			foreach ($table->Columns as $col)
+			{
+
+				if (is_string($col))
+					$col = new Field($col, $this->_STRINGS[$col]);
+
+				switch (strtolower(get_class($col)))
+				{
+				    case 'field':
+					if (preg_match('/_tab/', $col->ColName))
+					{
+						$col->ColName = preg_replace('/_tab/', ":$row", $col->ColName);
+					}
+					elseif (preg_match('/[^:\d]0$/', $col->ColName))
+					{
+						$col->ColName = preg_replace('/0$/', ":$row", $col->ColName);
+					}
+
+					
+					if($col->ColName == "irn_1")
+					{
+						if($col->ColName == "irn_1" && $col->Field == "SpecialObjectLink")
+						{
+							$searchType = "object";
+							$fielddata = $this->record->{$col->ColName};
+							$masterIrn = $fielddata;
+						}
+						else
+						{  
+							$searchType = "narrative";
+							$fielddata = $this->record->{$col->ColName};
+							$search .= "(AssMasterNarrativeRef == " . $fielddata . ")";
+						}
+						
+					}
+					break;
+				    case 'table':
+					break;
+				    case 'formatfield':
+					if (preg_match('/_tab/', $col->Format))
+					{
+						$col->Format = preg_replace('/_tab/', ":$row", $col->Format);
+					}
+					elseif (preg_match('/[^:\d]0$/', $col->Format))
+					{
+						$col->Format = preg_replace('/[^:\d]0$/', ":$row", $col->Format);
+					}
+					break;
+				}
+
+			}
+
+
+			$row++;
+		}
+
+		if($searchType == "object")
+		{
+
+			$link = new PreConfiguredQueryLink;
+			$link->LimitPerPage = 20;
+			$link->LinkText = 'Click here to list all Objects attached to Sub Narratives';
+			$link->ResultsListPage = "NarResultsListNarrativeObjects.php";
+			$link->Where = 'AssMasterNarrativeRef=' . $masterIrn;
+			
+			print '<a href="' . $link->generateRef() . '&narTitle=' . 
+			urlencode($this->record->{NarTitle}) . '&theMasterIrn=' . urlencode($masterIrn) . '">';
+			print '<font color="#666666" face="Verdana" size="' . $this->FontSize . '">';
+			print $link->LinkText;
+			print '</font></a>';
+		
+
+		}
+		elseif($searchType == "narrative")
+		{
+			$link = new PreConfiguredQueryLink;
+			$link->LimitPerPage = 20;
+			$link->LinkText = 'Click here to list Sub Narratives';
+			$link->ResultsListPage = "NarResultsList.php";
+			$link->Where = $search; 
+
+			print '<a href="' . $link->generateRef() . '">';
+			print '<font color="#666666" face="Verdana" size="' . $this->FontSize . '">';
+			print $link->LinkText;
+			print '</font></a>';
+		}
+
+	}
+	
+}
+
+
+// displays narrative information
+class
+NarPhmStandardDisplay extends BaseStandardDisplay
+{
+
+	// Set default in the constructor
+	function
+	NarPhmStandardDisplay()
+	{
+		// associated narratives
+		/*
+		$ass = new BackReferenceField;
+		$ass->RefDatabase = "enarratives";
+		$ass->RefField = "AssAssociatedWithRef_tab";
+		$ass->ColName = "irn_1";
+		$ass->Label = "Sub Narratives:";
+		$ass->LinksTo = "NarDisplay.php";
+		*/
+
+		// links to authors
+		$ass = new Field;
+		$ass->Database = "enarratives";
+		$ass->Field = "SummaryData";
+		$ass->ColName = "irn_1";
+
+
+
+		// narrative table
+		$narTable = new Table();
+		$narTable->Name = "Sub Narratives:";
+		$narTable->Columns = array($ass);
+
+
+		// master narrative
+		$master = new BackReferenceField;
+		$master->RefDatabase = "enarratives";
+		$master->RefField = "AssAssociatedWithRef_tab";
+		$master->ColName = "SummaryData";
+		$master->Label = "Master Narrative:";
+		$master->LinksTo = "NarDisplay.php";
+
+
+		// links to authors
+		$authors = new Field;
+		$authors->Database = "eparties";
+		$authors->Field = "SummaryData";
+		$authors->Label = "Related Authors:";
+		$authors->ColName = "NarAuthorsRef_tab->eparties->SummaryData";
+		$authors->LinksTo = "NarDisplayParty.php";
+
+
+
+		// links to parties 
+		$parties = new Field;
+		$parties->Database = "eparties";
+		$parties->Field = "SummaryData";
+		$parties->ColName = "ParPartiesRef_tab->eparties->SummaryData";
+		$parties->LinksTo = "NarDisplayParty.php";
+
+
+
+		// links to associated objects 	
+		$objects = new Field;
+		$objects->Database = "ecatalogue";
+		$objects->Field = "SummaryData";
+		$objects->ColName = "ObjObjectsRef_tab->ecatalogue->irn_1";
+		$objects->LinksTo = "NarDisplayObject.php";
+
+
+
+		// related module table
+		$modTable = new Table();
+		$modTable->Name = "Associated Modules:";
+		$modTable->Headings = array("Related Parties", "Related Objects");
+		$modTable->Columns = array($parties, $objects); 
+
+
+		// object table
+		$objTable = new Table();
+		$objTable->Name = "Associated Objects:";
+		$objTable->Columns = array($objects);
+
+
+
+		$this->Fields = array(
+
+				'NarTitle',
+				'NarNarrative',
+				$master,
+				$narTable,
+				$objTable,
+
+				);
+
+
+		$this->HeaderField = 'SummaryData';
+		$this->BaseStandardDisplay();
+		$this->Database = 'enarratives';
+
+	}
+
+
+	function
+	_printTable($table)
+	{
+		if (strtolower(get_class($table)) != 'table')
+			return;
+		elseIf( ! $this->_tableHasData($table, 1) )
+			return;
+
+		$flag = 1;
+		$row = 1;
+		$search = "";
+		$searchType = "";
+
+		while(1)
+		{
+			if (! $this->_tableHasData($table, $row))
+				break;
+			if ($row == 1)
+			{
+				for($i = 0; $i < count($table->Columns); $i++)
+				{
+					if (isset($table->Headings[$i]))
+						$heading = $table->Headings[$i];
+					else
+						$heading = $this->_STRINGS[$table->Columns[$i]->ColName];
+
+
+				}
+			}
+
+			foreach ($table->Columns as $col)
+			{
+
+				if (is_string($col))
+					$col = new Field($col, $this->_STRINGS[$col]);
+                
+				switch (strtolower(get_class($col)))
+				{
+				    case 'field':
+					if (preg_match('/_tab/', $col->ColName))
+					{
+						$col->ColName = preg_replace('/_tab/', ":$row", $col->ColName);
+					}
+					elseif (preg_match('/[^:\d]0$/', $col->ColName))
+					{
+						$col->ColName = preg_replace('/0$/', ":$row", $col->ColName);
+					}
+
+                    
+                    
+					if(preg_match('/ecatalogue->irn_1/', $col->ColName))
+					{
+						$searchType = "object";
+						$fielddata = $this->record->{$col->ColName};
+
+
+						if($flag == 1)
+						{
+							$search .= "(irn == " . $fielddata . ")";
+							$flag  = 0;
+						}
+						else
+						{
+							$search .= " or (irn == " . $fielddata . ")";
+						}
+
+					}
+					elseif($col->ColName == "irn_1")
+					{
+						$searchType = "narrative";
+						$fielddata = $this->record->{$col->ColName};
+
+						if($flag == 1)
+						{
+							$search .= 
+						"(AssMasterNarrativeRef == " . $fielddata . ")";
+						
+						}
+						else
+						{
+							$search .=
+						" or (AssMasterNarrativeRef == " . $fielddata . ")"; 
+			
+						}
+					}
+					
+					break;
+				    case 'table':
+					break;
+				    case 'formatfield':
+					if (preg_match('/_tab/', $col->Format))
+					{
+						$col->Format = preg_replace('/_tab/', ":$row", $col->Format);
+					}
+					elseif (preg_match('/[^:\d]0$/', $col->Format))
+					{
+						$col->Format = preg_replace('/[^:\d]0$/', ":$row", $col->Format);
+					}
+					break;
+				}
+
+			}
+
+
+			$row++;
+		}
+
+		if($searchType == "object")
+		{
+			$link = new PreConfiguredQueryLink;
+			$link->LimitPerPage = 20;
+			$link->LinkText = 'Click here to list Objects';
+			$link->ResultsListPage = "NarResultsListObject.php";
+			$link->Where = $search; 
+            
+			print '<a href="' . $link->generateRef() . '&narTitle=' . urlencode($this->record->{NarTitle}) . 
+			'&narIrn=' . urlencode($this->record->{irn_1}) . '">';
+			print '<font color="#666666" face="Verdana" size="' . $this->FontSize . '">';
+			print $link->LinkText;
+			print '</font></a>';
+		}
+		elseif($searchType == "narrative")
+		{
+			$link = new PreConfiguredQueryLink;
+			$link->LimitPerPage = 20;
+			$link->LinkText = 'Click here to list Sub Narratives';
+			$link->ResultsListPage = "NarResultsList.php";
+			$link->Where = $search; 
+
+
+			print '<a href="' . $link->generateRef() . '">';
+			print '<font color="#666666" face="Verdana" size="' . $this->FontSize . '">';
+			print $link->LinkText;
+			print '</font></a>';
+		}
+
+	}
+
+
+	
+
+}
+
+
+// displays object
+class
+NarPhmObjectDisplay extends BaseStandardDisplay 
+{
+
+	function
+	NarPhmObjectDisplay()
+	{
+
+		// dimensions height 
+		$height = new Field;
+		$height->Database = "ecatalogue";
+		$height->ColName = "DimHeight_tab";
+
+
+		// dimensions length
+		$length = new Field;
+		$length->Database = "ecatalogue";
+		$length->ColName = "DimLength_tab";
+
+		// dimensions width 
+		$width = new Field;
+		$width->Database = "ecatalogue";
+		$width->ColName = "DimWidth_tab";
+
+		// dimensions depth 
+		$depth = new Field;
+		$depth->Database = "ecatalogue";
+		$depth->ColName = "DimDepth_tab";
+
+		// dimensions diameter 
+		$diameter = new Field;
+		$diameter->Database = "ecatalogue";
+		$diameter->ColName = "DimDiameter_tab";
+
+		// dimensions unit length 
+		$ulength = new Field;
+		$ulength->Database = "ecatalogue";
+		$ulength->ColName = "DimUnitLength_tab";
+		
+		// dimensions weight 
+		$weight = new Field;
+		$weight->Database = "ecatalogue";
+		$weight->ColName = "DimWeight_tab";
+
+
+		// dimensions unit weight 
+		$uweight = new Field;
+		$uweight->Database = "ecatalogue";
+		$uweight->ColName = "DimUnitWeight_tab";
+
+
+		// dimensions type 
+		$type = new Field;
+		$type->Database = "ecatalogue";
+		$type->ColName = "DimType_tab";
+
+		
+		$dimTable = new Table();
+		$dimTable->Name = "Dimensions:";
+		$dimTable->Headings = array("Height", "Length", "Width", "Depth", "Diameter", 
+		"Unit Length", "Weight", "Unit Weight", "Type");
+		$dimTable->Columns = array($height, $length, $width, 
+		$depth, $diameter, $ulength, $weight, $uweight, $type);
+
+
+		// associated events 
+		$events = new BackReferenceField;
+		$events->RefDatabase = "eevents";
+		$events->RefField = "ObjAttachedObjectsRef_tab";
+		$events->ColName = "SummaryData";
+		$events->Label = "Events:";
+
+
+		$this->Fields = array(
+
+				'DesObjectStatement',
+				'SumRegistrationNumber',
+				'DesDescription',
+				'DesMarks',
+				'AccAccessionLotRef->eaccessionlots->AcqCreditLine',
+				$dimTable,
+				DimNotes, 
+				HisHistoryNotes, 
+				ProProductionNotes, 
+				SigStatement, 
+				ArcAdministrativeHistory,
+				$events,
+
+				);
+
+
+		$this->HeaderField = 'SummaryData';
+		$this->BaseStandardDisplay();
+	}
+
+
+
+
+	function
+	_printTable($table)
+	{
+		if (strtolower(get_class($table)) != 'table')
+			return;
+		elseIf( ! $this->_tableHasData($table, 1) )
+			return;
+
+		$row = 1;
+		while(1)
+		{
+			if (! $this->_tableHasData($table, $row))
+				break;
+			if ($row == 1)
+			{
+				// TODO - dont print if not set.
+				print "<!-- Start Sub Table -->\n";
+				print "<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" width=\"100%\">\n";
+				print "<tr>\n";
+				for($i = 0; $i < count($table->Columns); $i++)
+				{
+					if (isset($table->Headings[$i]))
+						$heading = $table->Headings[$i];
+					else
+						$heading = $this->_STRINGS[$table->Columns[$i]->ColName];
+					print "<td size='1'><b>";
+
+
+					// custom size bit was here
+
+
+					PPrint($heading, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+
+
+					print "</b></td>\n";
+				}
+				print "</tr>\n";
+			}
+
+			print "<tr>\n";
+			foreach ($table->Columns as $col)
+			{
+				print "<td>";
+
+
+				if (is_string($col))
+					$col = new Field($col, $this->_STRINGS[$col]);
+
+				switch (strtolower(get_class($col)))
+				{
+				    case 'field':
+					if (preg_match('/_tab/', $col->ColName))
+					{
+						$col->ColName = preg_replace('/_tab/', ":$row", $col->ColName);
+					}
+					elseif (preg_match('/[^:\d]0$/', $col->ColName))
+					{
+						$col->ColName = preg_replace('/0$/', ":$row", $col->ColName);
+					}
+					$this->_printField($col);
+					break;
+				    case 'table':
+				    	$this->_printTable($col);
+					break;
+				    case 'formatfield':
+					if (preg_match('/_tab/', $col->Format))
+					{
+						$col->Format = preg_replace('/_tab/', ":$row", $col->Format);
+					}
+					elseif (preg_match('/[^:\d]0$/', $col->Format))
+					{
+						$col->Format = preg_replace('/[^:\d]0$/', ":$row", $col->Format);
+					}
+				    	$this->_printFormatField($col);
+					break;
+				}
+			
+
+				print "</td>\n";
+			}
+			print "</tr>\n";
+			$row++;
+		}
+		print "</table>\n";
+		print "<!-- End Sub Table -->\n";
+	}
+}
+
+
+// displays party information
+class
+NarPhmPartyDisplay extends BaseStandardDisplay
+{
+
+	// Set default field in the constructor
+	function
+	NarPhmPartyDisplay()
+	{
+
+		// narrative link
+		$narrative = new BackReferenceField;
+		$narrative->RefDatabase = "enarratives";
+		$narrative->RefField = "ParPartiesRef_tab";
+		$narrative->ColName = "SummaryData";
+		$narrative->Label = "Related Narratives:";
+		$narrative->LinksTo = "NarDisplay.php";
+
+		// links to parties 
+		$parties = new Field;
+		$parties->Database = "eparties";
+		$parties->Field = "SummaryData";
+		$parties->Label = "Associated Parties:";
+		$parties->ColName = "AssAssociationRef_tab->eparties->SummaryData";
+		$parties->LinksTo = "NarDisplayParty.php";
+
+
+
+		$this->Fields = array(
+				'SummaryData',
+				'NamTitle',
+				'NamFirst',
+				'NamMiddle',
+				'NamLast',
+				'BioBirthDate',
+				'BioDeathDate',
+				'BioLabel',
+				$parties,
+				$narrative
+
+				);
+
+
+		$this->BaseStandardDisplay();
+		$this->HeaderField = 'SummaryData';
+		$this->Database = 'eparties';
+
+
+	}
+}
+
+
+
+
+?>

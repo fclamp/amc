@@ -1,0 +1,125 @@
+/* -----------------------------------
+basic layout
+----------------------------------- */
+
+.row
+{
+	clear: left;
+	overflow: hidden;
+	zoom: 1;
+	_overflow: visible;
+}
+
+/* -----------------------------------
+Box
+----------------------------------- */
+.box { margin: 20px 0; }
+
+.box, .box-body, .row
+{
+	overflow: hidden;
+	_overflow: visible;
+	zoom: 1;
+}
+
+.box-item
+{
+	float: left;
+	margin-right: 20px;
+}
+
+.box-item img { display: block; }
+.box-heading { margin: 0 0 0.5em; }
+
+
+/* -----------------------------------
+wide
+----------------------------------- */
+.container
+{
+	max-width: 1000px;
+	margin: 0 auto;
+}
+
+.full-col,.w-2col,.w-content,.w-aside,.w-explore,.w-small,.w-related-wrap,
+.w-related-gutter,.w-related-4,.w-feature-gutter,.w-feature-6,.w-feature-wrap 
+{
+	float: left;
+}
+
+.w-gutter,.w-related-gutter
+{
+	float: left;
+	background-color: blue;
+}
+
+.full-col { width: 100%; }
+.w-2col { width: 45%; margin-right: 6%; display: inline;  }
+.w-3col { width: 80%; float: left; margin-right: 6%; }
+
+.w-content { width: 58%; margin-right: 2%; }
+.w-aside { width: 40%;  }
+
+.w-feature-gutter { width: 4.31%; background: blue; }
+.w-feature-wrap { width: 91.38%; }
+.w-feature-6 { width: 15%; margin-right: 1.80%; display:inline; }
+
+.w-related-gutter { width: 6.25%; background: green; }
+.w-related-wrap { width: 86.50%; }
+.w-related-4 { width: 22.80%; margin-right: 2.86%; display: inline; }
+
+.w-explore { width: 44%; margin-right: 6%; padding-left: 3.5%; }
+.w-small { width: 13.5%; margin-right: 1.72%; }
+
+.full-col,.w-last { margin-right: 0; margin-left: 0; padding-left: 0; }
+
+.w-content img, .w-aside img { width: 100%; }
+
+nav a {
+	float: left;
+	padding: 0.2em 1em; 
+	border-right: 1px solid #2d8fb9;
+}
+nav li { display: inline; margin-left: -999em; }
+nav ul { margin:0; padding: 0.6em 0; overflow: auto; }
+nav a 
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+}
+nav a:hover { color:#5abae3;  }
+
+/* -----------------------------------
+Form Styles
+----------------------------------- */
+.search-form 
+{
+	width: 85%;
+	margin-left: 6%;
+}
+.ful-box {
+	width: 100%;
+	overflow: hidden;
+}
+.search-form label
+{
+	width: 25%;
+	float: left;
+	margin-right: 3%;
+}
+.box-right
+{
+	width: 70%;
+	float: left;
+}
+.form-2 
+{
+	width: 70%;
+	margin-left: 8em;
+	margin-bottom: 1em;
+}
+
+.inlineListBnt, .inlineList { list-style-type: none; padding: 0; overflow: hidden; width: 100%; }
+.inlineList li, .inlineList a, .inlineListBnt li, .inlineListBnt a { float: left; }
+.inlineList li, .inlineList a { margin: 0 0 0.5em 0; }

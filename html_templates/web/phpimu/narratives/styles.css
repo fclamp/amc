@@ -1,0 +1,266 @@
+/* Status */
+form.NarrativeForm
+{
+	margin: 0px 0px 0px 0px;
+}
+
+div.NarrativeStatus
+{
+	clear: both;
+}
+
+/* ... trails */
+div.NarrativeTrails
+{
+	float: left;
+}
+
+div.NarrativeTrails td
+{
+	font-size: 11px;
+}
+
+/* ... carts */
+div.NarrativeCarts
+{
+	float: right;
+	font-size: 11px;
+
+
+
+
+}
+
+div.NarrativeCarts select
+{
+	font-size: 11px;
+}
+
+div.NarrativeCarts input
+{
+	font-size: 11px;
+}
+
+div.NarrativeAuthors
+{
+	font-size: 10px;
+	text-align: center;
+}
+
+div.NarrativeMain
+{
+	clear: both;
+	font-size: 14px;
+	text-align: justify;
+}
+
+div.NarrativeMain table
+{
+	border-collapse: collapse;
+	margin: 10px 10px 10px 10px;
+}
+
+div.NarrativeMain .Content
+{
+	border: 1px solid #e0e0e0;
+	padding: 3px 3px 3px 3px;
+	width: 100%;
+}
+
+div.NarrativeMain .Content img
+{
+	float: left;
+	padding-right: 10px;
+}
+
+div.NarrativeMain .Control
+{
+	border: none;
+	text-align: center;
+	vertical-align: top;
+	font-size: 11px;
+}
+
+div.NarrativeMain .Control input
+{
+	font-size: 11px;
+}
+
+div.NarrativeMain .Control p
+{
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+div.NarrativeSection
+{
+	font-size: 14px;
+	font-weight: bold;
+	margin-left: 10px;
+	text-align: left;
+}
+
+div.NarrativeSection input
+{
+	font-size: 11px;
+}
+
+div.NarrativeSummary
+{
+	clear: both;
+	text-align: left;
+}
+
+div.NarrativeSummary table
+{
+	border-collapse: collapse;
+	margin: 10px 10px 10px 10px;
+}
+
+div.NarrativeSummary td
+{
+	font-size: 12px;
+	vertical-align: top;
+}
+
+div.NarrativeSummary .Image
+{
+	border-left: 1px solid #e0e0e0;
+	text-align: center;
+	padding: 3px 3px 3px 3px;
+}
+
+div.NarrativeSummary .Image#only
+{
+	border-top: 1px solid #e0e0e0;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+div.NarrativeSummary .Image#first
+{
+	border-top: 1px solid #e0e0e0;
+}
+
+div.NarrativeSummary .Image#last
+{
+	border-bottom: 1px solid #e0e0e0;
+}
+
+div.NarrativeSummary .Image a
+{
+	color: #e0e0e0;
+}
+
+div.NarrativeSummary .Content
+{
+	border-right: 1px solid #e0e0e0;
+	padding: 3px 3px 3px 3px;
+	width: 100%;
+}
+
+div.NarrativeSummary .Content#only
+{
+	border-top: 1px solid #e0e0e0;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+div.NarrativeSummary .Content#first
+{
+	border-top: 1px solid #e0e0e0;
+}
+
+div.NarrativeSummary .Content#last
+{
+	border-bottom: 1px solid #e0e0e0;
+}
+
+div.NarrativeSummary .Control
+{
+	border: none;
+	text-align: center;
+	vertical-align: top;
+}
+
+div.NarrativeSummary .Control input
+{
+	font-size: 11px;
+}
+
+div.NarrativeObjects
+{
+	clear: both;
+	text-align: left;
+}
+
+div.NarrativeObjects table
+{
+	border-collapse: collapse;
+	margin: 10px 10px 10px 10px;
+	border: 1px solid #e0e0e0;
+}
+
+div.NarrativeObjects .Content
+{
+	font-size: 12px;
+	padding: 3px 3px 3px 3px;
+	width: 100%;
+}
+
+div.NarrativeNavigation
+{
+	clear: both;
+	margin-bottom: 20px;
+}
+
+/* From results.php */
+
+/* From collections.php */
+.ListsTitle
+{
+	font-size: 18px;
+	text-align: center;
+}
+
+.ListsTable
+{
+	margin-left: 5%;
+	margin-right: 5%;
+}
+
+.ListsTable .Records
+{
+	text-align: center;
+}
+
+.ListsTable .OnDisplay
+{
+	text-align: center;
+}
+
+.ListsTable select
+{
+	font-size: 12px;
+}
+
+.ListsTable input
+{
+	font-size: 12px;
+}
+
+div.PublicationList
+{
+	font-size: 14px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+	vertical-align: top;
+}
+
+div.PublicationInstructions
+{
+	font-size: 14px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 30px;
+	text-align: left;
+}

@@ -1,0 +1,1215 @@
+<?php
+
+/*
+** Copyright (c) 1998-2011 KE Software Pty Ltd
+*/
+
+if (!isset($WEB_ROOT))
+        $WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($WEB_ROOT . '/objects/lib/serverconnection.php');
+require_once ($WEB_ROOT . '/webservices/lib/WebServiceObject.php');
+require_once ($WEB_ROOT . '/webservices/lib/SqlParser.php');
+require_once ($WEB_ROOT . '/webservices/lib/StructuredQuery.php');
+require_once ($WEB_ROOT . '/webservices/lib/FileOutput.php');
+
+/**
+ *
+ * Allow EMu to provide data as web service
+ *
+ * Provider is a base class from which EMu web service providers of various
+ * flavours can be built.  It includes methods to build and run database
+ * queries.
+ *
+ *
+ * Copyright (c) 1998-2011 KE Software Pty Ltd
+ *
+ * @package EMuWebServices
+ *
+ */
+class Provider extends WebServiceObject
+{
+	var $serviceName = "Provider";
+
+
+	/**
+	 * component of intermediate SQL request
+	 * @var string
+	 */
+	var $select;
+	/**
+	 * component of intermediate SQL request
+	 * @var string
+	 */
+	var $from;
+	/**
+	 * component of intermediate SQL request
+	 * @var string
+	 */
+	var $where;
+	/**
+	 * component of intermediate SQL request
+	 * @var string
+	 */
+	var $start;
+	/**
+	 * component of intermediate SQL request
+	 * @var string
+	 */
+	var $limit;
+
+	/**
+	 * set restrictions on database queries
+	 * these will ALWAYS be added to every TEXQL query
+	 * and will be 'AND'ed
+	 *
+	 * remove the "AdmPublishWebNoPassword = 'Yes'" term at own peril!
+	 *
+	 * @var string[]
+	 *
+	 */
+	var $_hardWiredRestrictions = array
+	(
+		"AdmPublishWebNoPassword CONTAINS 'Yes'",
+	);
+
+	function 
+	Provider($backendType='' ,$webRoot='' ,$webDirName='' ,$debugOn=0)
+	{
+		$this->{get_parent_class(__CLASS__)}($backendType, $webRoot, $webDirName, $debugOn);
+	}
+
+	function 
+	describe()
+	{
+		return	
+			"A Provider is a system to provide generic web services.\n".
+			"It handles requests and returns data using records in\n".
+			"the underlying EMu database.\n\n".  
+			parent::describe();
+	}
+
+	/**
+	 * set any general client specific properties.
+	 * This method should be implemented by the client specific object
+	 */
+	function 
+	configure()
+	{
+		$this->_makeThisAbstractMethod('customise');
+	}
+
+	/**	
+	 * take request in 'some' format and act appropriately
+	 * Should be overriden by the service specific child
+	 * inherited from this (eg DigirProvider.php)
+	 *
+	 * @param doc string
+	 *
+	 * @return string
+	 *   (typically xml)
+	 */
+	function 
+	request($doc)
+	{
+
+		$this->_makeThisAbstractMethod('request');
+	}
+
+	/**
+	 * make a component clause in a TEXQL statement
+	 *
+	 * takes field search criteria using fields specific to the web service
+	 * and translates these to EMu TEXQL where clauses.
+	 *
+	 * @param field string
+	 * @param operator string
+	 * @param value string
+	 *
+	 * @return string
+	 *
+	 */
+	function 
+	generateTexql($field,$operator,$value)
+	{
+		$this->_makeThisAbstractMethod('generateTexql');
+	}
+
+	/**
+	 * make a TEXQL statement from Web Service Specific query
+	 *
+	 * take a 'Query' in whatever form and translate it into a
+	 * TEXQL statement
+	 * (a 'Query' typically will not be the whole web service 'request'
+	 * but would be derived from information passed in the request and is
+	 * just the database access component of a request)
+	 *
+	 * @param query string
+	 *
+	 * @return string
+	 */
+	function 
+	_generateTexqlStatement($query)
+	{
+
+		$sql = $this->generateSqlStatement($query);
+		if ($_REQUEST['diagnostics'] == 'showSql')
+				$this->errorResponse($sql);
+		return $this->_sqlToTexql($sql);
+	}
+
+	function 
+	generateTexqlFromQuery($query)
+	{
+
+		$selectArray = $this->extractSelectFromQuery($query);
+
+		// select property may be used later to decide what fields need
+		// to be displayed by components using a provider
+		$this->select = implode(",",$selectArray);
+
+		$fromArray = $this->extractSrcFromQuery($query);
+		$postfixWhereArray = $this->extractPostfixFilterFromQuery($query);
+		$limits = $this->extractLimitsFromQuery($query);
+
+		$texql = $this->_sqlStructureToTexql(
+					$selectArray,
+					$fromArray,
+					$postfixWhereArray,
+					$limits);
+		
+
+		/*
+		if (isset($_REQUEST['diagnostics']))
+		{
+			$this->queryGenerationDiagnostics(
+					$texql,
+					$selectArray,
+					$fromArray,
+					$postfixWhereArray,
+					$limits);
+		}
+		*/
+
+		return $texql;
+	}	
+
+        /*
+         *
+         * queryGenerationDiagnostics
+         *
+         * used for internal debugging/testing etc - allows display of
+         * information on how query request is translated to texql
+         */
+        function queryGenerationDiagnostics(
+                                        $texql,
+                                        $selectArray,
+                                        $fromArray,
+                                        $postfixWhereArray,
+                                        $limits)
+        {
+
+                if ($_REQUEST['diagnostics'] == 'showTexql')
+                {
+                        $this->errorResponse($texql,'debug',true);
+                }
+                if ($_REQUEST['diagnostics'] == 'runTexql')
+                {
+                        $this->errorResponse($this->search($texql),'debug',false);
+                }
+                else if ($_REQUEST['diagnostics'] == 'showSql')
+                {
+                        $sql = new StructuredQuery();
+                        $this->errorResponse(
+                                                $sql->serialiseSqlStructure(
+                                                        $selectArray,
+                                                        $fromArray,
+                                                        $postfixWhereArray,
+                                                        $limits
+                                                ),
+                                                'debug',false);
+                }
+                else if ($_REQUEST['diagnostics'] == 'showEmuFields')
+                {
+                        // Displays list of fields and tests if they exist in
+                        // the given backend + checks syntax of generated texql
+                        $wanted = Array();
+                        foreach ($postfixWhereArray as $clause)
+                        {
+                                if (! preg_match("/^\*\* /",$clause))
+                                {
+                                        $field = preg_replace("/\s+.*/",'',$clause);
+                                        $wanted[$field]++;
+                                }
+                        }
+                        foreach ($selectArray as $field)
+                        {
+                                $wanted[$field]++;
+                        }
+                        $fields = array_keys($wanted);
+                        $from = implode(",",$fromArray);
+                        $ok = Array();
+                        $nok = Array();
+                        $unMapped = Array();
+                        foreach ($fields as $field)
+                        {
+                                $emuField = $this->generateValue($field,NULL);
+                                if ($emuField)
+                                {
+                                        $check = $this->search("DESCRIBE SELECT $emuField FROM $from");
+
+                                        if (preg_match("/status=.success./",$check))
+                                        {
+                                                $ok[] = "<field name='$emuField' table='$from' darwin='$field'>exists</field>";
+                                        }
+                                        else if (preg_match("/Unable to resolve/i",$check))
+                                        {
+                                                $nok[] = "<field name='$emuField' table='$from' darwin='$field'>DOES NOT EXIST</field>";
+                                        }
+                                        else if (preg_match("/Syntax error/i",$check))
+                                        {
+                                                $nok[] = "<field name='$emuField' table='$from' darwin='$field'>WARNING! Syntax Error encountered</field>";
+                                                $nok[] = "<msg>" . htmlentities($check) . "</msg>";
+                                        }
+                                        else
+                                        {
+                                                $nok[] = "<field name='$emuField' table='$from' darwin='$field'>WARNING! Error encountered</field>";
+                                                $nok[] = "<msg>" . htmlentities($check) . "</msg>";
+                                        }
+                                }
+                                else
+                                {
+                                        $unMapped[] = "<field darwin='$field'>not mapped to EMu</field>";
+                                }
+                        }
+                        $xml = Array();
+                        if (count($ok))
+                                $xml[] = "<found>\n". implode("\n",$ok) ."</found>";
+                        else
+                                $xml[] = "<found/>";
+                        if (count($nok))
+                                $xml[] = "<errors>\n". implode("\n",$nok) ."</errors>";
+                        else
+                                $xml[] = "<errors/>";
+
+                        $xml[] =  "<unmapped>". implode("\n",$unMapped) . "</unmapped>";
+
+                        $xml[] =  "<texql>". preg_replace("/,/",",\n",$texql) . "</texql>";
+
+                        $sql = $this->search("DESCRIBE $texql");
+                        if (preg_match("/status=.success./",$sql))
+                                $xml[] = "<texqlQuerySyntax>OK</texqlQuerySyntax>";
+                        else
+                                $xml[] = "<texqlQuerySyntax>FAILS</texqlQuerySyntax>";
+
+                        $this->errorResponse(implode("\n",$xml),'debug',false);
+                }
+
+                return $texql;
+        }
+
+	/**
+	 * generate a Stack of SQL Where statements from Web Service Request
+	 *
+	 * take some query in the particular 'Service' defined format and
+	 * translate into a Postix stack of operations
+	 * suitable for translation to Texql.
+	 */
+	function 
+	extractPostfixFilterFromQuery($srcQuery)
+	{
+		/*
+	 	* The stack would look like this:
+	 	* Source Query:
+	 	* (
+	 	* 	Genus LIKE 'Abies*' 
+	 	*	AND 
+	 	*	(
+	 	*		(Species LIKE 'pinace*')
+	 	*		OR
+	 	*		(
+	 	*			(Country like *Russia*)
+	 	*			AND 
+	 	*			(YearIdentified > 2002)
+	 	*		)
+	 	*	)
+	 	*
+	 	* will result in stack:
+	 	*	 YearIdentified > 2002
+	 	*	 Country LIKE *Russia*
+	 	*	 ** AND **
+	 	*	 Species LIKE pinace*
+	 	*	 ** OR **
+	 	*	 Genus LIKE Abies*
+	 	*	 ** AND **
+	 	*
+	 	*/
+		$this->_makeThisAbstractMethod('extractPostfixFilterFromQuery');
+	}
+
+	function 
+	extractSelectFromQuery($srcQuery)
+	{
+		$this->_makeThisAbstractMethod('extractSelectFromQuery');
+	}
+
+	function 
+	extractSrcFromQuery($srcQuery)
+	{
+		$this->_makeThisAbstractMethod('extractSrcFromQuery');
+	}
+	
+	function 
+	extractLimitsFromQuery($srcQuery)
+	{
+		$this->_makeThisAbstractMethod('extractLimitsFromQuery');
+	}
+
+	function 
+	_postfixWhereToInfix($postfixArray)
+	{
+		/* Used to reassemble SQL WHERE clauses from a Postfix stack
+		 *
+		 * eg 
+		 * if passed a list:
+		 *   Family = Culicidae 
+		 *   State = NSW
+		 *   State = Vic
+		 *   ** OR **
+		 *   Institution = NMNH
+		 *   ** AND **
+		 *   ** AND **
+		 * would return a string
+		 * (Family = Culicidae AND ((State = NSW OR State = Vic) AND
+		 *      Institution = NMNH))
+		 */
+		$stack = array();
+		foreach ($postfixArray as $item)
+		{
+
+			// this hack to handle being passed "field CONTAINS ''" clauses
+			// from boilerplate forms (that clause is a texql syntax error)
+			if (preg_match("/contains\s+'\s*'/i",$item))
+			{
+				$item = 'FALSE';
+			}
+
+			if (preg_match('/^\** (.+) \**$/',$item,$match))
+			{
+				$operand2 = array_pop($stack);
+				$operand1 = array_pop($stack);
+				$stack[] = "($operand1 $match[1] $operand2)";
+				
+			}
+			else if (preg_match('/^(\S+) (\S+) (.+)$/',$item,$match))
+			{
+				$field = $match[1];
+				$operator = $match[2];
+				$value = $match[3];
+				$fragment= $this->generateTexql(
+							$field,
+							$operator,
+							$value);
+				if (! $fragment)
+					$fragment = 'TRUE';
+				$stack[] = $fragment;
+			}
+			else if (preg_match('/^(TRUE|FALSE)$/i',$item))
+			{
+				$stack[] = $item;
+			}	
+			else
+			{
+				// stack incorrectly built (parsing error?)
+			}
+		}
+		return implode($stack," $match[1] ");
+	}
+
+	/**
+	 * take postfix stack representation of query and generate Texql
+	 */
+
+	function 
+	_sqlStructureToTexql($selectA,$fromA,$postFixStack,$limitsA)
+	{
+		$selects = Array();
+		foreach ($selectA as $srcField)
+		{
+			$emuField = $this->generateValue($srcField,NULL);
+			if ($emuField)
+				$selects[] = $emuField;
+		}
+		$select = implode(",",$selects);
+
+		$from = implode(",",$fromA);
+
+		$where = $this->_postfixWhereToInfix($postFixStack);
+
+		foreach ($this->_hardWiredRestrictions as $clause)
+		{
+			if ($where)
+				$where = "($where) AND $clause";
+			else
+				$where = $clause;
+		}
+
+
+		$limits = "";
+		if (count($limitsA) == 2)
+		{
+			$limits = "{" . $limitsA[0] ." to ". $limitsA[1] ."}";
+		}
+
+		return "(SELECT $select FROM $from WHERE $where) $limits";
+	}
+
+
+	/**
+	 * generate a 'GENERIC' SQL statement from Web Service Request
+	 *
+	 * This method must be implemented in child that defines the
+	 * service we are implementing (eg DigirProvider)
+	 *
+	 * take some query in the particular 'Service' defined format and
+	 * translate into a simple common 'intermediate' SQL form suitable for
+	 * translation to Texql.
+	 *
+	 * (Having intermediate SQL form means we only need to write a
+	 * translator from the common 'intermediate' SQL  form to our client
+	 * rather than a different one for each combination of request type and
+	 * service type)
+	 */
+	function 
+	generateSqlStatement($doc)
+	{
+		$this->_makeThisAbstractMethod('generateSqlStatement');
+	}
+
+	/**
+	 * take intermediate SQL query and translate into a TEXQL statement
+	 * @param sql string
+	 * @return string
+	 */
+	function 
+	_sqlToTexql($sql)
+	{
+		$range = '';
+		if (preg_match('/{([0-9to\s]+)}/',$sql,$match))
+		{
+			$range = $match[1];
+			$sql = preg_replace("/{\s*$range\s*}/",'',$sql);
+		}
+
+		list($discard,$select,$from,$where) = 
+			preg_split("/SELECT|FROM|WHERE/",$sql,4);
+
+		$selects = array();
+		foreach (preg_split("/\s*,\s*/",$select,-1) as $wantedField)
+		{
+			$wantedField = preg_replace('/^\s+|\s+$/','',$wantedField,-1); 
+
+			$translatedFragment = $this->generateValue($wantedField,NULL,$from);
+
+			if ($translatedFragment)
+				$selects[] = $translatedFragment;
+		}
+
+		$translatedPostfix = Array();
+
+		$sqlParser = new SqlParser();
+		$sqlParser->parse($where);
+
+		$postfix = $sqlParser->infixWhereToPostfix();
+
+		foreach ($postfix as $clause)
+		{
+		 	if (! preg_match('/^\*.+\*/',$clause))
+			{
+				$clause = preg_replace("/^\s+|\s+$/",'',$clause);
+				if (preg_match('/^TEXQL\s*=\s*(.+)/',$clause,$match))
+				{
+					$translatedFragment = 'e'. $match[1];
+				}
+				else if (preg_match('/(.+) (<>|=|<=|>=|<|>|CONTAINS|LIKE) (.+)/',$clause,$match))
+				{
+					$translatedFragment = $this->generateTexql(
+							$match[1],
+							$match[2],
+							$match[3]);
+				}
+				else if (preg_match("/^true$/i",$clause))
+				{
+					$translatedFragment = 'TRUE';
+				}
+				else
+				{
+					$translatedFragment = '';
+				}
+
+				if ($translatedFragment)
+					array_push($translatedPostfix,
+						$translatedFragment);
+				else		
+					array_push($translatedPostfix,'FALSE');
+			}
+			else
+				array_push($translatedPostfix,
+					$clause);
+		}
+		// add hardwired terms to query...
+		$hardwiredCount = 0;
+		foreach ($this->_hardWiredRestrictions as $clause)
+		{
+			foreach (preg_split("/\s*,\s*/",$from) as $module)
+			{
+				$module = preg_replace("/^\s*|\s*$/","",$module);
+				$translatedPostfix[] = 'e'. $module .".". $clause; 
+				$hardwiredCount++;
+			}
+		}
+
+		if (! count($postfix))
+                        $hardwiredCount--;
+
+		for ($i = 0; $i < $hardwiredCount; $i++)
+			$translatedPostfix[] = '* AND *';
+
+		$where = $sqlParser->postfixWhereToInfix($translatedPostfix);
+
+		// now assemble all the subclauses into Texql Statement
+		$select = implode($selects,',');
+		$select = preg_replace('/^\s*|\s*,\s*|\s*$/',',',$select);
+
+		$wanted = array();
+		$table = array();
+		foreach (preg_split('/\s*,\s*/',$select) as $field)
+		{
+			if (preg_match('/(.+)\.(.+)/',$field,$match))
+			{
+				$wanted[$field]++;
+				$table[$match[1]]++;
+			}
+			else if ($field)
+			{
+				$wanted[$field]++;
+				$table['ecatalogue']++;
+			}
+		}
+		$select = implode(array_keys($wanted),', ');
+		$from = implode(array_keys($table),', ');
+		if (! $where)
+			$where = 'true';
+
+		$texql =  "SELECT $select FROM $from WHERE $where";
+
+		if ($range)
+			$texql = "($texql) \{$range}";
+
+		if ($_REQUEST['diagnostics'] == 'showTexql')
+			$this->errorResponse($texql);
+		if ($_REQUEST['diagnostics'] == 'showEmuFields')
+		{
+			// This for debugging/testing/configuring.
+			// Displays list of fields and tests if they exist in
+			// the given backend + checks syntax of generated texql
+			foreach ($translatedPostfix as $clause)
+			{
+				if (! preg_match("/^\*/",$clause))
+				{
+					$field = preg_replace("/\s*=.*/",'',$clause);
+					$field = preg_replace("/\(|\)/",'',$field);
+					$wanted[$field]++;
+				}
+			}
+			$fields = array_keys($wanted);
+			$ok = Array();
+			$nok = Array();
+			foreach ($fields as $field)
+			{
+				list($matches, $check) = $this->search("DESCRIBE SELECT $field FROM $from");
+				if (preg_match("/status=.success./",$check))
+					$ok[] = "<field name='$field' table='$from'>exists</field>\n";
+				else	
+					$nok[] = "<field name='$field' table='$from'>DOES NOT EXIST</field>\n";
+			}
+			$ok = "<found>\n". implode("\n",$ok) ."</found>";
+			$nok = "<errors>\n". implode("\n",$nok) ."</errors>";
+
+			list($matches, $sql) = $this->search("DESCRIBE $texql");
+			$this->errorResponse(implode("\n",Array($nok,$ok,$sql)));
+		}
+		return $texql;
+	}
+
+	/**
+	 * builds intermediate SQL query from components
+	 *
+	 * just builds the query given extracted components
+	 *
+	 */
+	function 
+	buildQuery($select,$from,$where,$start,$limit)
+	{
+
+		$this->select = $select;
+		$this->from = $from;
+		$this->where = $where;
+		$this->start = $start;
+		$this->limit = $limit;
+		$sql =  "SELECT $this->select 
+					FROM catalogue 
+					WHERE ($this->where)";
+		if ($this->limit > 0)
+			$sql = "($sql) {". 
+				$this->start ." to ".
+				$this->limit ."}"; 
+
+		return $sql;	
+	}
+
+
+
+	/**
+	 * take EMu record and return the requested (service specific) Field Value
+	 *
+	 * if passed NULL as EMu record field, suggest child objects implement
+	 * system where it will return the EMu fields used to assemble the
+	 * wanted (service specific) field.
+	 *
+	 * @param wantedField string
+	 * @param emuRecord string[]
+	 * @param module string[]
+	 * @return string
+	 */
+	function 
+	generateValue($wantedField,$emuRecord,$module="ecatalogue")
+	{
+		$this->_makeThisAbstractMethod('generateValue');
+	}
+
+	function 
+	_postString($texql)
+	{
+		$content = "texql=". urlencode($texql);
+		$length = strlen($content);
+		$post = "POST /texxmlserver/post HTTP/1.0\r\n".
+			"Content-Length: $length\r\n\r\n".
+			$content;
+		return $post;	
+	}
+
+	/* mangle Texql to handle select clauses like
+	 * MulMultiMediaRef_tab->emultimedia->MulCreator
+	 * by using an alias field (and recording what the alias represents for
+	 * later assembly)
+	 *
+	 * eg
+	 *  SELECT MulMultiMediaRef_tab->emultimedia->MulCreator
+	 * will become:
+	 *  SELECT MulMultiMediaRef_tab AS alias_0
+	 * and aliasMap will record
+	 * alias_0 = MulMultiMediaRef_tab->emultimedia->MulCreator
+	 *
+	 */
+	function
+	_processCrossTableTexql($texql)
+	{
+		$aliasMap = array();
+		$aliasId = 0;
+		while (preg_match("/((\S+?)->([A-Za-z_\->]+))/",$texql,$matches))
+		{
+			$texql = preg_replace("/$matches[1]/"," $matches[2] as alias_$aliasId",$texql);
+			$aliasMap["alias_$aliasId"] = $matches[1];
+			$aliasId++;
+		}
+		return array($texql, $aliasMap);
+	}
+
+	/* if had a texql with refs to other module fields
+	 * like:
+	 *   "MulMultiMediaRef_tab->emultimedia->MulCreator"
+	 * then the Texql statement was mangled to use field aliases and the
+	 * resulting XML has stuff like:
+	 *   <alias_0><field_Ref>123</fieldRef></alias_0>
+	 *
+	 * This routine takes that XML (and a map of what the aliased bits
+	 * represent) and Queries and adds components into XML matching the
+	 * aliased bits
+	 */
+	 function
+	_subQueryCrossTable($results, $aliasMap)
+	{
+		 // for each alias in turn...
+		 for ($i=0; $i<count($aliasMap); $i++)
+		{
+		 	$aliasElement = "alias_$i";
+			$linkParts = preg_split("/->/",$aliasMap[$aliasElement], 3);
+
+			$linkingRef = $linkingField = $linkParts[0];
+			$linkedModule = $linkParts[1];
+			$wantedField = $linkParts[2];
+
+			if (preg_match("/_tab$/", $linkingField))
+			{
+				$linkingField = preg_replace("/_tab$/", "", $linkingField);
+			}			
+
+			// while <alias_x>1234</alias_x>
+			while ( preg_match("/<$aliasElement>(.*?)<\/$aliasElement>/s", $results, $match))
+			{
+				$aliasedBlock = $match[0];
+				$unquotedBlockToReplace = $match[0];
+				$blockToReplace = preg_quote($unquotedBlockToReplace, '/');
+
+				// kludge - atomic reference fields were not considered when designing this
+				if (preg_match("/<$aliasElement>(\d*)<\/$aliasElement>/", $unquotedBlockToReplace, $matches))
+				{
+					$aliasedBlock = "<$linkingField>$matches[1]</$linkingField>";
+				}
+
+				// look up the attached record
+				while (preg_match("/<$linkingField>(\d+?)<\/$linkingField>/", $aliasedBlock, $match))
+				{
+
+					$irn = $match[1];
+					$bitToReplace = preg_quote($match[0], '/');
+					$bitToReplace = preg_replace("/<\?xml.*?\?>\s*/", "", $bitToReplace);
+					$subTexql = "select " . $wantedField . " from " . $linkedModule . " where irn = $irn";
+					$subResults = $this->search($subTexql, $subMatches);
+					$subResults = preg_replace("/<\?xml.*?\?>\s*/", "", $subResults);
+					$subResults = preg_replace("/^.*<record>\s*|\s*<\/record>.*/s", "", $subResults);
+					$aliasedBlock = preg_replace("/$bitToReplace/", $subResults, $aliasedBlock);
+				}
+
+
+				// replace <alias_x>1234</alias_x> with <XYZ_Ref>Stuff from other module</XYZ_Ref>
+				$aliasedBlock = preg_replace("/<$aliasElement>/", "<$linkingRef>", $aliasedBlock);
+				$aliasedBlock = preg_replace("/<\/$aliasElement>/", "</$linkingRef>", $aliasedBlock);
+				$results = preg_replace("/$blockToReplace/", $aliasedBlock, $results);
+
+			}
+
+			// replace <XYZ_Ref> tags with <XYZ_Ref__ModuleName__ModuleField>
+			$expandedName = implode("__",array($linkingField, $linkedModule, $wantedField));
+
+			$results = preg_replace("/$wantedField/", $expandedName, $results);
+
+			if (preg_match("/^(.+)_tab$/", $wantedField, $match))
+			{
+				$atomName = preg_quote($match[1]);
+				$expandedName = preg_replace("/_tab$/","", $expandedName);
+				$results = preg_replace("/(<\/*)$atomName>/", "$1$expandedName>", $results);
+			}
+		 }
+		 return $results;
+	}
+
+	/**
+	 * run TEXQL query 
+	 *
+	 * currently queries via texxmlserver connection
+	 * and returns XML
+	 *
+	 * @param texql string
+	 * @return string
+	 *
+	 */
+	function 
+	search($texql, &$matches)
+	{
+		$start = time();
+		$status = false;
+		$matches = 0;
+
+		// if necessary mangle texql to allow fields like
+		// "MulMultiMediaRef_tab->emultimedia->MulCreator"
+		list($texql, $aliasMap) =
+		$this->_processCrossTableTexql($texql);
+
+		###
+		### ESTABLISH TEXXMLSERVER CONNECTION AND POST TEXQL
+		###
+		$connection = new TexxmlserverConnection;
+		if (! $connection)
+		{
+			$mesg = 'could not connect to the KE XML database server (1)';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$socket = $connection->Open();
+		if (! $socket || $socket < 0)
+		{
+			$mesg = 'could not connect to the KE XML database server (2)';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$this->log("POST texql to texxmlserver: $texql");
+
+		$post = $this->_postString($texql);
+		if (fwrite($socket, $post) === false)
+		{
+			fclose($socket);
+			$mesg = 'could not write to KE XML database server socket';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+		fflush($socket);
+
+		###
+		### REMOVE HTTP HEADERS + OTHER STUFF WE DONT NEED FROM RESPONSE
+		### GET RESULT STATUS AND MATCHES
+		###
+		$results = '';
+		while (! feof($socket))
+		{
+			if (($line = trim(fgets($socket))) === false)
+			{
+				fclose($socket);
+				$mesg = 'could not read from KE XML database server socket';
+				return $this->setError($mesg, __FILE__, __LINE__);
+			}
+
+			if (preg_match("/^<\?xml.*\?>$/", $line))
+			{
+				$results .= "$line\n";
+			}
+			else if (preg_match("/^<results\s+status=\"(\w+)\"(?:\s+(\w+)=\"(.+)\")?>$/", $line, $match))
+			{
+				if (strtolower($match[1]) == 'success')
+				{
+					$status = true;
+				}
+				else if (strtolower($match[1]) == 'failed')
+				{
+					$status = false;
+				}
+				else
+				{
+					fclose($socket);
+					$mesg = "unknown KE XML database server response: '{$match[1]}'";
+					return $this->setError($mesg, __FILE__, __LINE__);
+				}
+
+				if (isset($match[2]))
+				{
+					if (isset($match[3]))
+					{
+						if (strtolower($match[2]) == 'matches')
+						{
+							$matches = $match[3];
+						}
+						else if (strtolower($match[2]) == 'error')
+						{
+							fclose($socket);
+							$mesg = "KE XML database server returned: '{$match[3]}'";
+							return $this->setError($mesg, __FILE__, __LINE__);
+						}
+						else
+						{
+							fclose($socket);
+							$mesg = "unknown KE XML database server response: '{$match[2]}'";
+							return $this->setError($mesg, __FILE__, __LINE__);
+						}
+					}
+					else
+					{
+						fclose($socket);
+						$mesg = "unexpected KE XML database server response: '{$match[2]}'";
+						return $this->setError($mesg, __FILE__, __LINE__);
+					}
+				}
+				break;
+			}
+		}
+		if ($status === false)
+		{
+			fclose($socket);
+			$mesg = 'unknown KE XML database server failure';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$results .= "<results>\n";
+		while (! feof($socket))
+		{
+			if (($data = fread($socket, 8192)) === false)
+			{
+				fclose($socket);
+				$mesg = 'could not read from KE XML database server socket';
+				return $this->setError($mesg, __FILE__, __LINE__);
+			}
+			$results .= $data;
+		}
+		if (fclose($socket) === false)
+		{
+			$mesg = 'could not close KE XML database server socket';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$this->log("texxmlserver matches: $matches");
+		$this->debugMessage('texxmlserver query time: ' . (time() - $start), 3);
+		$this->debugMessage("texxmlserver response:\n{$results}", 4);
+
+		if (count($aliasMap) > 0)
+		{
+			// do any cross table queries and add to XML
+			$results = $this->_subQueryCrossTable($results, $aliasMap);
+		}	
+
+		return $results;
+	}
+
+	function 
+	searchToFile($texql, &$matches)
+	{
+		$start = time();
+		$status = false;
+		$matches = 0;
+
+		###
+		### ESTABLISH TEXXMLSERVER CONNECTION AND POST TEXQL
+		###
+		$connection = new TexxmlserverConnection;
+		if (! $connection)
+		{
+			$mesg = 'could not connect to the KE XML database server (1)';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$socket = $connection->Open();
+		if (! $socket || $socket < 0)
+		{
+			$mesg = 'could not connect to the KE XML database server (2)';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$this->log("POST texql to texxmlserver: $texql");
+
+		$post = $this->_postString($texql);
+		if (fwrite($socket, $post) === false)
+		{
+			fclose($socket);
+			$mesg = 'could not write to KE XML database server socket';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+		fflush($socket);
+
+		###
+		### REMOVE HTTP HEADERS + OTHER STUFF WE DONT NEED FROM RESPONSE
+		### GET RESULT STATUS AND MATCHES
+		###
+		$resultsStart = '';
+		while (! feof($socket))
+		{
+			if (($line = trim(fgets($socket))) === false)
+			{
+				fclose($socket);
+				$mesg = 'could not read from KE XML database server socket';
+				return $this->setError($mesg, __FILE__, __LINE__);
+			}
+			
+			if (preg_match("/^<\?xml.*\?>$/", $line))
+			{
+				$resultsStart .= "$line\n";
+			}
+			else if (preg_match("/^<results\s+status=\"(\w+)\"(?:\s+(\w+)=\"(.+)\")?>$/", $line, $match))
+			{
+				if (strtolower($match[1]) == 'success')
+				{
+					$status = true;
+				}
+				else if (strtolower($match[1]) == 'failed')
+				{
+					$status = false;
+				}
+				else
+				{
+					fclose($socket);
+					$mesg = "unknown KE XML database server response: '{$match[1]}'";
+					return $this->setError($mesg, __FILE__, __LINE__);
+				}
+
+				if ($status === true && ! isset($match[2]))
+				{
+					# TODO
+					#fclose($socket);
+					#$mesg = 'KE XML database server query succeeded but could not determine match count';
+					#return $this->setError($mesg, __FILE__, __LINE__);
+					$matches = 0;
+				}
+				else if (isset($match[2]))
+				{
+					if (isset($match[3]))
+					{
+						if (strtolower($match[2]) == 'matches')
+						{
+							$matches = $match[3];
+						}
+						else if (strtolower($match[2]) == 'error')
+						{
+							fclose($socket);
+							$mesg = "KE XML database server returned: '{$match[3]}'";
+							return $this->setError($mesg, __FILE__, __LINE__);
+						}
+						else
+						{
+							fclose($socket);
+							$mesg = "unknown KE XML database server response: '{$match[2]}'";
+							return $this->setError($mesg, __FILE__, __LINE__);
+						}
+					}
+					else
+					{
+						fclose($socket);
+						$mesg = "unexpected KE XML database server response: '{$match[2]}'";
+						return $this->setError($mesg, __FILE__, __LINE__);
+					}
+				}
+				break;
+			}
+		}
+		if ($status === false)
+		{
+			fclose($socket);
+			$mesg = "unknown KE XML database server failure '$line'";
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$resultsStart .= "<results>\n";
+		$fileOutput =& new FileOutput();
+
+		$output = array($resultsStart, $socket);
+		if (($files = $fileOutput->write($output)) === false)
+		{
+			if (($errors = $fileOutput->getErrors()) !== false)
+			{
+				foreach ($errors as $error)
+				{
+					$this->setError($error);
+				}
+			}
+			else
+			{
+				$error = 'unexpected error writing output';
+				$this->setError($error, __FILE__, __LINE__);
+			}
+			return false;
+		}
+
+		if (fclose($socket) === false)
+		{
+			$mesg = 'could not close KE XML database server socket';
+			return $this->setError($mesg, __FILE__, __LINE__);
+		}
+
+		$this->log("texxmlserver matches: $matches");
+		$this->debugMessage('texxmlserver query time: ' . (time() - $start), 3);
+		$this->debugFile($files, 4, 'texxmlserver response:');
+
+		return $files;
+	}
+
+	function 
+	getHandle()
+	{
+		$this->_makeThisAbstractMethod('getHandle');
+	}
+
+	/**
+	 * used only for testing
+	 *
+	 * generates a request (for itself rather than being passed one by a
+	 * client) and acts on it
+	 *
+	 * @param search string
+	 *
+	 * @return string
+	 *
+	 */
+	function 
+	requestAndProcess($search)
+	{
+		$this->_makeThisAbstractMethod('requestAndProcess');
+	}
+
+	/**
+	 * translate lat/longs from DMS to decimal
+	 *
+	 * Many systems may use lat/long data so rather than replicate this
+	 * in the children this has been placed here
+	 *
+	 * @param dms string
+	 *    eg ('151 32 15 E')
+	 *
+	 * @return float
+	 *
+	 */
+	function 
+	degMinSecToDecimal($dms)
+	{
+		list($deg,$min,$sec,$hemisphere) = preg_split('/\s+/',$dms,4);
+		$deg += ($min / 60) + ($sec / 3600);
+		if (preg_match('/W|S/',$hemisphere))
+			$deg = - $deg;
+		else if (preg_match('/W|S/',$sec))
+			$deg = - $deg;
+		else if (preg_match('/W|S/',$min))
+			$deg = - $deg;
+		return $deg;	
+	}
+
+	function 
+	emuDate2Iso8601Time($emuDate, $emuTime)
+	{
+		if (! isset($emuDate))
+			return '';
+
+		$months = array
+		(
+			'Jan' => 1 ,
+ 			'Feb' => 2,
+ 			'Mar' => 3,
+ 			'Apr' => 4,
+ 			'May' => 5,
+			'Jun' => 6,
+ 			'Jul' => 7,
+ 			'Aug' => 8,
+ 			'Sep' => 9,
+ 			'Oct' => 10,
+ 			'Nov' => 11,
+ 			'Dec' => 12
+		);
+
+		list($day, $month, $year) = preg_split('/\s+|\//', $emuDate);
+		$month = preg_replace('/^0/','',$month);
+
+		if (isset($months[$month]))
+			$month = $months[$month];
+
+ 		if (! isset($emuTime))
+ 			$emuTime = '00:00:00';
+
+		list($hour, $minute, $second) = preg_split('/:/', $emuTime, 3);
+		
+		if (! isset($second) || $second == '')
+			$second = '00';
+
+		return sprintf('%4.4d-%02.2d-%02.2dT%02.2d:%02.2d:%02.2dZ', $year, $month, $day, $hour, $minute, $second);
+	}
+
+
+
+}
+
+if (isset($_REQUEST['test']))
+{
+	$serviceFile = basename($_SERVER['PHP_SELF']);
+
+	if (basename($serviceFile) == 'Provider.php')
+	{
+		$webObject = new Provider();
+		$webObject->test();
+	}
+}
+
+?>

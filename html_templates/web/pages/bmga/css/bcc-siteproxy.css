@@ -1,0 +1,207 @@
+/* 
+  Style to apply to containing element.
+*/
+div#siteproxy {padding: 6px 6px; width: 90%; margin: 0 auto}
+
+/*
+   Original component definitions. Entries in this file should be kept in sync with bcc.css.
+*/
+
+#siteproxy .component {}
+
+#siteproxy .componentHeader {background-color: #A0A52E;}
+#siteproxy .componentHeaderText {font-size: medium; font-weight: bold; color: #FFFFFF}
+#siteproxy .componentHeaderHyperlink {font-size: medium; color: #FFFFFF}
+#siteproxy .componentHeaderTinyText {font-size: x-small; color: #FFFFFF}
+#siteproxy .componentHeaderTinyHyperlink {font-size: x-small; color: #FFFFFF}
+
+#siteproxy .componentBody {background-color: #F0F0F0; margin-top: 1em;}
+#siteproxy .componentBody2 {background-color: #CCCCCC}
+#siteproxy .componentBodyText {font-size: small;}
+/*.componentBodyText a {padding-left: 1em; margin-top: 1em;}*/
+
+#siteproxy .componentBodyText a {padding-left: 1em; }
+
+#siteproxy .componentBodyHyperlink {font-size: small}
+#siteproxy .componentBodyLargeText {font-size: large}
+#siteproxy .componentBodyTinyText {font-size: x-small}
+
+
+/* New style for EMu search fields on detailed search */
+#objStatusLbl {background-color: #F0F0F0}
+#objNameLbl {background-color: #F0F0F0}
+#subClassLbl {background-color: #F0F0F0}
+#objFullNameLbl {background-color: #F0F0F0}
+#mapTitleLbl {background-color: #F0F0F0}
+#publisherLbl {background-color: #F0F0F0}
+#objNumLbl {background-color: #F0F0F0}
+#specNameLbl {background-color: #F0F0F0}
+#familyLbl {background-color: #F0F0F0}
+#genusLbl {background-color: #F0F0F0}
+#orderLbl {background-color: #F0F0F0}
+#speciesLbl {background-color: #F0F0F0}
+#otherNumTypeLbl {background-color: #F0F0F0}
+#otherNumLbl {background-color: #F0F0F0}
+#bibliographyLbl {background-color: #F0F0F0}
+#culturalGroupLbl {background-color: #F0F0F0}
+#nameCollLbl {background-color: #F0F0F0}
+#makerLbl {background-color: #F0F0F0}
+#productionPlaceLbl {background-color: #F0F0F0}
+#productionDateLbl {background-color: #F0F0F0}
+#creditLineLbl {background-color: #F0F0F0}
+#associatedEventLbl {background-color: #F0F0F0}
+#associatedPersonLbl {background-color: #F0F0F0}
+#descriptionLbl {background-color: #F0F0F0}
+#obverseDescriptionLbl {background-color: #F0F0F0}
+#reverseDescriptionLbl {background-color: #F0F0F0}
+#chronsgraphyLbl {background-color: #F0F0F0}
+#lithosgraphyLbl {background-color: #F0F0F0}
+#localityLbl {background-color: #F0F0F0}
+#archSiteNameLbl {background-color: #F0F0F0}
+#titleLbl {background-color: #F0F0F0}
+#artistLbl {background-color: #F0F0F0}
+#periodLbl {background-color: #F0F0F0}
+#adateLbl {background-color: #F0F0F0}
+#aplaceLbl {background-color: #F0F0F0}
+#preciseLocationLbl {background-color: #F0F0F0}
+#collEventLbl {background-color: #F0F0F0}
+#locLevel1Lbl {background-color: #F0F0F0}
+#locLevel2Lbl {background-color: #F0F0F0}
+#siteCodeLbl {background-color: #F0F0F0}
+#projectNameLbl {background-color: #F0F0F0}
+#preservationLbl {background-color: #F0F0F0} 
+
+/*
+   New application definitions.
+*/
+#siteproxy h1 {color: #2D4191; margin: 0px 0px 15px 0px; font-size: 1.5em;}
+#siteproxy h2 {margin: 10px 0px 15px 0px; font-size: 1.3em; font-weight: bold;  padding: 0px;}
+
+#siteproxy .content {border: 1px #666666 solid}
+
+#siteproxy .header {background-color: #424242; font-weight: bold; color: #FFFFFF}
+#siteproxy .body {background-color: #F0F0F0}
+#siteproxy .alternate {background-color: #CCCCCC}
+
+#siteproxy .large {font-size: large}
+#siteproxy .medium {font-size: medium}
+#siteproxy .small {font-size: small}
+#siteproxy .tiny {font-size: x-small}
+
+#siteproxy .header .link {color: #FFFFFF}
+#siteproxy .body .link {}
+#siteproxy .alternate .link {}
+
+#siteproxy .header .email {color: #FFFFFF}
+#siteproxy .body .email {}
+#siteproxy .alternate .email {}
+
+/* cross-browser table centering */
+#siteproxy table.mcenter {margin-left: auto; margin-right: auto}
+
+/* div centering */
+#siteproxy div.centered {margin-left: auto; margin-right: auto; text-align: center}
+
+/* table cell valign top */
+#siteproxy td.valignTop {vertical-align: top;}
+
+/* Do not underline text used for a <a name> tag NB This is supported in Internet Explorer from version 7 and doesn't currently work with Mac browsers (Aug'07) */
+#siteproxy a[name] {
+	font-weight: normal;
+	text-decoration: none;
+}
+
+/* Use this to remove underline from <a name tags */
+#siteproxy a.nounderlining {
+	text-decoration: none;
+}
+
+/*
+   City map application definitions.
+*/
+
+#siteproxy .columnCentre {
+  text-align: center;
+  vertical-align: top;
+}
+
+#siteproxy .columnLeftAlign {
+  text-align: left;
+  vertical-align: middle;
+}
+
+#siteproxy .columnRightAlign {
+  text-align: right;
+  vertical-align: middle;
+}
+
+#siteproxy .visitBristolComponentHeader {
+  background-color: #0099CC;
+  text-align: left;
+  vertical-align: top;
+}
+
+#siteproxy .visitBristolComponentHeaderText {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: medium;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+
+#siteproxy .visitBristolComponent {
+  background-color: #333366;
+  text-align: left;
+  vertical-align: top;
+}
+
+#siteproxy .visitBristolComponentText {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.9em;
+  color: #FFFFFF;
+}
+
+#siteproxy img.middle {
+  vertical-align: middle;
+}
+
+/*
+   style for warning messages
+*/
+#siteproxy .error {
+  color: red;
+}
+
+/*
+   prevent text warp
+*/
+#siteproxy .nowrap {
+  white-space: nowrap;
+}
+
+/*
+  fixed width elements
+*/
+#siteproxy .width5pc{width: 5%;}
+#siteproxy .width12pc{width: 12%;}
+#siteproxy .width16pc{width: 16%;}
+#siteproxy .width20pc{width: 20%;}
+#siteproxy .width25pc{width: 25%;}
+#siteproxy .width30pc{width: 30%;}
+#siteproxy .width33pc{width: 33%;}
+#siteproxy .width34pc{width: 34%;}
+#siteproxy .width50pc{width: 50%;}
+#siteproxy .width70pc{width: 70%;}
+#siteproxy .width75pc{width: 75%;}
+#siteproxy .width80pc{width: 80%;}
+#siteproxy .width95pc{width: 95%;}
+#siteproxy .width100pc{width: 100%;}
+
+#siteproxy .width60px{width: 60px;}
+#siteproxy .width130px{width: 130px;}
+#siteproxy .width200px{width: 200px;}
+
+#siteproxy .padding2px{padding: 2px;}
+#siteproxy .padding4px{padding: 4px;}
+
+#siteproxy .margin2px{margin: 2px;}
+#siteproxy .margin4px{margin: 4px;}

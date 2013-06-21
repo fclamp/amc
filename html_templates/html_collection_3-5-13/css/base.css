@@ -1,0 +1,134 @@
+body
+{
+	margin: 0;
+	padding: 0;
+	color: #404041;
+	background: #fff;
+	font: 100%/1.1 Helvetica Neue, helvetica, arial, sans-serif;
+}
+
+h1, h2 { margin: 0; }
+p { margin: 0 0 1em 0; line-height: 1.2em; }
+a { color: #0e5072; }
+
+.marginRight { margin-right: 1em; }
+.marginRightDouble { margin-right: 2em; }
+.marginRightHalf { margin-right: 0.5em; }
+.marginLeft { margin-left: 1em; }
+.marginLeftDouble { margin-left: 2em; }
+.marginLeftHalf { margin-left: 0.5em; }
+.marginTop { margin-top: 1em; }
+.marginTopDouble { margin-top: 2em; }
+.marginTopHalf { margin-top: 0.5em; }
+.marginBottom { margin-bottom: 1em; }
+.marginBottomDouble { margin-bottom: 2em; }
+.marginBottomHalf { margin-bottom: 0.5em; }
+.marginNone { margin: 0; }
+.marginLeftSpec { margin-left: 6%; }
+
+.paddingTop { padding-top: 1em; }
+.paddingTopDouble { padding-top: 2em; }
+.paddingTopHalf { padding-top: 0.5em; }
+.paddingBottom { padding-bottom: 1em; }
+.paddingBottomDouble { padding-bottom: 2em; }
+.paddingBottomHalf { padding-bottom: 0.5em; }
+.paddingLeft { padding-left: 1em; }
+.paddingLeftDouble { padding-left: 2em; }
+.paddingLeftHalf{ padding-left: 0.5em; }
+.paddingRight { padding-right: 1em; }
+.paddingRightDouble { padding-right: 2em; }
+.paddingRightHalf { padding-right: 0.5em; }
+.paddingNone { padding: 0; }
+
+.alignLeft { float: left; }
+.alignRight { float: right; }
+.block { display: block; }
+.overflow { overflow: hidden; }
+.border-none { border: none; }
+
+.bb-grey { border-bottom: 2px solid #d1d2d4; }
+.br-grey { border-right: 1px solid #c8c9cc; padding: 0 1em; }
+
+/* Background colours */
+.lightBlue { background: #e7f2f8; }
+.darkBlue { background: #083e59; }
+.whiteBB { border-bottom: 2px solid #fff; }
+
+/* Background gradients */ 
+.darkBlueGrad
+{
+	background: #0e5172; 
+	background-image: -webkit-linear-gradient(#1f6f90, #0e5172);
+	background-image: -moz-linear-gradient(#1f6f90, #0e5172);
+	background-image: -ms-linear-gradient(#1f6f90, #0e5172);
+	background-image: -o-linear-gradient(#1f6f90, #0e5172);
+	background-image: linear-gradient(#1f6f90, #0e5172);
+}
+
+.orangeGrad
+{
+		background: #db8d37;
+		background-image: -webkit-linear-gradient(#db8d37, #da5f27);
+		background-image: -moz-linear-gradient(#db8d37, #da5f27);
+		background-image: -ms-linear-gradient(#db8d37, #da5f27);
+		background-image: -o-linear-gradient(#db8d37, #da5f27);
+		background-image: linear-gradient(#db8d37, #da5f27);
+		color: #fff;
+}
+.greyGrad
+{
+	background-color: #d2d3d5;
+	background-image: -webkit-linear-gradient(top,#d2d3d5, #ecedee 15%);
+	background-image: -moz-linear-gradient(top,#d2d3d5, #ecedee 15%);
+	background-image: -ms-linear-gradient(top,#d2d3d5, #ecedee 15%);
+	background-image: -o-linear-gradient(top,#d2d3d5, #ecedee 15%);
+	background-image: linear-gradient(top,#d2d3d5, #ecedee 15%);
+}
+.whiteGrad
+{
+	background: #e7e8e9;
+	background-image: -webkit-linear-gradient(top,#e7e8e9, #ffffff 10%);
+	background-image: -moz-linear-gradient(top,#e7e8e9, #ffffff 10%);
+	background-image: -ms-linear-gradient(top,#e7e8e9, #ffffff 10%);
+	background-image: -o-linear-gradient(top,#e7e8e9, #ffffff 10%);
+	background-image: linear-gradient(top,#e7e8e9, #ffffff 10%);
+}
+
+/* Font colours */
+.dBFont { color: #083e59; }
+.wFont { color: #fff; }
+.bFont { color: #231f20; }
+.AquaFont { color: #0e5072; }
+
+/* Font weights */
+.bold { font-weight: bold; }
+.normal { font-weight: normal; }
+.uppercase { text-transform: uppercase; }
+
+/* Font Size */
+.font40 { font-size: 250%; }
+.font38 { font-size: 237.5%; }
+.font36 { font-size: 225%; }
+.font34 { font-size: 212.5%; }
+.font32 { font-size: 200%; }
+.font30 { font-size: 187.5%; }
+.font29 { font-size: 181.25%; }
+.font28 { font-size: 175%; }
+.font26 { font-size: 162.5%; }
+.font24 { font-size: 150%; }
+.font22 { font-size: 137.5%; }
+.font20 { font-size: 125%; }
+.font19 { font-size: 118.75%; }
+.font18 { font-size: 112.5%; }
+.font17 { font-size: 106.25%; }
+.font16 { font-size: 100%; }
+.font15 { font-size: 93.75%; }
+.font14 { font-size: 87.5%; }
+.font13 { font-size: 81.25%; }
+.font12 { font-size: 75%; }
+.font11 { font-size: 68.75%; }
+.font10 { font-size: 62.5%; }
+.lineHeight1 { line-height: 1; }
+.lineHeight12 { line-height: 1.2; }
+.lineHeight14 { line-height: 1.4; }
+.lineHeight15 { line-height: 1.5; }

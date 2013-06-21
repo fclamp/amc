@@ -1,0 +1,1175 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2009
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseQueryForms.php');
+
+/**
+ *
+ * These classes produce simplified, unstyled html, removing inline style of
+ * the older classes they inherit from.
+ *
+ **/
+
+
+/*
+ *********** Basic Query Class ***********************
+ */
+class AmBasicQueryForm extends BaseBasicQueryForm
+{
+	var $formAttributes = "";
+
+	var $Options = array(
+		'anywhere' => 'BioMicrohabitatDescription|CatRegNumber|CitTypeStatus_tab|DeaDeaccessionMethod|ExtendedData|LocSiteLocal|LocSubstrate|MetClass|MetGroup|MetName|MetTypeSymbol|MinClass|MinColor|MinCut|MinGroup|MinSpecies|MinVariety|ObjKeywords_tab|ObjLabel|ProCollectionArea|ProCountry_tab|ProPlace|ProStateProvince_tab|QuiHabitat_tab|QuiLatLongDetermination|QuiPreciseLocationLocal_tab|QuiTaxonLocal|QuiTaxonomyClass|QuiTaxonomyFamily|QuiTaxonomyGenus|QuiTaxonomyOrder|QuiTaxonomyPhylum|QuiTaxonomySpecies|RocClass|RocRockName|SumArchSiteName|SumCategory|SumItemName|TekDescription|TekName|TekShape|ZooSex_tab|ZooStage_tab|QuiTaxonRef->etaxonomy->ComName_tab',
+/*		'taxonomy' => 'QuiTaxonomyClass|QuiTaxonomyFamily|QuiTaxonomyGenus|QuiTaxonomyOrder|QuiTaxonomyPhylum|QuiTaxonomySpecies|QuiTaxonLocal',
+		'summary' => 'ExtendedData',
+		'habitat' => 'QuiHabitat_tab|BioMicrohabitatDescription',
+		'site/collection'	=> 'LocSubstrate|QuiLatLongDetermination|QuiPreciseLocationLocal_tab|LocSiteLocal|ProPlace|ProCollectionArea|ProCountry_tab|ProStateProvince_tab',
+		'anthropology'		=> 'SumItemName|ObjKeywords_tab|ObjLabel|DeaDeaccessionMethod|SumArchSiteName|ProCollectionArea|ProCountry_tab|ProPlace|ProStateProvince_tab|ProStateProvince_tab',
+		'meteorite'		=> 'MetClass|MetGroup|MetName|MetTypeSymbol',
+		'mineral'		=> 'MinClass|MinColor|MinCut|MinGroup|MinSpecies|MinVariety',
+		'rock'			=> 'RocClass|RocRockName',
+		'tektite'		=> 'TekDescription|TekName|TekShape',
+		*/
+	);
+
+	function display()
+	{
+		// override default EMuWeb Query Object - make it simple
+		// unstyled html with css classes
+
+		$_hidden = array();
+		foreach($this->Options as $option => $fields)
+		{
+			$_hidden[] = "<input type='hidden' name='$option' value='$fields' />";
+		}	
+		$hidden = implode("\n",$_hidden);
+
+
+		$_additional = array();
+		if (count($this->Options) > 1)
+		{
+			$_additional[] = "<select name='QueryOption' class='queryOptions searchInput'>";
+
+			// Show Options in dropdown
+			// The "options" should not contain spaces.  If a space or "special" label is
+			// required, define an entry in the strings file with an ID the same name as
+			// the option.
+			$spaceerror = 0;
+			foreach($this->Options as $option => $val)
+			{
+				if (preg_match("/\s/", $option))
+				{
+					$spaceerror++;
+				}
+				$optDisplay = $this->_STRINGS['QUERY_OPTION_' . strtoupper($option)];
+				if ($optDisplay == '')
+				{
+					$optDisplay = $this->_STRINGS[$option];
+				}
+				if ($optDisplay == '')
+				{
+					$optDisplay = $option;
+				}
+				
+				$_additional[] = "\t\t\t\t\t<option value='$option'>$optDisplay</option>";
+			}
+			$_additional[] =  "\t\t\t\t</select>";
+		}
+		else
+		{
+			$option = array_keys($this->Options);
+			$option = $option[0];
+			$_additional[] = "<input type='hidden' name='QueryOption' value='$option' />";
+		}
+		$additional = implode("\n",$_additional);
+
+		$self = isset($GLOBALS['REQUEST_URI']) 
+				? $GLOBALS['REQUEST_URI'] : $_SERVER['REQUEST_URI'];
+
+		$form = $this->ResultsListPage;
+		print("
+			<form method='post' action='$form' $this->formAttributes >
+				<div id='emu-search-one'>
+					<input type='text' name='QueryTerms' class='searchInput' />
+					$additional
+				</div>	
+				<div id='emu-search-one2'>
+					<input type='checkbox' name='ImagesOnly' id='ImagesOnly' value='true' />
+					<label for='ImagesOnly'>List works only with images</label>
+				</div>
+				<div id='emu-search-one3'>
+					<a href='AdvQuery.php'>Advanced search</a>
+				</div>
+
+				<div id='emu-search-two'>
+					<input type='image' name='submit' id='submit' alt='submit' src='images/search.gif' />
+				</div>	
+
+				<input type='hidden' name='QueryName' value='BasicQuery' />
+				<input type='hidden' name='QueryPage' value='$self' />
+				<input type='hidden' name='Restriction value='$this->Restriction' />
+				<input type='hidden' name='StartAt' value='1' />
+				$hidden
+  			</form>
+		");
+	}
+}
+
+
+/*
+ *********** Advanced Query Class ********************
+ */
+class AmAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $formAttributes = "";
+
+	var $Options = array(
+		'anywhere' => 'BioMicrohabitatDescription|CatRegNumber|CitTypeStatus_tab|DeaDeaccessionMethod|ExtendedData|LocSiteLocal|LocSubstrate|MetClass|MetGroup|MetName|MetTypeSymbol|MinClass|MinColor|MinCut|MinGroup|MinSpecies|MinVariety|ObjKeywords_tab|ObjLabel|ProCollectionArea|ProCountry_tab|ProPlace|ProStateProvince_tab|QuiHabitat_tab|QuiLatLongDetermination|QuiPreciseLocationLocal_tab|QuiTaxonLocal|QuiTaxonomyClass|QuiTaxonomyFamily|QuiTaxonomyGenus|QuiTaxonomyOrder|QuiTaxonomyPhylum|QuiTaxonomySpecies|RocClass|RocRockName|SumArchSiteName|SumCategory|SumItemName|TekDescription|TekName|TekShape|ZooSex_tab|ZooStage_tab|QuiTaxonRef->etaxonomy->ComName_tab',
+
+
+		'taxonomy' => 'QuiTaxonomyClass|QuiTaxonomyFamily|QuiTaxonomyGenus|QuiTaxonomyOrder|QuiTaxonomyPhylum|QuiTaxonomySpecies|QuiTaxonLocal',
+		'summary' => 'ExtendedData',
+		'habitat' => 'QuiHabitat_tab|BioMicrohabitatDescription',
+		'site/collection'	=> 'LocSubstrate|QuiLatLongDetermination|QuiPreciseLocationLocal_tab|LocSiteLocal|ProPlace|ProCollectionArea|ProCountry_tab|ProStateProvince_tab',
+		'anthropology'		=> 'SumItemName|ObjKeywords_tab|ObjLabel|DeaDeaccessionMethod|SumArchSiteName|ProCollectionArea|ProCountry_tab|ProPlace|ProStateProvince_tab|ProStateProvince_tab',
+		'meteorite'		=> 'MetClass|MetGroup|MetName|MetTypeSymbol',
+		'mineral'		=> 'MinClass|MinColor|MinCut|MinGroup|MinSpecies|MinVariety',
+		'rock'			=> 'RocClass|RocRockName',
+		'tektite'		=> 'TekDescription|TekName|TekShape',
+	);
+
+	function display()
+	{
+		// override default EMuWeb Query Object - make it simple
+		// unstyled html with css classes
+		$self = isset($GLOBALS['PHP_SELF']) 
+				? $GLOBALS['PHP_SELF'] : $_SERVER['PHP_SELF'];
+
+		$_hidden = array();
+		if ($this->RankCheckbox)
+		{
+			$hidden[] = '<input type="hidden" name="RankOn" value="AdmWebMetadata" />';
+		}
+
+		foreach($this->Options as $option => $fields)
+		{
+			$_hidden[] = "<input type='hidden' name='$option' value='$fields' />";
+		}	
+		$hidden = implode("\n",$_hidden);
+
+
+		$_inputs = array();
+		if ($this->RankCheckbox)
+		{
+			$_inputs[] = "<input class='searchInput' type='checkbox' name='Rank' value='true' />";
+			$_inputs[] = "$this->_STRINGS['RELEVANCE_RANK']";
+		}
+
+		if (count($this->Options) > 1)
+		{
+			$_inputs[] = "<select name='QueryOption' class='queryOptions searchInput'>";
+
+			// Show Options in dropdown
+			// The "options" should not contain spaces.  If a space or "special" label is
+			// required, define an entry in the strings file with an ID the same name as
+			// the option.
+			$spaceerror = 0;
+			foreach($this->Options as $option => $val)
+			{
+				if (preg_match("/\s/", $option))
+				{
+					$spaceerror++;
+				}
+				$optDisplay = $this->_STRINGS['QUERY_OPTION_' . strtoupper($option)];
+				if ($optDisplay == '')
+				{
+					$optDisplay = $this->_STRINGS[$option];
+				}
+				if ($optDisplay == '')
+				{
+					$optDisplay = $option;
+				}
+				
+				$_inputs[] = "<option value='$option'>$optDisplay</option>";
+			}
+			$_inputs[] = "</select>";
+		}
+		$inputs = implode("\n",$_inputs);
+
+		$form = $this->ResultsListPage;
+		print("
+		<div id='emu-advanced'>
+			<form method='post' action='$form' $this->formAttributes >
+				<div id='emu-advanced2'>
+					<input type='checkbox' name='ImagesOnly' value='true' id='ImagesOnly'/>
+					<label for='ImagesOnly'>List works only with images</label>
+				</div>
+				<div id='emu-advanced1'>
+					<div>
+						<label for='location'>Location</label>
+                                                <input name='location' id='location' type='text' />
+					</div>	
+					<div>
+						<label for='withallwords'>With all words</label>
+						<input name='withallwords' type='text' name='withallwords'/>
+					</div>
+					<div>
+                                                <label for='withexactphrase'>With exact phrase</label>
+                                                <input name='withexactphrase' id='withexactphrase' type='text' />
+                                        </div>
+                                        <div>
+                                                <label for='withanywords'>With any words</label>
+                                                <input name='withanywords' id='withanywords' type='text' />
+                                        </div>
+                                        <div>
+                                                <label for='withoutthewords'>Without the words</label>
+                                                <input name='withoutthewords' id='withoutthewords' type='text' />
+                                        </div>
+                                        <div>
+                                                <label for='soundslikewords'>Sounds like words</label>
+                                                <input name='soundslikewords' id='soundslikewords' type='text' />
+                                        </div>
+                                        <div>
+                                                <label for='resultsperpage'>Results per page</label>
+                                                <input name='resultsperpage' id='resultsperpage' type='text' />
+                                         </div>
+				</div>	
+				<div id='emu-advanced3'>
+                			<input type='image' id='search' name='search' src='images/search.gif' />
+				</div>	
+				<input type='hidden' name='QueryName' value='AdvancedQuery' />
+				<input type='hidden' name='QueryPage' value='$self' />
+				<input type='hidden' name='Restriction value='$this->Restriction' />
+				<input type='hidden' name='StartAt' value='1' />
+				$hidden
+			</form>
+ 			<div id='emu-advanced4'>
+                                        <div id='emu-advanced5'>
+                                                <h2>
+                                                        Natural species search
+                                                </h2>
+						<form method='post' action='$form' $this->formAttributes >
+                                                        <div id='emu-advanced5b'>
+                                                                <input type='checkbox' name='ImagesOnly2' id='ImagesOnly2' value='true' />
+                                                                <label for='ImagesOnly2'>List works only with images</label>
+                                                        </div>
+                                                        <div id='emu-advanced5a'>
+                                                                <div>
+                                                                        <label for='BioMicrohabitatDescription'>BioMicrohabitatDescription</label>
+                                                                        <input name='BioMicrohabitatDescription' id='BioMicrohabitatDescription' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='RegistrationNumber'>Registration Number</label>
+                                                                        <input name='RegistrationNumber' id='RegistrationNumber' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='TypeStatus'>Type Status</label>
+                                                                        <input name='TypeStatus' id='TypeStatus' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='DeaccessionMethod'>Deaccession Method</label>
+                                                                        <input name='DeaccessionMethod' id='DeaccessionMethod' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='SummaryData'>Summary Data</label>
+                                                                        <input name='SummaryData' id='SummaryData' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='Substrate'>Substrate</label>
+                                                                        <input name='Substrate' id='Substrate' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MeteoriteClass'>Meteorite Class</label>
+                                                                        <input name='MeteoriteClass' id='MeteoriteClass' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MeteoriteGroup'>Meteorite Group</label>
+                                                                        <input name='MeteoriteGroup' id='MeteoriteGroup' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MeteoriteType'>Meteorite Type</label>
+                                                                        <input name='MeteoriteType' id='MeteoriteType' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MineralColour'>Mineral Colour</label>
+                                                                        <input name='MineralColour' id='MineralColour' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MineralGroup'>Mineral Group</label>
+                                                                        <input name='MineralGroup' id='MineralGroup' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MineralSpecies'>Mineral Species</label>
+                                                                        <input name='MineralSpecies' id='MineralSpecies' type='text' />
+                                                                </div>
+								 <div>
+                                                                        <label for='MineralVariety'>Mineral Variety</label>
+                                                                        <input name='MineralVariety' id='MineralVariety' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='Keywords'>Keywords</label>
+                                                                        <input name='Keywords' id='Keywords' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='Label'>Label</label>
+                                                                        <input name='Label' id='Label' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='CollectionArea'>Collection Area</label>
+                                                                        <input name='CollectionArea' id='CollectionArea' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='Country'>Country</label>
+                                                                        <input name='Country' id='Country' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='Place'>Place</label>
+                                                                        <input name='Place' id='Place' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='ProvinceState'>Province/State</label>
+                                                                        <input name='ProvinceState' id='ProvinceState' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='Habitat'>Habitat</label>
+                                                                        <input name='Habitat' id='Habitat' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MapDeterminationMethod'>Map Determination</label>
+                                                                        <input name='MapDeterminationMethod' id='MapDeterminationMethod' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='Latitude'>Latitude</label>
+                                                                        <input name='Latitude' id='Latitude' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='MapPrecision'>Map Precision</label>
+                                                                        <input name='MapPrecision' id='MapPrecision' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='TaxonomicName'>Taxonomic Name</label>
+                                                                        <input name='TaxonomicName' id='TaxonomicName' type='text' />
+                                                                </div>
+  								<div>
+                                                                        <label for='TaxonomicClass'>Taxonomic Class</label>
+                                                                        <input name='TaxonomicClass' id='TaxonomicClass' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='TaxonomicFamily'>Taxonomic Family</label>
+                                                                        <input name='TaxonomicFamily' id='TaxonomicFamily' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='TaxonomicGenus'>Taxonomic Genus</label>
+                                                                        <input name='TaxonomicGenus' id='TaxonomicGenus' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='TaxonomicOrder'>Taxonomic Order</label>
+                                                                        <input name='TaxonomicOrder' id='TaxonomicOrder' type='text' />
+                                                                </div>
+                                                                <div>
+                                                                        <label for='TaxonomicPhylum'>Taxonomic Phylum</label>
+                                                                        <input name='TaxonomicPhylum' id='TaxonomicPhylum' type='text' />
+                                                                </div>
+                                                            </div>
+                                                            <div id='emu-advanced5c'>
+                                                                 <input name='search' id='search' type='image' src='images/search.gif' />
+                                                            </div>
+							<input type='hidden' name='QueryName' value='AdvancedQuery' />
+							<input type='hidden' name='QueryPage' value='$self' />
+							<input type='hidden' name='Restriction value='$this->Restriction' />
+							<input type='hidden' name='StartAt' value='1' />
+							$hidden
+                                                        </form>
+                                                </div>
+                                                <div id='emu-advanced6'>
+                                                        <h2>
+                                                                Cultural collections
+                                                        </h2>
+							<form method='post' action='$form' $this->formAttributes >
+                                                                <div id='emu-advanced6b'>
+                                                                        <input type='checkbox' name='ImagesOnly2' id='ImagesOnly3' value='true' />
+                                                                        <label for='ImagesOnly3'>List works only with images</label>
+                                                                </div>
+                                                                <div id='emu-advanced6a'>
+                                                                        <div>
+                                                                                <label for='AMnumber'>AM number</label>
+                                                                                <input name='AMnumber' id='AMnumber' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='Registrationdate'>Registration date</label>
+                                                                                <input name='Registrationdate' id='Registrationdate' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='CulturalStatus'>Status</label>
+                                                                                <input name='CulturalStatus' id='CulturalStatus' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='Object'>Object</label>
+                                                                                <input name='Object' id='Object' type='text' />
+                                                                        </div>
+ 									<div>
+                                                                                <label for='Category'>Category</label>
+                                                                                <input name='Category' id='Category' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='Archeologicalsitename'>Archeological site name</label>
+                                                                                <input name='Archeologicalsitename' id='Archeologicalsitename' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='Place2'>Place</label>
+                                                                                <input name='Place2' id='Place2' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='Region'>Region</label>
+                                                                                <input name='Region' id='Region' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='StateorProvince'>State or Province</label>
+                                                                                <input name='StateorProvince' id='StateorProvince' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='Country2'>Country</label>
+                                                                                <input name='Country2' id='Country2' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='CollectionArea2'>Collection area</label>
+                                                                                <input name='CollectionArea2' id='CollectionArea2' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='Bibliography'>Bibliography</label>
+                                                                                <input name='Bibliography' id='Bibliography' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='RelatedObjects'>Related objects</label>
+                                                                                <input name='RelatedObjects' id='RelatedObjects' type='text' />
+                                                                        </div>
+                                                                        <div>
+                                                                                <label for='NameOfSource'>Name of source</label>
+                                                                                <input name='NameOfSource' id='NameOfSource' type='text' />
+                                                                        </div>
+                                                                </div>
+                                                                <div id='emu-advanced6c'>
+                                                                   <input name='search' id='search' type='image' src='images/search.gif' /> 
+								</div>
+								<input type='hidden' name='QueryName' value='AdvancedQuery' />
+								<input type='hidden' name='QueryPage' value='$self' />
+								<input type='hidden' name='Restriction value='$this->Restriction' />
+								<input type='hidden' name='StartAt' value='1' />
+								$hidden
+                                                        </form>
+						</div>
+					</div>
+				</div>
+		</div>	
+		");
+	}	
+}
+
+/*
+/*********** Detailed Query Class ********************
+ */
+class AmDetailedAnthQueryForm extends BaseDetailedQueryForm
+{
+	// override default EMuWeb Query Object - make it simple
+	// unstyled html with css classes
+
+	var $Fields = array(
+		'SumRegNumber',
+		'AcqRegDate',
+		'ExtendedData',
+		#'DeaDeaccessionMethod',
+		'ObjKeywords_tab',
+		'ObjLabel',
+		'ProCollectionArea',
+		'ProCountry_tab',
+		'ProPlace',
+		'ProStateProvince_tab',
+		'SumArchSiteName',
+		'SumCategory',
+		'SumItemName',
+		#'DetRights',
+		'DetSubject_tab',
+		'MulCreator_tab',
+	);
+
+	var $Hints = array(
+		'ExtendedData' 			=> '[ eg. Newcastle ]',
+		'CatRegNumber'			=> '[ eg. P.67176 ]',
+		'MulCreator_tab'		=> '',
+	);
+
+	function display()
+	{
+		global $ALL_REQUEST;
+		$self = isset($GLOBALS['PHP_SELF']) 
+				? $GLOBALS['PHP_SELF'] : $_SERVER['PHP_SELF'];
+
+
+
+		$_secondSearch = array();
+		if ($this->SecondSearch)
+		{
+			//add a second search and clear button to the top of the page
+			$_secondSearch[] = "<input type='submit' name='Search' value='Search' />";
+			$_secondSearch[] = "<input type='reset' name='Reset' value='Clear' />\n";
+			if ($this->ImagesOnlyOption == 1)
+			{
+				$_secondSearch[] = "<input type='checkbox' name='ImagesOnly' value='true' />\n";
+				$_secondSearch[] = $this->_STRINGS['ONLY_WITH_IMAGES'];
+			}
+		}
+		$secondSearch = implode("\n",$_secondSearch);
+
+
+		#$fnSearches = "";
+		$fnSearches = $this->makeFieldNameSearches();
+
+		$_limit = array();
+		if ($this->ImagesOnlyOption == 1)
+		{
+			$_limit[] = "<div class='searchPrompt'>" . $this->_STRINGS['ONLY_WITH_IMAGES'] . "</div>\n" .
+				"\t\t\t\t<input type='checkbox' name='ImagesOnly' value='true' class='searchInput' />\n" .
+				"\t\t\t\t<div class='hint' />\n";
+		}
+		$limit = implode("\n", $_limit);
+
+		$form = $this->ResultsListPage;
+		print("
+		<div class='emuWebObject'>
+			<script language='JavaScript'>
+			<!--
+			// some JavaScript to assist with lookup list popup
+			function openLookupList(formID, fieldID, LutName, restriction, term)
+			{
+				var url = '$GLOBALS[LOOKUPLIST_URL]' +
+					'?formid=' + formID +
+ 					'&fieldid=' + fieldID +
+ 					'&lname=' + LutName +
+					'&restriction=' + restriction +
+					'&ll=' + term; +
+					'&lang=$this->LanguageData';
+
+				window.open(url, 'popupWindow', 'height=500,width=250,location=no,status=no,toolbar=no,scrollbars=yes').focus();
+			}
+			-->
+			</script>
+			<form method='post' action='$form' class='emuWebForm' $this->formAttributes >
+
+		 			<div class='submit'>
+ 						$secondSearch
+					</div>
+
+					<div class='searchPromptAndInput'>
+						$limit
+					</div>
+
+					$fnSearches
+					
+					<div class='searchPromptAndInput'>
+						<div class='searchPrompt'>Results To Show per Page</div>
+						<select name='LimitPerPage' class='queryOptions searchInput'>
+		 					<option value='5' >5 results</option>
+		 					<option value='10' >10 results</option>
+		 					<option value='20' >20 results</option>
+		 					<option value='50' >50 results</option>
+		 					<option value='100' >100 results</option>
+                				</select>
+					</div>	
+
+					<div class='submit'>
+						<input  type='submit' name='Search' value='Search' />
+						<input  type='reset' name='Reset' value='Clear' />
+					</div>	
+
+					<input type='hidden' name='QueryName' value='DetailedQuery' />
+					<input type='hidden' name='StartAt' value='1' />
+					<input type='hidden' name='QueryPage' value='$self' />
+					<input type='hidden' name='Restriction' value='$this->Restriction' />
+				</form> 
+			</div>	
+			");
+
+	} //end display()
+
+	function makeFieldNameSearches()
+	{
+		// assembles string of HTML representing field name query
+		// controls
+		$_fnSearch = array();
+		foreach ($this->Fields as $fld)
+		{
+			// Convert string fields to QueryField objects
+			if (is_string($fld))
+			{
+				$fieldObject = new QueryField;
+				$fieldObject->ColName = $fld;
+				$fld = $fieldObject;
+			}
+
+			// Security
+			if (strtolower($fld->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($fld->ValidUsers))
+					continue;
+			}
+
+
+			$promptColName = $fld->ColName;
+			if ($fld->IsLower)
+			{
+				$promptColName .= "Lower";
+			}
+			elseif ($fld->IsUpper)
+			{
+				$promptColName .= "Upper";
+			}
+
+			$label = $fld->ColName;
+			if (isset($this->_STRINGS[$promptColName]))
+			{
+				$label = $this->_STRINGS[$promptColName];
+			}
+
+
+			$htmlFieldName = 'col_' . $fld->ColName;
+			if (strtolower(get_class($fld)) == 'queryfield')
+			{
+				$htmlFieldName = 'col';
+				switch (strtolower($fld->ColType))
+				{
+			    		case 'date':
+						$htmlFieldName .= '_date';
+						break;
+			    		case 'float':
+						$htmlFieldName .= '_float';
+						break;
+				    	case 'integer':
+						$htmlFieldName .= '_int';
+						break;
+				    	case 'string':
+						$htmlFieldName .= '_str';
+						break;
+				    	case 'longitude':
+						$htmlFieldName .= '_long';
+						break;
+				    	case 'latitude':
+						$htmlFieldName .= 'lat_';
+						break;
+				    	case 'text':
+						$htmlFieldName .= '';
+						break;
+				}
+				if ($fld->IsLower)
+				{
+					$htmlFieldName .= '_lower_';
+				}
+				elseif ($fld->IsUpper)
+				{
+					$htmlFieldName .= '_upper_';
+				}
+				$htmlFieldName .= '_' . $fld->ColName;
+			}
+			else
+			{
+				WebDie('Invalid Field Type - Expected QueryField');
+			}
+
+			$hintColName = $fld->ColName;
+			if ($fld->IsLower)
+			{
+				$hintColName .= "Lower";
+			}	
+			elseif ($fld->IsUpper)
+			{
+				$hintColName .= "Upper";
+			}	
+
+
+			if (isset($this->DropDownLists[$fld->ColName]))
+			{
+				$this->generateDropDown($fld->ColName, $htmlFieldName);
+			}
+			elseif (isset($this->LookupLists[$fld->ColName]))
+			{
+				$colName = $this->LookupLists[$fld->ColName];
+				$restriction = $this->getLookupRestriction($colName);
+				$restriction = urlencode($restriction);
+				$lookupName = urlencode($colName);
+
+				$_fnSearch[] = "<div class='searchPromptAndInput'>";
+				$_fnSearch[] = "\t<div class='searchPrompt'>$label</div>";
+
+				// print picklist/lookuplist image and link
+				$_fnSearch[] = "\t\t<input class='searchInput' type='text' value='' name='$htmlFieldName' />";
+				$_fnSearch[] = "\t\t<a href='javascript:void(0)' onclick='" .
+					"openLookupList('dtlquery',
+ 						'$htmlFieldName',
+ 						'$lookupName',
+ 						'$restriction',
+ 						dtlquery['$htmlFieldName'].value)" .
+						">";
+					;
+				$imgPath = $GLOBALS['WEB_PICKLIST_GRAPHIC'];
+				$_fnSearch[] = "\t\t<img src='$imgPath' /></a>";
+				$_fnSearch[] = "\t\t<div class='hint'>" . $this->Hints[$hintColName] . "</div>";
+				$_fnSearch[] = "\t</div>";
+			}
+			else
+			{
+				$_fnSearch[] = "\n<div class='searchPromptAndInput'>";
+				$_fnSearch[] = "\t<div class='searchPrompt'>$label</div>";
+				$_fnSearch[] = "\t<input class='searchInput' type='text' value='' name='$htmlFieldName' />";
+				$_fnSearch[] = "\t<div class='hint'>" . $this->Hints[$hintColName] . "</div>";
+				$_fnSearch[] = "</div>";
+			}
+		}
+		return implode("\n", $_fnSearch);
+	}
+
+}
+
+/*
+/*********** Detailed Query Class ********************
+ */
+class AmDetailedQueryForm extends BaseDetailedQueryForm
+{
+	// override default EMuWeb Query Object - make it simple
+	// unstyled html with css classes
+
+	var $Fields = array(
+		'BioMicrohabitatDescription',
+		'CatRegNumber',
+		'CitTypeStatus_tab',
+		'ExtendedData',
+		#'IdeDateIdentified0',
+		'LocSubstrate',
+		'MetClass',
+		#'MetCurrentSpecimenWeight',
+		'MetGroup',
+		'MetName',
+		'MetTypeSymbol',
+		'MinClass',
+		#'MinColor',
+		#'MinCut',
+		'MinGroup',
+		'MinSpecies',
+		'MinVariety',
+		#'QuiCollBottomDepthFromMet',
+		#'QuiCollBottomDepthToMet',
+		'QuiHabitat_tab',
+		'QuiLatLongDetermination',
+		'QuiLatitude0',
+		'QuiLongitude0',
+		'QuiPreciseLocationLocal_tab',
+		'QuiTaxonLocal',
+		'QuiTaxonRef->etaxonomy->ComName_tab',
+		'QuiTaxonomyClass',
+		'QuiTaxonomyFamily',
+		'QuiTaxonomyGenus',
+		'QuiTaxonomyOrder',
+		'QuiTaxonomyPhylum',
+		'QuiTaxonomySpecies',
+		'QuiTaxonomySubSpecies',
+		'RocClass',
+		'RocRockName',
+		'SqsSiteName',
+		'TekDescription',
+		'TekName',
+		#'TekShape',
+		'ZooSex_tab',
+		'ZooStage_tab',
+
+		#'BioEventDateFrom',
+		#'BioEventDateTo',
+		'ComName_tab',
+		#'DetRights',
+		'DetSubject_tab',
+		'EraAMStage',
+		'EraAge1',
+		'EraAge2',
+		'EraEra',
+		'LocElevationASLFromMt',
+		'LocElevationASLFromMt',
+		'MulCreator_tab',
+	);
+
+	var $Hints = array(
+		'ExtendedData' 			=> '[ eg. Newcastle ]',
+		'QuiTaxonomyClass'		=> '[ eg. Malacostraca ]',
+		'QuiTaxonomyFamily'		=> '[ eg. Lysiosquillidae ]',
+		'QuiTaxonomyGenus'		=> '[ eg. Lysiosquilla ]',
+		'QuiTaxonomyOrder'		=> '[ eg. Stomatopoda ]',
+		'QuiTaxonomyPhylum'		=> '[ eg. Crustacea ]',
+		'QuiTaxonomySpecies'		=> '[ eg. isos ]',
+		'QuiTaxonomySubSpecies'		=> '',
+		'QuiTaxonRef->etaxonomy->ComName_tab' => '[ eg. Wombat ]',
+		'QuiHabitat_tab'		=> '',
+		'CatRegNumber'			=> '[ eg. P.67176 ]',
+		'BioMicrohabitatDescription'	=> '',
+		'QuiTaxonLocal'			=> '[ eg Epiactis adeliana ]',
+		'CitTypeStatus_tab'		=> '[ eg. Holotype ]',
+		#'IdeDateIdentified0'		=> '[ eg. 2003 ]', # non text search
+		'QuiLatitude0'			=> '',
+		'QuiLongitude0'			=> '',
+		'LocSubstrate'			=> '[ eg. reef edge ]',
+		'QuiLatLongDetermination'	=> '',
+		'QuiPreciseLocationLocal_tab'	=> '',
+		'MetClass'			=> '',
+		#'MetCurrentSpecimenWeight'	=> '',
+		'MetGroup'			=> '',
+		'MetName'			=> '',
+		'MetTypeSymbol'			=> '',
+		'MinClass'			=> '',
+		'MinColor'			=> '',
+		'MinCut'			=> '',
+		'MinGroup'			=> '',
+		'MinSpecies'			=> '',
+		'MinVariety'			=> '',
+		'RocClass'			=> '',
+		'RocRockName'			=> '',
+		'SqsSiteName'			=> '',
+		'TekDescription'		=> '',
+		'TekName'			=> '',
+		'TekShape'			=> '',
+		'ZooSex_tab'			=> '[ eg. female ]',
+		'ZooStage_tab'			=> '',
+		#'BioEventDateFrom'		=> '',
+		#'BioEventDateTo'		=> '',
+		'ComName_tab'			=> '',
+		'DetRights'			=> '',
+		'DetSubject_tab'		=> '',
+		'EraAMStage'			=> '',
+		'EraAge1'			=> '',
+		'EraAge2'			=> '',
+		'EraEra'			=> '',
+		'LocElevationASLFromMt'		=> '',
+		'LocElevationASLFromMt'		=> '',
+		'MulCreator_tab'		=> '',
+	);
+
+	function display()
+	{
+		global $ALL_REQUEST;
+		$self = isset($GLOBALS['PHP_SELF']) 
+				? $GLOBALS['PHP_SELF'] : $_SERVER['PHP_SELF'];
+
+		$_secondSearch = array();
+		if ($this->SecondSearch)
+		{
+			//add a second search and clear button to the top of the page
+			$_secondSearch[] = "<input type='submit' name='Search' value='Search' />";
+			$_secondSearch[] = "<input type='reset' name='Reset' value='Clear' />\n";
+			if ($this->ImagesOnlyOption == 1)
+			{
+				$_secondSearch[] = "<input type='checkbox' name='ImagesOnly' value='true' />\n";
+				$_secondSearch[] = $this->_STRINGS['ONLY_WITH_IMAGES'];
+			}
+		}
+		$secondSearch = implode("\n",$_secondSearch);
+
+
+		#$fnSearches = "";
+		$fnSearches = $this->makeFieldNameSearches();
+
+		$_limit = array();
+		if ($this->ImagesOnlyOption == 1)
+		{
+			$_limit[] = "<div class='searchPrompt'>" . $this->_STRINGS['ONLY_WITH_IMAGES'] . "</div>\n" .
+				"\t\t\t\t<input type='checkbox' name='ImagesOnly' value='true' class='searchInput' />\n" .
+				"\t\t\t\t<div class='hint' />\n";
+		}
+		$limit = implode("\n", $_limit);
+
+		$form = $this->ResultsListPage;
+		print("
+		<div class='emuWebObject'>
+			<script language='JavaScript'>
+			<!--
+			// some JavaScript to assist with lookup list popup
+			function openLookupList(formID, fieldID, LutName, restriction, term)
+			{
+				var url = '$GLOBALS[LOOKUPLIST_URL]' +
+					'?formid=' + formID +
+ 					'&fieldid=' + fieldID +
+ 					'&lname=' + LutName +
+					'&restriction=' + restriction +
+					'&ll=' + term; +
+					'&lang=$this->LanguageData';
+
+				window.open(url, 'popupWindow', 'height=500,width=250,location=no,status=no,toolbar=no,scrollbars=yes').focus();
+			}
+			-->
+			</script>
+			<form method='post' action='$form' class='emuWebForm' $this->formAttributes >
+
+		 			<div class='submit'>
+ 						$secondSearch
+					</div>
+
+					<div class='searchPromptAndInput'>
+						$limit
+					</div>
+
+					$fnSearches
+					
+					<div class='searchPromptAndInput'>
+						<div class='searchPrompt'>Results To Show per Page</div>
+						<select name='LimitPerPage' class='queryOptions searchInput'>
+		 					<option value='5' >5 results</option>
+		 					<option value='10' >10 results</option>
+		 					<option value='20' >20 results</option>
+		 					<option value='50' >50 results</option>
+		 					<option value='100' >100 results</option>
+                				</select>
+					</div>	
+
+					<div class='submit'>
+						<input  type='submit' name='Search' value='Search' />
+						<input  type='reset' name='Reset' value='Clear' />
+					</div>	
+
+					<input type='hidden' name='QueryName' value='DetailedQuery' />
+					<input type='hidden' name='StartAt' value='1' />
+					<input type='hidden' name='QueryPage' value='$self' />
+					<input type='hidden' name='Restriction' value='$this->Restriction' />
+				</form> 
+			</div>	
+			");
+
+	} //end display()
+
+	function makeFieldNameSearches()
+	{
+		// assembles string of HTML representing field name query
+		// controls
+		$_fnSearch = array();
+		foreach ($this->Fields as $fld)
+		{
+			// Convert string fields to QueryField objects
+			if (is_string($fld))
+			{
+				$fieldObject = new QueryField;
+				$fieldObject->ColName = $fld;
+				$fld = $fieldObject;
+			}
+
+			// Security
+			if (strtolower($fld->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($fld->ValidUsers))
+					continue;
+			}
+
+
+			$promptColName = $fld->ColName;
+			if ($fld->IsLower)
+			{
+				$promptColName .= "Lower";
+			}
+			elseif ($fld->IsUpper)
+			{
+				$promptColName .= "Upper";
+			}
+
+			$label = $fld->ColName;
+			if (isset($this->_STRINGS[$promptColName]))
+			{
+				$label = $this->_STRINGS[$promptColName];
+			}
+
+
+			$htmlFieldName = 'col_' . $fld->ColName;
+			if (strtolower(get_class($fld)) == 'queryfield')
+			{
+				$htmlFieldName = 'col';
+				switch (strtolower($fld->ColType))
+				{
+			    		case 'date':
+						$htmlFieldName .= '_date';
+						break;
+			    		case 'float':
+						$htmlFieldName .= '_float';
+						break;
+				    	case 'integer':
+						$htmlFieldName .= '_int';
+						break;
+				    	case 'string':
+						$htmlFieldName .= '_str';
+						break;
+				    	case 'longitude':
+						$htmlFieldName .= '_long';
+						break;
+				    	case 'latitude':
+						$htmlFieldName .= 'lat_';
+						break;
+				    	case 'text':
+						$htmlFieldName .= '';
+						break;
+				}
+				if ($fld->IsLower)
+				{
+					$htmlFieldName .= '_lower_';
+				}
+				elseif ($fld->IsUpper)
+				{
+					$htmlFieldName .= '_upper_';
+				}
+				$htmlFieldName .= '_' . $fld->ColName;
+			}
+			else
+			{
+				WebDie('Invalid Field Type - Expected QueryField');
+			}
+
+			$hintColName = $fld->ColName;
+			if ($fld->IsLower)
+			{
+				$hintColName .= "Lower";
+			}	
+			elseif ($fld->IsUpper)
+			{
+				$hintColName .= "Upper";
+			}	
+
+
+			if (isset($this->DropDownLists[$fld->ColName]))
+			{
+				$this->generateDropDown($fld->ColName, $htmlFieldName);
+			}
+			elseif (isset($this->LookupLists[$fld->ColName]))
+			{
+				$colName = $this->LookupLists[$fld->ColName];
+				$restriction = $this->getLookupRestriction($colName);
+				$restriction = urlencode($restriction);
+				$lookupName = urlencode($colName);
+
+				$_fnSearch[] = "<div class='searchPromptAndInput'>";
+				$_fnSearch[] = "\t<div class='searchPrompt'>$label</div>";
+
+				// print picklist/lookuplist image and link
+				$_fnSearch[] = "\t\t<input class='searchInput' type='text' value='' name='$htmlFieldName' />";
+				$_fnSearch[] = "\t\t<a href='javascript:void(0)' onclick='" .
+					"openLookupList('dtlquery',
+ 						'$htmlFieldName',
+ 						'$lookupName',
+ 						'$restriction',
+ 						dtlquery['$htmlFieldName'].value)" .
+						">";
+					;
+				$imgPath = $GLOBALS['WEB_PICKLIST_GRAPHIC'];
+				$_fnSearch[] = "\t\t<img src='$imgPath' /></a>";
+				$_fnSearch[] = "\t\t<div class='hint'>" . $this->Hints[$hintColName] . "</div>";
+				$_fnSearch[] = "\t</div>";
+			}
+			else
+			{
+				$_fnSearch[] = "\n<div class='searchPromptAndInput'>";
+				$_fnSearch[] = "\t<div class='searchPrompt'>$label</div>";
+				$_fnSearch[] = "\t<input class='searchInput' type='text' value='' name='$htmlFieldName' />";
+				$_fnSearch[] = "\t<div class='hint'>" . $this->Hints[$hintColName] . "</div>";
+				$_fnSearch[] = "</div>";
+			}
+		}
+		return implode("\n", $_fnSearch);
+	}
+}
+
+class 
+AmNarrativeBasicQueryForm extends AmBasicQueryForm
+{
+	
+	function
+	AmNarrativeBasicQueryForm()
+	{
+		$this->Options = array(
+			'anywhere' => 'SummaryData|NarNarrative|DesGeographicLocation_tab',
+		);
+		$this->ResultsListPage = "NarrativeResultsList.php";
+		$this->AmBasicQueryForm();
+	}
+
+	function 
+	display()
+	{
+		// override default EMuWeb Query Object - make it simple
+		// unstyled html with css classes
+
+		// In this case display is identical to
+		// AMBasicQueryForm::display except it doesn't show the image
+		// and advanced search links/checkboxes
+
+		$_hidden = array();
+		foreach($this->Options as $option => $fields)
+		{
+			$_hidden[] = "<input type='hidden' name='$option' value='$fields' />";
+		}	
+		$hidden = implode("\n",$_hidden);
+
+
+		$_additional = array();
+		if (count($this->Options) > 1)
+		{
+			$_additional[] = "<select name='QueryOption' class='queryOptions searchInput'>";
+
+			// Show Options in dropdown
+			// The "options" should not contain spaces.  If a space or "special" label is
+			// required, define an entry in the strings file with an ID the same name as
+			// the option.
+			$spaceerror = 0;
+			foreach($this->Options as $option => $val)
+			{
+				if (preg_match("/\s/", $option))
+				{
+					$spaceerror++;
+				}
+				$optDisplay = $this->_STRINGS['QUERY_OPTION_' . strtoupper($option)];
+				if ($optDisplay == '')
+				{
+					$optDisplay = $this->_STRINGS[$option];
+				}
+				if ($optDisplay == '')
+				{
+					$optDisplay = $option;
+				}
+				
+				$_additional[] = "\t\t\t\t\t<option value='$option'>$optDisplay</option>";
+			}
+			$_additional[] =  "\t\t\t\t</select>";
+		}
+		else
+		{
+			$option = array_keys($this->Options);
+			$option = $option[0];
+			$_additional[] = "<input type='hidden' name='QueryOption' value='$option' />";
+		}
+		$additional = implode("\n",$_additional);
+
+		$self = isset($GLOBALS['REQUEST_URI']) 
+				? $GLOBALS['REQUEST_URI'] : $_SERVER['REQUEST_URI'];
+
+		$form = $this->ResultsListPage;
+		print("
+			<form method='post' action='$form' $this->formAttributes >
+				<div id='emu-search-one'>
+					<input type='text' name='QueryTerms' class='searchInput' />
+					$additional
+				</div>	
+				<div id='emu-search-two'>
+					<input type='image' name='submit' id='submit' alt='submit' src='images/search.gif' />
+				</div>	
+
+				<input type='hidden' name='QueryName' value='BasicQuery' />
+				<input type='hidden' name='QueryPage' value='$self' />
+				<input type='hidden' name='Restriction value='$this->Restriction' />
+				<input type='hidden' name='StartAt' value='1' />
+				$hidden
+  			</form>
+		");
+	}
+}
+
+?>

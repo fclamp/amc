@@ -1,0 +1,43 @@
+/* 
+-----------------------------------------
+footer-primary styles
+-----------------------------------------
+*/
+
+#footer-primary
+{
+	clear: both;
+	float: left;
+	width: 940px;
+	padding: 20px 20px 15px;
+	background: #e3e3e3 url(/images/site/back-footer-primary.gif) no-repeat;
+	border-bottom: 1px solid #fff;
+}
+
+#home #footer-primary { background: #e3e3e3 url(/images/site/back-footer-primary-home.gif) no-repeat; }
+
+#footer-primary h3
+{
+	position: absolute;
+	left: -500em;
+}
+
+#footer-primary ul
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer-primary li
+{
+	margin: 0 0 0 10px;
+	padding: 0;
+	list-style-type: none;
+	float: right;
+}
+
+#footer-primary li.nsw-government
+{
+	float: left;
+	margin: 0;
+}

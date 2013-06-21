@@ -1,0 +1,31 @@
+EMuWeb TODO - for KE Software developer use
+
+HIGH
+	* Multilang support
+
+        * Interger range query support
+
+	* Custom "NO IMAGE" file support
+
+	* Add "and" logic support in basic query form.
+
+MEDIUM
+
+        * Add "Publishable Media" fields to all backends for linked images.
+
+        * Write new MetaData object
+
+
+LOW
+        * write a package-up script so pages can easially be moved 
+	to a secondary/offsite web server.
+
+        * Language support in XML server rather than at the PHP API level.
+
+        * Fix border-class under netscape
+
+
+===============================================================================
+DONE
+        * provide custom error pages/messages
+

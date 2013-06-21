@@ -1,0 +1,189 @@
+<?php
+
+/*
+*  Copyright (c) KE Software Pty Ltd - 2003
+*/
+
+/* 
+Created By: Martin Jujou
+Creation Date: 17/9/2003
+*/
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseDisplayObjects.php');
+
+class
+AmStandardDisplay extends BaseStandardDisplay
+{
+	// Set default in the constructor
+	function
+	AmStandardDisplay()
+	{
+		// associated narratives
+		$ass = new BackReferenceField;
+		$ass->RefDatabase = "enarratives";
+		$ass->RefField = "AssMasterNarrativeRef";
+		$ass->ColName = "SummaryData";
+		$ass->Label = "Associated Narrative Links";
+		$ass->LinksTo = "Display.php";
+
+		// master narrative
+		$master = new BackReferenceField;
+		$master->RefDatabase = "enarratives";
+		$master->RefField = "AssAssociatedWithRef_tab";
+		$master->ColName = "SummaryData";
+		$master->Label = "Master Narrative Link";
+		$master->LinksTo = "Display.php";
+
+		// links to authors
+		$authors = new Field;
+		$authors->Database = "eparties";
+		$authors->Field = "SummaryData";
+		$authors->ColName = "NarAuthorsRef_tab->eparties->SummaryData";
+		$authors->Label = "Author Links";
+		$authors->LinksTo = "DisplayParty.php";
+
+		// links to associated objects 	
+		$objects = new Field;
+		$objects->Database = "ecatalogue";
+		$objects->Field = "SummaryData";
+		$objects->ColName = "ObjObjectsRef_tab->ecatalogue->SummaryData";
+		$objects->Label = "Associated Object Links";
+		$objects->LinksTo = "DisplayObject.php";
+
+		// keep here just incase
+		// object names
+		//$objectsName = new Field;
+		//$objectsName->ColName = 'ObjObjectsRef_tab->ecatalogue->SummaryData';
+		//$objectsName->Italics = 1;
+
+		// related module table
+		$modTable = new Table();
+		$modTable->Name = "Associated Modules";
+		$modTable->Columns = array($authors, $objects); 
+
+
+		$this->Fields = array(
+				'irn_1',
+				'SummaryData',
+				'NarNarrative',
+				'DesVersionDate',
+				'DesHistoricalSignificance',
+				'DesPurpose',
+				'DesType_tab',
+				'DesIntendedAudience_tab',
+				'DesGeographicLocation_tab',
+				'DesSubjects_tab',
+				$master,
+				$ass,
+				$modTable
+				);
+
+
+		$this->HeaderField = 'SummaryData';
+		$this->BaseStandardDisplay();
+		$this->Database = 'enarratives';
+	}
+}
+
+class
+AmObjectDisplay extends BaseStandardDisplay
+{
+
+	function
+	AmObjectDisplay()
+	{
+		// narrative link
+		$narrative = new BackReferenceField;
+		$narrative->RefDatabase = "enarratives";
+		$narrative->RefField = "ObjObjectsRef_tab";
+		$narrative->ColName = "SummaryData";
+		$narrative->Label = "Narrative Links";
+		$narrative->LinksTo = "Display.php";
+
+				
+
+		$party = new BackReferenceField;
+		$party->RefDatabase = "enarratives";
+		$party->RefField = "ObjObjectsRef_tab";
+		$party->ColName = "NarAuthorsRef_tab->eparties->SummaryData";
+		$party->Label = "Party Links";
+		$party->LinksTo = "DisplayParty.php";
+
+
+		$this->Fields = array(
+				'irn_1',
+				'SummaryData',
+				$narrative,
+				$party
+				);
+
+
+		$this->HeaderField = 'SummaryData';	
+		$this->BaseStandardDisplay();
+		$this->Database = 'ecatalogue';
+	}
+}
+
+
+
+class
+AmPartyDisplay extends BaseStandardDisplay
+{
+
+	// Set default field in the constructor
+	function
+	AmPartyDisplay()
+	{
+		// narrative link
+		$narrative = new BackReferenceField;
+		$narrative->RefDatabase = "enarratives";
+		$narrative->RefField = "NarAuthorsRef_tab";
+		$narrative->ColName = "SummaryData";
+		$narrative->Label = "Related Narratives";
+		$narrative->LinksTo = "Display.php";
+
+		/*
+		should work !!!!
+		$object = new BackReferenceField;
+		$object->RefDatabase = "enarratives";
+		$object->RefField = "NarAuthorsRef_tab";
+		$object->ColName = "ObjObjectsRef_tab->ecatalogue->SummaryData";
+		$object->Label = "Related Objects";
+		$object->LinksTo = "Display.php";
+		*/
+
+
+		$object = new BackReferenceField;
+		$object->RefDatabase = "enarratives";
+		$object->RefField = "NarAuthorsRef_tab";
+		$object->ColName = "ObjObjectsRef_tab->ecatalogue->SummaryData";
+		$object->Label = "Related Objects";
+		$object->LinksTo = "Display.php";
+
+
+		
+		$this->Fields = array(
+				'irn_1',
+				'SummaryData',
+				'NamSex',
+				'NamSource',
+				'BioBirthPlace',
+				'BioDeathPlace',
+				'BioEthnicity',
+				'BioBirthDate',
+				'BioDeathDate',
+				$narrative,
+				$object
+				);
+
+
+		$this->BaseStandardDisplay();
+		$this->HeaderField = 'SummaryData';
+		$this->Database = 'eparties';
+	}
+}
+
+?>

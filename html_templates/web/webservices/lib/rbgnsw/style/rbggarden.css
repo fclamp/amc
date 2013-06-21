@@ -1,0 +1,392 @@
+/* general element properties */
+
+body {
+	behavior: url("./lib/rbgnsw/style/csshover3.htc");
+	color: black;
+	font-size: 10pt;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	text-align: left;
+	margin: 0px;
+	padding: 0px;
+	background: white url(../../../images/rbgnsw/linkBackground.gif) repeat-y 0px 0px;
+}
+
+
+
+h1 {
+	font-size: 18pt;
+}
+
+h2 {
+	font-size: 15pt;
+}
+
+h3 {
+	font-size: 12pt;
+}
+
+.emphasis {
+	font-weight: bold;
+}
+
+
+.alert {
+	font-weight: bold;
+	color : red;
+}
+
+/* header banner */
+#banner {
+	width: 1024px;
+	background: #157b94;
+	color: white;
+	height: 110px;
+	position: relative;
+	left: 0px;
+	top: 0px;
+}
+
+
+#dept {
+	padding-top: 1em;
+	float: left;
+	clear: none;
+	width: 400px;
+}
+
+#dept a {
+	color: white;
+	text-decoration: none;
+}
+
+#logo {
+	float: left;
+	clear: left;
+	width: 200px;
+	border: 0px white solid;
+}
+#logo img {
+	border: 0px;
+}
+
+/* horizontal links in banner */
+#bannerLinkHolder {
+	padding-top: 1em;
+	float: right;
+	clear: none;
+	width: 500px;
+}
+
+#bannerLinks {
+	float: right;
+	clear: none;
+	margin: 0;
+	text-decoration: none;
+	list-style-type: none;
+}
+
+#bannerLinks li {
+	float: left;
+	clear: none;
+	border-left: 1px solid #fff;
+	padding: 0px 8px 0px 8px;
+}
+
+#bannerLinks li.first {
+	border-left: none;
+}
+
+#bannerLinks a {
+	color: white;
+	text-decoration: none;
+}
+
+
+#titleAndTabHolder {
+	float: right;
+	clear: right;
+	width: 600px;
+}
+
+#pageTitle {
+	float: left;
+	width: 600px;
+	top: 36px;
+	right: -5px;
+	text-align: left;
+	font-size: 14pt;
+	padding: 2px;
+}
+
+/* page navigation tabs */
+#tabListHolder  {
+	width:600px;
+	height: 100%;
+	float: left;
+	clear: left;
+}
+
+#tabList {
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+	height: 2em;
+	position: relative;
+}
+
+.bottomFloater {
+	position: absolute;
+	bottom: 0px;
+}	
+
+.tabs {
+	text-align: center;
+	vertical-align: center;
+	list-style-type: none;
+	float: left;
+	clear: none;
+	border: solid #333333;
+	border-width: 1px 1px 0px 1px;
+	background: #157b94;
+	color : white;
+	width: 14em;
+	height: 2em;
+}
+
+.selectedTab {
+	border-width: 1px 2px 0px 2px;
+	background: #a0c9cf;
+	color: black;
+	height: 2em;
+}
+
+#contentTitle {
+	font-size: 14pt;
+	font-weight: bold;
+	padding-left: 1em;
+}
+#contentExplanation {
+	font-size: 10pt;
+	font-weight: bold;
+	padding-left: 2em;
+}
+
+
+
+
+
+/*footer*/
+
+.bottom {
+	float: left;
+	clear: both;
+	width: 1024px;
+	background: white url(../../../images/rbgnsw/linkBackground.gif) repeat-y 0px 0px;
+}
+
+
+#greycorner {
+	margin: 20px 0px 0px 0px;
+	clear:both;
+	background: transparent  url(../../../images/rbgnsw/greyCorner.gif) bottom right no-repeat;
+	width: 100%;
+}
+
+.footer
+{
+	padding: 0;
+	margin: 0;
+	color: white;
+	background: #5f5e5c;
+	width: 100%;
+	height: 22px;
+	text-align: left;
+}
+
+
+.footer ul {
+	display: inline;
+	margin-top: 10px;
+}	
+
+.footer ul li {
+	display: inline;
+	padding: 2px 10px;
+	border-width: 0 1px 0 0px;
+	border-color: white;
+	border-style: solid;
+}
+
+.footer ul li a {
+	margin: 2px;
+	color: white;
+	text-decoration: none;
+}
+
+.footer ul li.noBorder {
+	border-width: 0px;
+}
+
+.footer ul li.sponsored {
+	margin: 0 0 0 20%;
+}
+
+
+
+.footer ul li a:hover
+{
+	background-color: #333;
+	color: white;
+}
+
+.sponsored a {
+	border: 0px solid black;
+	background: black;
+	text-transform: uppercase;
+	
+}
+
+#middle {
+	float: left;
+}
+
+#contentPanel {
+	width: 800px; 
+	float: left;
+	clear: none;
+	vertical-align: top;
+}
+
+#navPanel {
+	color: #0c6176;
+	background: transparent url(../../../images/rbgnsw/linkBackground.gif) repeat-y 0px 0px;
+    	width: 200px;
+	vertical-align: top;
+	float: left;
+	text-align: left;
+	height: 520px;
+}
+
+#navPanel img {
+	margin-bottom: 0;
+}
+
+#imagePanel {
+	margin-top: 10px;
+	margin-right: 0px;
+	margin-left: 0px;
+	width: 157px;
+	float: right;
+}
+
+.fancyLinks {
+	text-align: left;
+	cursor: pointer;
+}
+
+.fancyLinks div {
+	font-weight: bold;
+}
+
+#topCorner {
+	float: left;
+	clear: both;
+	background: white url(../../../images/rbgnsw/topLeftCurve.gif) top left no-repeat;
+	width: 200px;
+}
+
+#breadCrumbHolder {
+	width: 820px;
+	clear: none;
+	float: left;
+}
+#breadCrumbs {
+	float: right;
+}
+
+#breadCrumbs a {
+	text-decoration: none;
+	color: black;
+}
+
+#breadCrumbs a:hover {
+   	text-decoration: underline;
+}
+
+.softBackground {
+	left: 0px;
+	width: 200px;
+	/*min-height: 400px;*/
+	/*height: 400px;*/
+	/*position: absolute;*/
+	background: #4da7bf
+}
+
+.navPanelContent {
+	margin-top: 2em;
+}
+
+.navPanelContent {
+	margin-left: 0px;
+	padding-left: 0;
+}
+
+.navPanelContent li {
+    list-style-type: none;
+    background: transparent url(../../../images/rbgnsw/white-arrow.gif) no-repeat scroll 4px 5px;
+    padding-left: 15px;
+    text-decoration: none;
+}
+
+.navPanelContent li:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.navPanelContent * a {
+   text-decoration: none;
+   color: #0c6176;
+}
+
+.navPanelContent * a:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.dataTable {
+	margin: 20px 0px 0px 10px;
+	display: block;
+}
+
+
+#mapHolder {
+	border: 0px black solid;
+	position: absolute;
+	margin-left: auto;
+	margin-right: auto;
+	width: 200px;
+}
+
+.rightFloater {
+	clear: both;
+}
+
+.leftFloater {
+	text-align: left;
+	float: left;
+}
+
+.setWidth {
+	width: 8em;
+}
+
+.bottomFiller {
+    background: white;
+    height: 360px;
+
+}
+
+#printerLink {
+	font-weight: bold;
+	cursor: pointer;
+}

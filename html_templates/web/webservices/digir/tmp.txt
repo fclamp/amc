@@ -1,0 +1,612 @@
+
+RCS file: /home/cvs/emu/emu/master/web/webservices/digir/DigirProvider.php,v
+Working file: DigirProvider.php
+head: 1.40
+branch:
+locks: strict
+access list:
+symbolic names:
+	emu-fmnh-3-2-03-0710181: 1.40
+	emu-ypmnh-3-2-03-0710181: 1.40
+	emu-cma-3-2-03-0710171: 1.40
+	emu-cma-3-2-03-0710151: 1.40
+	emu-beamish-3-2-03-0710161: 1.40
+	emu-sum-3-2-03-0710151: 1.40
+	emu-cmcc-3-2-03-0710101: 1.40
+	emu-nmnh-3-2-03-0710021: 1.40
+	emu-ushmm-3-2-03-0709281: 1.40
+	emu-nhm-3-2-03-0709281: 1.40
+	emu-sum-3-2-03-0709271: 1.40
+	emu-wshs-3-2-03-0709241: 1.40
+	emu-lacm-3-2-03-0709241: 1.40
+	emu-nmnh-3-2-03-0709201: 1.40
+	emu-ushmm-3-2-03-0709141: 1.40
+	emu-acm-3-2-03-0709181: 1.40
+	emu-usmc-3-2-03-0709171: 1.40
+	emu-mhs-3-2-03-0709171: 1.40
+	emu-sum-3-2-03-0709171: 1.40
+	emu-lacm-3-2-03-0709061: 1.40
+	emu-fmnh-3-2-03-0709051: 1.39
+	emu-wdi-3-2-03-0709051: 1.38
+	emu-galleryuk-3-2-03-0709051: 1.38
+	emu-lacm-3-2-03-0709041: 1.38
+	emu-lvsp-3-2-03-0709041: 1.38
+	emu-nybg-3-2-03-0708311: 1.38
+	emu-lacmm-3-2-03-0708311: 1.38
+	emu-ushmm-3-2-03-0708311: 1.37
+	emu-nmnh-3-2-03-0708301: 1.35
+	emu-artbank-3-2-03-0708302: 1.35
+	emu-artbank-3-2-03-0708301: 1.35
+	emu-qag-3-2-03-0708281: 1.35
+	emu-ushmm-3-2-03-0707261: 1.35
+	emu-ushmm-3-2-03-0708241: 1.35
+	emu-nhm-3-2-03-0708241: 1.35
+	emu-nhm-3-2-03-0708231: 1.35
+	emu-wmgl-3-2-03-0708221: 1.35
+	emu-am-3-2-03-0708221: 1.35
+	emu-sum-3-2-02-0708161: 1.32
+	emu-wdi-3-2-03-0708151: 1.32
+	emu-ram-3-2-03-0708141: 1.28
+	emu-fmnh-3-2-03-0708101: 1.28
+	emu-nhm-3-2-03-0708101: 1.28
+	emu-rcmpmus-3-2-03-0708071: 1.28
+	emu-pam-3-2-03-0708071: 1.28
+	emu-nmai-3-2-03-0708021: 1.28
+	emu-nhm-3-2-03-0708021: 1.28
+	emu-ushmm-3-2-03-0707251: 1.28
+	emu-cmhc-3-2-03-0707231: 1.28
+	emu-gallery-3-2-03-0707231: 1.28
+	emu-cmcc-3-2-03-0707201: 1.28
+	emu-gallery-3-2-03-0707191: 1.28
+	emu-tepapa-3-2-03-0707181: 1.28
+	emu-nybg-3-2-03-0707171: 1.28
+	emu-ypmnh-3-2-03-0707161: 1.28
+	emu-lacm-3-2-03-0707161: 1.28
+	emu-cma-3-2-03-0707131: 1.28
+	emu-lacm-data-3-2-03-070713: 1.28
+	emu-nhm-3-2-03-0707131: 1.28
+	emu-tepapa-3-2-03-0707131: 1.28
+	emu-nhm-3-2-03-0707121: 1.28
+	emu-am-3-2-03-0707121: 1.28
+	emu-cmcc-3-2-03-0707111: 1.28
+	emu-nmai-3-2-03-0707112: 1.28
+	emu-nmai-3-2-03-0707111: 1.28
+	emu-nhm-3-2-03-0707091: 1.28
+	emu-tepapa-3-2-03-0707091: 1.28
+	emu-cmcc-3-2-03-0707071: 1.28
+	emu-usmc-3-2-03-0707061: 1.28
+	emu-lacm-3-2-03-0707051: 1.28
+	emu-ushmm-3-2-03-0707031: 1.28
+	emu-tepapa-3-2-03-0707051: 1.28
+	emu-cmcc-3-2-03-0707031: 1.28
+	emu-cjh-3-2-03-0707021: 1.28
+	emu-cjh-3-2-03-0703221: 1.28
+	emu-ushmm-3--03-0706261: 1.28
+	emu-qag-3-2-03-0706261: 1.28
+	emu-ypmnh-3-2-03-0706251: 1.28
+	emu-nhm-3-2-03-0706221: 1.28
+	emu-msic-3-2-03-0706211: 1.28
+	emu-cmhc-3-2-03-0706191: 1.27
+	emu-qag-3-2-03-0706191: 1.27
+	emu-tepapa-3-2-03-0706191: 1.27
+	emu-ushmm-3-2-03-0706181: 1.27
+	emu-nhm-3-2-03-0706181: 1.27
+	emu-usmc-3-2-03-0706141: 1.27
+	emu-cmcc-3-2-03-0706131: 1.27
+	emu-cma-3-2-03-0706131: 1.27
+	emu-mhs-3-2-03-0706131: 1.27
+	emu-mv-3-2-03-0706131: 1.27
+	emu-gal-3-2-03-0706121: 1.27
+	emu-dpiq-3-2-03-0706121: 1.27
+	emu-fmnh-3-2-03-0706081: 1.24
+	emu-ushmm-3-2-03-0706071: 1.24
+	emu-cmhc-3-2-03-0706061: 1.24
+	emu-cma-3-2-03-0706051: 1.24
+	emu-nhm-3-2-03-0706051: 1.24
+	emu-nhm-3-2-03-0706041: 1.24
+	emu-nwm-3-2-03-0706041: 1.24
+	emu-fmnh-3-2-03-0705311: 1.24
+	emu-mv-3-2-03-0705311: 1.24
+	emu-mhs-3-2-03-07053001: 1.24
+	emu-ypmnh-3-2-03-0705241: 1.24
+	emu-fmnh-3-2-03-0705241: 1.24
+	emu-nhm-3-2-03-0705231: 1.23
+	emu-ushmm-3-2-02-0705221: 1.23
+	emu-acm-3-2-03-0705221: 1.23
+	emu-nhm-3-2-03-0705211: 1.21
+	emu-nhm-3-2-03-0705171: 1.20
+	emu-mv-3-2-03-0705181: 1.20
+	emu-nmai-3-2-03-0705151: 1.18
+	emu-galleryuk-3-2-03-0705141: 1.18
+	emu-wmgl-3-2-03-0705111: 1.18
+	emu-gallery-3-2-03-0705111: 1.18
+	emu-msic-3-2-03-0705081: 1.18
+	emu-mv-3-2-03-0705081: 1.18
+	emu-am-3-2-03-0705071: 1.18
+	emu-mhs-3-2-03-0705021: 1.18
+	emu-gag-3-2-03-0705021: 1.18
+	emu-ima-3-2-03-0705021: 1.18
+	emu-hms-3-2-03-0705021: 1.18
+	emu-nmnh-3-2-03-0705011: 1.18
+	emu-nmai-3-2-03-0705011: 1.17
+	emu-gallery-3-2-03-0704291: 1.17
+	emu-tepapa-3-2-03-0704261: 1.17
+	emu-lvsp-3-2-03-0704231: 1.17
+	emu-nhm-3-2-03-0704231: 1.17
+	emu-tepapa-3-2-03-0704181: 1.17
+	emu-lcms-3-2-03-0704171: 1.17
+	emu-mv-3-2-03-0704171: 1.17
+	emu-nmnh-3-2-03-0704131: 1.17
+	emu-nhm-3-2-03-0704111: 1.17
+	emu-mv-3-2-03-0704111: 1.17
+	emu-ima-3-2-03-0704101: 1.17
+	emu-nybg-3-2-03-0704041: 1.17
+	emu-tepapa-3-2-03-0704041: 1.17
+	emu-artbank-3-2-03-0704021: 1.17
+	emu-fmnh-3-2-03-0704022: 1.17
+	emu-fmnh-3-2-03-0704021: 1.17
+	emu-am-3-2-02-0704021: 1.17
+	emu-nmai-3-2-03-0703291: 1.17
+	emu-mv-3-2-03-0703291: 1.17
+	emu-ypmnh-3-2-03-0703282: 1.17
+	emu-3-2-03: 1.17
+	emu-fmnh-3-2-02-0703231: 1.17
+	emu-nmai-3-2-03-0703191: 1.17
+	emu-oph-3-2-02-0703161: 1.17
+	emu-rbgnsw-3-2-02-0703161: 1.17
+	emu-3-2-03-0703141: 1.17
+	emu-nhm-3-2-03-0703121: 1.17
+	emu-mhsox-3-2-03-0703081: 1.16
+	emu-nhm-3-2-03-0703081: 1.16
+	emu-mhsox-3-2-02-0703011: 1.16
+	emu-lvsp-3-2-03-0702271: 1.16
+	emu-afip-3-2-03-0702261: 1.15
+	emu-nhm-3-2-03-0702261: 1.15
+	emu-galleryuk-3-2-03-0702221: 1.15
+	emu-npg-3-2-02-0702221: 1.15
+	emu-fmnh-3-2-02-0702211: 1.15
+	emu-nhm-3-2-03-0702211: 1.15
+	emu-cmcc-3-2-03-0702191: 1.15
+	emu-nhm-3-2-02-0702191: 1.15
+	emu-phm-3-2-02-0702201: 1.15
+	emu-mhsox-3-2-03-0702141: 1.15
+	emu-fmnh-3-2-02-0702061: 1.15
+	emu-mv-3-2-02-0702061: 1.15
+	emu-nhm-3-2-02-0702052: 1.15
+	emu-mhs-3-2-02-0702021: 1.15
+	emu-fmnh-3-2-02-0702011: 1.15
+	emu-rsm-3-2-02-0701311: 1.15
+	emu-mhsox-3-2-02-0701311: 1.15
+	emu-fmnh-3-2-02-0701301: 1.15
+	emu-phm-3-2-02-0701291: 1.15
+	emu-wmgl-3-2-02-0701231: 1.15
+	emu-ypmnh-3-2-02-0701221: 1.15
+	emu-cma-3-2-02-0701191: 1.15
+	emu-mhs-3-2-02-0701221: 1.15
+	emu-cstmc-3-2-02-071111: 1.15
+	emu-sum-3-2-02-0701191: 1.15
+	emu-cstmc-3-2-02-0701171: 1.15
+	emu-nhm-3-2-02-0701161: 1.15
+	emu-mv-3-2-02-0701161: 1.15
+	emu-fmnh-3-2-02-0701151: 1.15
+	emu-cmcc-3-2-02-0701151: 1.15
+	emu-nhm-3-2-02-0701121: 1.15
+	emu-hms-3-2-02-0701101: 1.15
+	emu-phm-3-2-02-0701101: 1.15
+	emu-mhs-3-2-02-0701091: 1.15
+	emu-phm-3-2-02-0701091: 1.15
+	emu-gallery-3-2-02-0701081: 1.15
+	emu-mhsox-3-2-02-0701051: 1.15
+	emu-nhm-3-2-02-0701041: 1.15
+	emu-nhm-3-2-02-0701031: 1.15
+	emu-ypmnh-3-2-02-0612201: 1.15
+	emu-amnh-3-2-02-0612171: 1.15
+	emu-mv-3-2-02-0612121: 1.15
+	emu-tepapa-3-2-02-0612121: 1.15
+	emu-nhm-3-2-02-0612111: 1.15
+	emu-wdi3-2-02-0612081: 1.15
+	emu-qvmag-3-2-02-0612081: 1.15
+	emu-fmnh-3-2-02-0612071: 1.15
+	emu-phm-3-2-02-0612071: 1.15
+	emu-qvmag-3-2-02-0612071: 1.15
+	emu-am-3-2-02-0612071: 1.15
+	emu-jmfe-3-2-02-0612041: 1.15
+	emu-nmai-3-2-02-0612041: 1.15
+	emu-nhm-3-2-02-0612011: 1.15
+	emu-wmgl-3-2-02-0611301: 1.15
+	emu-fmnh-3-2-02-0611291: 1.15
+	emu-3-2-02-0611281: 1.15
+	emu-mpm-3-2-02-0611271: 1.15
+	emu-nhm-3-2-02-0611241: 1.15
+	emu-sam-3-2-02-0611241: 1.15
+	emu-nmlh-3-2-02-0611231: 1.15
+	emu-nhm-3-2-02-0611221: 1.15
+	emu-sam-3-2-02-0611221: 1.15
+	emu-nybg-3-2-02-0611211: 1.15
+	emu-nmai-3-2-02-0611171: 1.15
+	emu-nhm-3-2-02-0611171: 1.15
+	emu-gallery-3-2-02-0611161: 1.15
+	emu-hms-3-2-02-0611131: 1.14
+	emu-amnh-3-2-02-0611111: 1.14
+	emu-rsm-3-2-02-0611081: 1.14
+	emu-nhm-3-2-02-0611081: 1.14
+	emu-wmgl-3-2-02-0611061: 1.14
+	emu-nhm-3-2-02-0611031: 1.14
+	emu-fmnh-3-2-02-0611021: 1.14
+	emu-usprr-3-2-02-0611011: 1.14
+	emu-cma-3-2-02-0610301: 1.14
+	emu-ram-3-2-02-0610301: 1.14
+	emu-nhm-3-2-02-0610251: 1.14
+	emu-nmnh-3-2-02-0610201: 1.8
+	emu-phm-3-2-1-0610191: 1.8
+	emu-mv-3-2-02-0610191: 1.8
+	emu-nhm-3-2-02-0610161: 1.7
+	emu-ram-3-2-02-0610131: 1.7
+	emu-galleryuk-3-2-02-0610132: 1.7
+	emu-galleryuk-3-2-02-0610131: 1.7
+	emu-fmnh-3-2-02-0610111: 1.7
+	emu-nmai-3-2-02-0610111: 1.7
+	emu-nhm-3-2-02-0610091: 1.7
+	emu-nhm-3-2-02-0610061: 1.7
+	emu-htsa-3-2-02-0610051: 1.7
+	emu-nhm-3-2-02-0610031: 1.7
+	emu-htsa-3-2-02-0610041: 1.7
+	emu-jlmm-3-2-02-0610031: 1.7
+	emu-cstmc-3-2-02-0610031: 1.7
+	emu-nhm-3-2-02-0610021: 1.7
+	emu-nmai-3-2-02-0610011: 1.7
+	emu-nmlh-3-2-02-0609291: 1.7
+	emu-mm-3-2-02-0609291: 1.7
+	emu-rbgnsw-3-2-02-0609291: 1.7
+	emu-fmnh-3-2-02-0609281: 1.7
+	emu-hsta-3-2-02-0609281: 1.7
+	emu-msim-3-2-02-0609261: 1.7
+	emu-am-3-2-02-0609251: 1.7
+	emu-htsa-0609251: 1.7
+	emu-nmai-3-2-02-0609211: 1.7
+	emu-htsa-3-2-02-0609221: 1.7
+	emu-nybg-3-2-02-0609211: 1.6
+	emu-mv-3-2-02-0609211: 1.6
+	emu-cmcc-3-2-02-0609151: 1.6
+	emu-3-2-02: 1.6
+	emu-nhm-3-2-01-0609141: 1.6
+	emu-nhm-3-2-01-0609131: 1.6
+	emu-mv-3-2-01-0609131: 1.6
+	emu-amnh-3-2-01-0609131: 1.6
+	emu-pmhns-3-2-01-0609121: 1.6
+	emu-cjh-3-2-01-0609121: 1.6
+	emu-galleryuk-3-2-01-0609111: 1.6
+	emu-nhm-3-2-01-0609081: 1.6
+	emu-afip-3-2-01-0609061: 1.6
+	emu-htsa-3-2-01-0609031: 1.6
+	emu-nhm-3-2-01-0609011: 1.6
+	emu-sum-3-2-01-0609011: 1.6
+	emu-acm-3-2-01-0608311: 1.6
+	emu-oph-3-2-01-0608311: 1.6
+	emu-acm-3-2-01-0608291: 1.6
+	emu-tepapa-3-2-01-0608281: 1.6
+	emu-cmcc-3-2-01-0608251: 1.6
+	emu-mdhs-3-2-01-0608251: 1.6
+	emu-mv-3-2-01-0608241: 1.6
+	emu-nmai-3-2-01-0608241: 1.6
+	emu-rsm-3-2-01-0608241: 1.6
+	emu-cjh-3-2-01-0608241: 1.6
+	emu-mpm-3-2-01-0608221: 1.6
+	emu-ushmm-3-2-01-0608231: 1.6
+	emu-mdhs-3-2-01-0608221: 1.6
+	emu-fmnh-3-2-01-0608211: 1.6
+	emu-nybg-3-2-01-0608161: 1.6
+	emu-amnh-3-2-01-0608141: 1.6
+	emu-nmai-3-2-01-0608111: 1.6
+	emu-sum-3-02-01-0608111: 1.6
+	emu-amlive-3-2-01-0608101: 1.6
+	emu-ushmm-3-2-01-0608091: 1.6
+	emu-galleryuk-3-2-01-0608081: 1.6
+	emu-gallery-3-2-01-0608071: 1.6
+	emu-nma-3-2-01-0608031: 1.6
+	emu-nma-3-2-01-0608021: 1.6
+	emu-galleryuk-3-2-01-0608011: 1.6
+	emu-nmnh-3-2-01-0607311: 1.6
+	emu-wdi-3-2-01-0607311: 1.6
+	emu-nma-3-2-01-0607311: 1.6
+	emu-nmai-3-2-01-0607261: 1.6
+	emu-nhm-3-2-01-0607251: 1.6
+	emu-phm-3-2-01-0607241: 1.6
+	emu-client-3-2-01-0607211: 1.6
+	emu-nmnh-3-2-01-0607191: 1.6
+	emu-nma-3-2-01-0607191: 1.6
+	emu-nhm-3-2-01-0607181: 1.6
+	emu-nmnh-3-2-01-0607181: 1.6
+	emu-nhm-3-2-01-0607171: 1.6
+	emu-sum-3-2-01-0607171: 1.6
+	emu-rbgnsw-3-2-01-0607141: 1.6
+	emu-fmnh-3-2-01-0607131: 1.6
+	emu-acm-3-2-01-0606211: 1.6
+	emu-sum-3-2-01-0607131: 1.6
+	emu-ampaltest-3-2-01-0607131: 1.6
+	emu-tcmi-3-2-01-0607111: 1.6
+	emu-nhm-3-1-02-0607111: 1.6
+	emu-ushmm-3-2-01-0607091: 1.6
+	emu-jlmm-3-2-01-0607061: 1.6
+	emu-nhm-3-1-02-0607061: 1.6
+	emu-ima-3-2-01-0607061: 1.6
+	emu-tepapa-3-2-01-0607061: 1.6
+	emu-htsa-3-2-01-0607051: 1.6
+	emu-htsa-3-2-01-0607041: 1.6
+	emu-usprr-3-2-01-0606301: 1.6
+	emu-tepapa-3-2-01-0606301: 1.6
+	emu-jlmm-3-2-01-0606291: 1.6
+	emu-nma-3-2-01-0606291: 1.6
+	emu-sum-3-2-01-0606261: 1.6
+	emu-3-2-01: 1.6
+	emu-jlmm-3-1-02-0606211: 1.6
+	emu-sam-3-1-02-0606161: 1.6
+	emu-nma-3-1-02-0606161: 1.6
+	emu-nmai-3-1-02-0606151: 1.6
+	emu-nhm-3-1-02-0606151: 1.6
+	emu-rbgnsw-3-1-02-0606091: 1.6
+	emu-nmnh-3-1-02-0606062: 1.6
+	emu-nmnh-3-1-02-0606061: 1.6
+	emu-nmnh-3-1-02-0605311: 1.6
+	emu-nhm-3-1-02-0605301: 1.6
+	emu-gallery-3-1-02-0605301: 1.6
+	emu-fmnh-3-1-02-0605291: 1.6
+	emu-artbank-3-1-02-0605291: 1.6
+	emu-nmai-3-1-02-0605241: 1.6
+	emu-tepapa-3-1-02-0605251: 1.6
+	emu-nhm-3-1-02-0605241: 1.6
+	emu-lvsp-3-1-02-0605241: 1.6
+	emu-nybg-3-1-02-0605231: 1.6
+	emu-nmai-3-1-02-0605161: 1.6
+	emu-nmai-3-1-02-0605151: 1.6
+	emu-nhm-3-1-02-0605141: 1.6
+	emu-ypmnh-3-1-02-0605121: 1.6
+	emu-mv-3-1-02-0605121: 1.6
+	emu-pmhns-3-1-02-0605111: 1.6
+	emu-ypmnh-3-1-02-0605101: 1.6
+	emu-ypmnh-3-1-02-0605041: 1.6
+	emu-sam-3-1-02-0605041: 1.6
+	emu-ypmnh-3-1-02-0604281: 1.6
+	emu-ypmnh-3-1-02-0604272: 1.6
+	emu-ypmnh-3-1-02-0604271: 1.6
+	emu-amnh-0604161: 1.5
+	emu-nmnh-3-1-02-0604131: 1.5
+	emu-uhmb-3-1-01-0604121: 1.5
+	emu-nmnh-3-1-01-0604101: 1.4
+	emu-qvmag-3-1-02-0604071: 1.4
+	emu-sam-3-1-02-0604061: 1.4
+	emu-3-1-02: 1.4
+	emu-mv-3-1-01-0603311: 1.4
+	emu-nma-3-1-01-0603311: 1.4
+	emu-tepapa-3-1-01-0603291: 1.4
+	emu-mv-3-1-01-0603291: 1.4
+	emu-mv-3-1-01-0603241: 1.4
+	emu-amnh-3-1-01-0603211: 1.4
+	emu-nmnh-3-1-01-0603201: 1.4
+	emu-sam-3-1-01-0603131: 1.2
+	emu-gallerytrain-3-1-01-0603091: 1.2
+	emu-nhm-3-1-01-0603091: 1.2
+	emu-npg-3-1-01-0603091: 1.2
+	emu-oph-3-1-01-0603091: 1.2
+	emu-nga-3-1-01-0603062: 1.1
+	emu-3-1-01: 1.1
+	emu-nga-3-1-01-0603061: 1.1
+	emu-nma-3-1-01-0602281: 1.1
+	emu-nmnh-3-1-00-0602231: 1.1
+	emu-nma-3-1-01-0602231: 1.1
+	emu-nmnh-3-1-00-0602221: 1.1
+	emu-nmnh-3-1-00-0602191: 1.1
+	emu-gallery-3-1-00-0601301: 1.1
+	emu-amnh-3-1-0-0601311: 1.1
+	emu-amnh-3-1-00-0601301: 1.1
+	emu-fmnh-3-0-06-0601171: 1.1
+	emu-pmhns-3-1-00-0601171: 1.1
+	emu-fmnh-3-0-06-0601162: 1.1
+	emu-pmhns-3-1-00-0601161: 1.1
+	emu-fmnh-3-0-06-0601161: 1.1
+	emu-pmhns-3-1-0601131: 1.1
+	emu-rsm-3-1-00-0601131: 1.1
+	emu-cstmc-3-0-06-0512302: 1.1
+	emu-cstmc-3-0-06-0512301: 1.1
+	emu-amnh-3-1-00-0512281: 1.1
+keyword substitution: kv
+total revisions: 40;	selected revisions: 40
+description:
+----------------------------
+revision 1.40
+date: 2007/09/05 19:21:24;  author: luca;  state: Exp;  lines: +3 -5
+luca:
+- minor layout changes
+----------------------------
+revision 1.39
+date: 2007/09/05 16:14:41;  author: luca;  state: Exp;  lines: +3 -3
+luca:
+- backslashed double dashes in texql returned as xml comment with results
+----------------------------
+revision 1.38
+date: 2007/08/31 21:40:26;  author: luca;  state: Exp;  lines: +119 -0
+luca:
+- added back dwc simple mappings to DigirProvider.php
+- removed dwc simple mappings from DigirProviderFactory.php & fixed up the client
+  specific overridding of simple mapping to check the simple mappings after it has
+  checked the client specific mappings
+----------------------------
+revision 1.37
+date: 2007/08/31 00:14:28;  author: luca;  state: Exp;  lines: +0 -2
+luca:
+- minor cleanup
+----------------------------
+revision 1.36
+date: 2007/08/30 19:45:56;  author: luca;  state: Exp;  lines: +745 -684
+luca:
+- major reworking of digir webservice.
+- added lib/XmlTree.php for parsing xml request
+- changed file & class name of EMuToDarwinConverter to EMuConverter
+----------------------------
+revision 1.35
+date: 2007/08/16 04:49:37;  author: jonk;  state: Exp;  lines: +0 -2
+removed redundant filter parsing call (JonK)
+----------------------------
+revision 1.34
+date: 2007/08/16 01:52:21;  author: jonk;  state: Exp;  lines: +1 -0
+added get filter prior to validating filter (JonK)
+----------------------------
+revision 1.33
+date: 2007/08/16 00:25:04;  author: jonk;  state: Exp;  lines: +1 -0
+escape single quotes in text data used in query term (JonK)
+----------------------------
+revision 1.32
+date: 2007/08/15 07:11:13;  author: jonk;  state: Exp;  lines: +119 -88
+changed default mapping field types to match emu catalogue (JonK)
+----------------------------
+revision 1.31
+date: 2007/08/15 02:37:07;  author: jonk;  state: Exp;  lines: +18 -19
+commented out now unused code - ultimately to be removed (JonK)
+----------------------------
+revision 1.30
+date: 2007/08/15 00:47:01;  author: jonk;  state: Exp;  lines: +1 -1
+fixed error in inventory response generation not getting correct xml
+namespace (JonK)
+----------------------------
+revision 1.29
+date: 2007/08/15 00:13:26;  author: jonk;  state: Exp;  lines: +171 -21
+1. changed to use query data structure rather than sql string as
+   standard query format
+2. moved standard EMu Darwin core mappings to be set as default
+   mappings from client object to here
+3. added support for non string simple mappings (JonK)
+----------------------------
+revision 1.28
+date: 2007/06/20 14:24:28;  author: luca;  state: Exp;  lines: +243 -246
+luca:
+- alot of cleanup
+- fixed bug where diagnostics did not get reported because of bad variable name
+- changed default inventoryCacheDir
+- added code to validate xml request before processing it
+----------------------------
+revision 1.27
+date: 2007/06/11 23:06:50;  author: luca;  state: Exp;  lines: +3 -0
+luca:
+- added another log message for "empty request" where the page is visited but no
+  data is passed on the url
+----------------------------
+revision 1.26
+date: 2007/06/11 19:32:49;  author: luca;  state: Exp;  lines: +5 -0
+luca:
+- added some log information - logging request type (search, metadata, inventory)
+----------------------------
+revision 1.25
+date: 2007/06/11 18:17:41;  author: luca;  state: Exp;  lines: +6 -3
+luca:
+- moved logging of records found from EMuToDarwinConverter.php to here
+- fixed bug
+----------------------------
+revision 1.24
+date: 2007/05/23 20:46:46;  author: luca;  state: Exp;  lines: +22 -13
+luca:
+- get match count from texxmlserver response if possible instead of querying twice
+----------------------------
+revision 1.23
+date: 2007/05/22 21:46:55;  author: luca;  state: Exp;  lines: +0 -3
+luca:
+- removed code to replace & with &amp; - this is handled elsewhere
+----------------------------
+revision 1.22
+date: 2007/05/22 02:58:39;  author: luca;  state: Exp;  lines: +14 -11
+luca:
+- set large memory_limit & max_execution_time for script
+- changed method to get darwin core name to use to find inventory file
+- set up to use dwc namespace as well as darwin namespace
+- removed extra array_shift($data) line
+----------------------------
+revision 1.21
+date: 2007/05/18 00:44:22;  author: jonk;  state: Exp;  lines: +23 -3
+added forced restriction to query sizes (JonK)
+----------------------------
+revision 1.20
+date: 2007/05/17 04:45:33;  author: jonk;  state: Exp;  lines: +4 -1
+drop count from cached inventories if count set to false (JonK)
+----------------------------
+revision 1.19
+date: 2007/05/17 04:10:09;  author: jonk;  state: Exp;  lines: +38 -0
+added ability to get inventory data from cached files (JonK)
+----------------------------
+revision 1.18
+date: 2007/05/01 06:16:28;  author: jonk;  state: Exp;  lines: +1 -1
+changed case of 'parent' qualifier to work with php5 (JonK)
+----------------------------
+revision 1.17
+date: 2007/03/12 00:46:02;  author: jonk;  state: Exp;  lines: +2 -2
+added ISO-8859-1 encoding for generated XML to allow display of
+characters like degree symbol etc (JonK)
+----------------------------
+revision 1.16
+date: 2007/02/27 02:02:01;  author: jonk;  state: Exp;  lines: +2 -0
+added service directory property (JonK)
+----------------------------
+revision 1.15
+date: 2006/11/14 04:39:59;  author: jonk;  state: Exp;  lines: +6 -4
+fixed warning generated on some php's if _diagnostics not set (JonK)
+----------------------------
+revision 1.14
+date: 2006/10/25 03:28:17;  author: jonk;  state: Exp;  lines: +67 -49
+1. renamed private properties with underscore
+2. added option to drop query for total matches if slow server (JonK)
+----------------------------
+revision 1.13
+date: 2006/10/25 02:01:27;  author: jonk;  state: Exp;  lines: +25 -25
+1. fixed missing host abstract metadata response
+2. adjusted indenting that somehow got screwed (JonK)
+----------------------------
+revision 1.12
+date: 2006/10/25 01:50:18;  author: jonk;  state: Exp;  lines: +153 -134
+1. allow multiple resource queries and query filtering
+2. simplified metadata setting procedures (JonK)
+----------------------------
+revision 1.11
+date: 2006/10/24 05:59:36;  author: jonk;  state: Exp;  lines: +38 -7
+changed diagnostics to include total match counts (JonK)
+----------------------------
+revision 1.10
+date: 2006/10/24 02:01:23;  author: jonk;  state: Exp;  lines: +30 -10
+included namespaces into xml as 'genuine' DiGIR Portal requires them (JonK)
+----------------------------
+revision 1.9
+date: 2006/10/23 22:47:08;  author: jonk;  state: Exp;  lines: +92 -67
+changed diagnostic message names to be closer to other digir systems,
+added response type element to header, add stylesheet header facility
+(JonK)
+----------------------------
+revision 1.8
+date: 2006/10/18 06:14:53;  author: jonk;  state: Exp;  lines: +0 -1
+format (JonK)
+----------------------------
+revision 1.7
+date: 2006/09/22 05:11:54;  author: jonk;  state: Exp;  lines: +0 -33
+moved  emuDate2Iso8601Time method to parent for use by other Provider
+objects (JonK)
+----------------------------
+revision 1.6
+date: 2006/04/19 04:16:10;  author: jonk;  state: Exp;  lines: +1 -1
+fixed return value of method
+----------------------------
+revision 1.5
+date: 2006/04/11 04:13:34;  author: jonk;  state: Exp;  lines: +12 -2
+act gracefully if EMuWeb is not running (JonK)
+----------------------------
+revision 1.4
+date: 2006/03/13 04:49:55;  author: jonk;  state: Exp;  lines: +9 -1
+added temporary fix to mask naked ampersands returned by texxmlserver (JonK)
+----------------------------
+revision 1.3
+date: 2006/03/13 02:46:28;  author: jonk;  state: Exp;  lines: +21 -0
+added option to allow debug data to be returned (JonK)
+----------------------------
+revision 1.2
+date: 2006/03/08 06:14:30;  author: jonk;  state: Exp;  lines: +2 -1
+added option to test if fields exist in EMu module (JonK)
+----------------------------
+revision 1.1
+date: 2005/12/22 05:15:44;  author: jonk;  state: Exp;
+added to CVS (JonK)
+=============================================================================

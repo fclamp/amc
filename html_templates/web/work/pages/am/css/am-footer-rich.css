@@ -1,0 +1,68 @@
+/* 
+-----------------------------------------
+footer-rich styles
+-----------------------------------------
+*/
+
+#footer-rich
+{
+	clear: both;
+	float: left;
+	width: 940px;
+	padding: 20px;
+	background: #f1f1f1 url(/images/site/back-footer-rich.gif) no-repeat;
+}
+
+#footer-rich h3 { font-size: 125%; }
+
+#footer-rich ul
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer-rich li
+{
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	padding-left: 10px;
+	background: url(/images/site/icon-arrow.gif) no-repeat 0 .5em;
+}
+
+#footer-rich blockquote
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer-column1
+{
+	float: left;
+	width: 217px;
+	margin-right: 24px;
+}
+
+#footer-column2
+{
+	float: left;
+	width: 217px;
+	margin-right: 24px;
+}
+
+#footer-column3
+{
+	float: left;
+	width: 217px;
+	margin-right: 24px;
+}
+
+#footer-column4
+{
+	float: right;
+	width: 200px;
+}
+
+#footer-column4 p { margin: 0 0 .5em; }
+#footer-column4 p.source { margin: 0 0 1em; }
+

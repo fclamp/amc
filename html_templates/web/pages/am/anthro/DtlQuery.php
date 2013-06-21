@@ -1,0 +1,697 @@
+<html>
+
+<head>
+<title>
+Anthropology Collections On-Line [Detailed Search]
+</title>
+
+<style type='text/css'>
+
+	body { 
+		font-family: Tahoma, Arial;
+		font-size: 9pt;
+	}	
+	table {
+		font-family: Tahoma, Arial;
+		font-size: 9pt;
+		color: #336699;
+	}
+
+	a:link { color: #336699; text-decoration: none }
+	a:active { color: #336699; text-decoration: none }
+	a:visited { color: #336699; text-decoration: none }
+	a:hover { color: #FFFFFF; text-decoration: none; background: #336699 }
+
+
+</style>
+</head>
+
+
+<body bgcolor="#FFFFE8">
+
+
+<table width="95%" cellpadding=0 cellspacing=0>
+<tr>
+<td width="240" valign="top" align="left">
+
+
+<table cellpadding=0 cellspacing=0 width=90%>
+<tr>
+<td bgcolor="#5F9EA0">
+
+<table border="0" width="100%" cellspacing="2" cellpadding="2">
+<tr>
+<td width="50%" bgcolor="#5F9EA0">
+<font color="#FFFFFF"><b>Topics</b></font>
+</td>
+</tr>
+
+
+
+<tr>
+<td width="50%" bgcolor="#FFFFE8">
+
+<ul>
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Archaeology') 
+	or (NarNarrative contains 'Archaeology') or 
+	(NarTitle contains 'Archaeology') or (SummaryData contains 'Archaeology')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Archaeology</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists 
+	(DesSubjects_tab where DesSubjects contains 'Art' or DesSubjects  contains 'Architecture' 
+	or DesSubjects  contains 'Carved Tree') or
+	(NarNarrative contains 'Art' or NarNarrative contains 'Architecture' or NarNarrative contains 'Carved Tree') or 
+	(NarTitle contains 'Art' or NarTitle contains 'Architecture' or NarTitle contains 'Carved Tree') or 
+	(SummaryData contains 'Art' or SummaryData contains 'Architecture' or SummaryData contains 'Carved Tree')";
+
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Art</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists 
+	(DesSubjects_tab where DesSubjects contains 'Body Accessories' or DesSubjects  contains 'Body Enhancement') or
+	(NarNarrative contains 'Body Accessories' or NarNarrative contains 'Body Enhancement') or 
+	(NarTitle contains 'Body Accessories' or NarTitle contains 'Body Enhancement') or 
+	(SummaryData contains 'Body Accessories' or SummaryData contains 'Body Enhancement')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Body Accessories</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists 
+	(DesSubjects_tab where DesSubjects contains 'Clothing') or
+	(NarNarrative contains 'Clothing') or 
+	(NarTitle contains 'Clothing') or 
+	(SummaryData contains 'Clothing')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Clothing</a></b>
+
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists 
+	(DesSubjects_tab where DesSubjects contains 'Communication' or DesSubjects  contains 'Currency' 
+	or DesSubjects  contains 'Measurement') or
+	(NarNarrative contains 'Communication' or NarNarrative contains 'Currency' 
+	or NarNarrative contains 'Measurement') or 
+	(NarTitle contains 'Communication' or NarTitle contains 'Currency' or NarTitle contains 'Measurement') or 
+	(SummaryData contains 'Communication' or SummaryData contains 'Currency' 
+	or SummaryData contains 'Measurement')";
+
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Communication and Exchange</a></b>
+
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Container') 
+	or (NarNarrative contains 'Container') or (NarTitle contains 'Container') or (SummaryData contains 'Container')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Container</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Household') 
+	or (NarNarrative contains 'Household') or (NarTitle contains 'Household') or (SummaryData contains 'Household')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Household</a></b>
+
+
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists 
+	(DesSubjects_tab where DesSubjects contains 'Hunting' or DesSubjects  contains 'Fishing' 
+	or DesSubjects  contains 'Weapon') or
+	(NarNarrative contains 'Hunting' or NarNarrative contains 'Fishing' 
+	or NarNarrative contains 'Weapon') or 
+	(NarTitle contains 'Hunting' or NarTitle contains 'Fishing' or NarTitle contains 'Weapon') or 
+	(SummaryData contains 'Hunting' or SummaryData contains 'Fishing' 
+	or SummaryData contains 'Weapon')";
+
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Hunting</a></b>
+
+
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Pastime') 
+	or (NarNarrative contains 'Pastime') or (NarTitle contains 'Pastime') or (SummaryData contains 'Pastime')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Leisure</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Raw Material') 
+	or (NarNarrative contains 'Raw Material') or (NarTitle contains 'Raw Material') or 
+	(SummaryData contains 'Raw Material')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Raw Material</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists 
+	(DesSubjects_tab where DesSubjects contains 'Sound' or DesSubjects  contains 'Music') or
+	(NarNarrative contains 'Sound' or NarNarrative contains 'Music') or 
+	(NarTitle contains 'Sound' or NarTitle contains 'Music') or 
+	(SummaryData contains 'Sound' or SummaryData contains 'Music')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Sound and Music</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists 
+	(DesSubjects_tab where DesSubjects contains 'Textile' or DesSubjects  contains 'Equipment') or
+	(NarNarrative contains 'Textile' or NarNarrative contains 'Equipment') or 
+	(NarTitle contains 'Textile' or NarTitle contains 'Equipment') or 
+	(SummaryData contains 'Textile' or SummaryData contains 'Equipment')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Textile and Equipment</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Tool') 
+	or (NarNarrative contains 'Tool') or (NarTitle contains 'Tool') or 
+	(SummaryData contains 'Tool')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Tool</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Toy') 
+	or (NarNarrative contains 'Toy') or (NarTitle contains 'Toy') or 
+	(SummaryData contains 'Toy')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Toy</a></b>
+
+
+<li><b>
+<a href="
+<?php
+	require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Where = 
+	"exists (DesSubjects_tab where DesSubjects contains 'Transport') 
+	or (NarNarrative contains 'Transport') or (NarTitle contains 'Transport') or 
+	(SummaryData contains 'Transport')";
+
+        $MediaLink->PrintRef();
+?>
+
+">
+Transport</a></b>
+
+
+</ul>
+
+
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+
+<br>
+
+
+<table cellpadding=0 cellspacing=0 width=90%>
+<tr>
+<td bgcolor="#5F9EA0">
+
+<table border="0" width="100%" cellspacing="2" cellpadding="2">
+<tr>
+<td width="50%" bgcolor="#5F9EA0">
+<font color="#FFFFFF"><b>Highlights</b></font>
+</td>
+</tr>
+
+<tr>
+<td width="50%" bgcolor="#FFFFE8">
+
+<ul>
+
+<li><b>
+<a href="
+<?php
+        require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Database = "enarratives";
+
+	$MediaLink->Where =
+	"exists (DesSubjects_tab where DesSubjects contains 'Cook') or 
+	(NarNarrative contains 'Cook') or (NarTitle contains
+	'Cook') or (SummaryData contains 'Cook')";
+
+
+        $MediaLink->PrintRef();
+?>
+">
+Cook Collection</a></b>
+
+
+<li><b>
+<a href="
+<?php
+        require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Database = "enarratives";
+
+	$MediaLink->Where =
+	"exists (DesSubjects_tab where DesSubjects contains 'Malagan') or 
+	(NarNarrative contains 'Malagan') or (NarTitle contains
+	'Malagan') or (SummaryData contains 'Malagan')";
+
+        $MediaLink->PrintRef();
+?>
+">
+Malagan Masks</a></b>
+
+
+
+<li><b>
+<a href="
+<?php
+        require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Database = "enarratives";
+
+	$MediaLink->Where =
+	"exists (DesSubjects_tab where DesSubjects contains 'Aboriginal') or 
+	(NarNarrative contains 'Aboriginal') or (NarTitle contains
+	'Aboriginal') or (SummaryData contains 'Aboriginal')";
+
+        $MediaLink->PrintRef();
+?>
+">
+Aboriginal Bark Paintings</a></b>
+
+
+<li><b>
+<a href="
+<?php
+        require_once('../../../objects/common/PreConfiguredQuery.php');
+        $MediaLink = new PreConfiguredQueryLink;
+        $MediaLink->LimitPerPage = 20;
+        $MediaLink->Database = "enarratives";
+
+	$MediaLink->Where =
+	"exists (DesSubjects_tab where DesSubjects contains 'Torres') or 
+	(NarNarrative contains 'Torres') or (NarTitle contains
+	'Torres') or (SummaryData contains 'Torres')";
+
+        $MediaLink->PrintRef();
+?>
+">
+Torres Strait Islands</a></b>
+</ul>
+
+
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+<br>
+
+
+
+<table cellpadding=0 cellspacing=0 width=90%>
+<tr>
+<td bgcolor="#5F9EA0">
+
+<table border="0" width="100%" cellspacing="2" cellpadding="2">
+<tr>
+<td width="50%" bgcolor="#5F9EA0">
+<font color="#FFFFFF"><b>Search Types</b></font>
+</td>
+</tr>
+
+<tr>
+<td width="50%" bgcolor="#FFFFE8">
+
+<ul>
+<li><b><a href="Query.php">Basic Query</a></b>
+<li><i>Detailed Query</i>
+</ul>
+
+
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+<br>
+
+</td>
+
+
+<td width="*" valign="top">
+
+<img src="images/header.gif">
+<br>
+<br>
+<br>
+<br>
+
+<?php
+require_once('../../../objects/lib/common.php');
+$LangSelector = new LanguageSelector;
+$LangSelector->FontFace = 'Tahoma, Arial';
+$LangSelector->FontSize = '2';
+$LangSelector->FontColor = '#336699';
+//$LangSelector->Show();
+?>
+
+
+<form action="" method=GET>
+<font face=Tahoma size=2 color=#336699>Collection to search
+<br>
+<select name=type onChange="submit();">
+
+<?php
+
+// used to switch selected dropdown menu
+if($ALL_REQUEST['type'] == "objectplace"){
+
+        ?>
+	<option value="objectpeople">Object and People/Culture</option>
+	<option value="objectplace" selected>Object and Place</option>
+	<option value="peopleculture">People/Culture and Place</option>
+	<option value="all">Object, People/Culture and Place</option>
+	<?php
+
+}
+elseif($ALL_REQUEST['type'] == "objectpeople"){
+
+        ?>
+	<option value="objectpeople" selected>Object and People/Culture</option>
+	<option value="objectplace">Object and Place</option>
+	<option value="peopleculture">People/Culture and Place</option>
+	<option value="all">Object, People/Culture and Place</option>
+	<?php
+}
+elseif($ALL_REQUEST['type'] == "all"){
+
+        ?>
+	<option value="objectpeople">Object and People/Culture</option>
+	<option value="objectplace">Object and Place</option>
+	<option value="peopleculture">People/Culture and Place</option>
+	<option value="all" selected>Object, People/Culture and Place</option>
+	<?php
+
+}
+else{
+        ?>
+	<option value="objectpeople">Object and People/Culture</option>
+	<option value="objectplace">Object and Place</option>
+	<option value="peopleculture" selected>People/Culture and Place</option>
+	<option value="all">Object, People/Culture and Place</option>
+	<?php
+}
+
+?>
+
+</select>
+</font>
+<input type=submit value="Go!">
+</form>
+
+<br>
+
+(Note: Will only search catalogue records) 
+
+<br>
+<br>
+<br>
+
+<?php
+
+if($ALL_REQUEST['type'] == "objectplace"){
+
+        require_once('../../../objects/am/anthro/QueryForms.php');
+	$queryform = new AmDetailedQueryFormOne;
+	$queryform->Title = "Detailed Object and Place Search";
+	$queryform->ResultsListPage = "ResultsListObject.php";
+
+	$queryform->LookupLists = array('ObjKeywords_tab' => 'Keywords', 
+	'SumItemName' => 'ItemName',
+	'ProCountry_tab' => 'Locality[2]',
+	'ProCollectionArea'	=> 'Locality[1]',
+	'ProAreaGroup'		=> 'AreaGroup',
+	'ProRegion'		=> 'Locality[4]',
+	'ProPlace'		=> 'Place'
+	);
+
+	$queryform->FontFace = 'Tahoma, Arial';
+	$queryform->FontSize = '2';
+	$queryform->BodyTextColor = '#336699';
+	$queryform->TitleTextColor = '#FFFFFF';
+	$queryform->BorderColor = '#336699';
+	$queryform->BodyColor = '#FFFFE8';
+	$queryform->Show();
+
+}
+elseif($ALL_REQUEST['type'] == "objectpeople"){
+
+        require_once('../../../objects/am/anthro/QueryForms.php');
+	$queryform = new AmDetailedQueryFormTwo;
+	$queryform->ResultsListPage = "ResultsListObject.php";
+
+	$queryform->LookupLists = array('ObjKeywords_tab' => 'Keywords', 
+	'SumItemName' => 'ItemName'
+	);
+
+
+	$queryform->Title = "Detailed Object and People/Culture Search";
+	$queryform->FontFace = 'Tahoma, Arial';
+	$queryform->FontSize = '2';
+	$queryform->BodyTextColor = '#336699';
+	$queryform->TitleTextColor = '#FFFFFF';
+	$queryform->BorderColor = '#336699';
+	$queryform->BodyColor = '#FFFFE8';
+	$queryform->Show();
+}
+elseif($ALL_REQUEST['type'] == "all"){
+
+
+        require_once('../../../objects/am/anthro/QueryForms.php');
+	$queryform = new AmDetailedQueryFormFour;
+	$queryform->ResultsListPage = "ResultsListObject.php";
+
+	$queryform->LookupLists = array('ObjKeywords_tab' => 'Keywords', 
+	'SumItemName' => 'ItemName',
+	'ProCountry_tab' => 'Locality[2]',
+	'ProCollectionArea'	=> 'Locality[1]',
+	'ProAreaGroup'		=> 'AreaGroup',
+	'ProRegion'		=> 'Locality[4]',
+	'ProPlace'		=> 'Place'
+	);
+
+	$queryform->Title = "Detailed Object, People/Culture and Place Search";
+	$queryform->FontFace = 'Tahoma, Arial';
+	$queryform->FontSize = '2';
+	$queryform->BodyTextColor = '#336699';
+	$queryform->TitleTextColor = '#FFFFFF';
+	$queryform->BorderColor = '#336699';
+	$queryform->BodyColor = '#FFFFE8';
+	$queryform->Show();
+
+}
+else{
+
+        require_once('../../../objects/am/anthro/QueryForms.php');
+	$queryform = new AmDetailedQueryFormThree;
+	$queryform->ResultsListPage = "ResultsListObject.php";
+
+	$queryform->LookupLists = array(
+
+	'ProCountry_tab' => 'Locality[2]',
+	'ProCollectionArea'	=> 'Locality[1]',
+	'ProAreaGroup'		=> 'AreaGroup',
+	'ProRegion'		=> 'Locality[4]',
+	'ProPlace'		=> 'Place'
+	);
+
+	$queryform->Title = "Detailed People/Culture and Place Search";
+	$queryform->FontFace = 'Tahoma, Arial';
+	$queryform->FontSize = '2';
+	$queryform->BodyTextColor = '#336699';
+	$queryform->TitleTextColor = '#FFFFFF';
+	$queryform->BorderColor = '#336699';
+	$queryform->BodyColor = '#FFFFE8';
+	$queryform->Show();
+}
+
+?>
+
+
+
+
+</td>
+</tr>
+</table>
+
+<br>
+<br>
+
+</body>
+
+
+</html>

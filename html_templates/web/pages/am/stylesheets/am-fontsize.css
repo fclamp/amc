@@ -1,0 +1,20 @@
+/* 
+-----------------------------------------
+fontsize styles
+-----------------------------------------
+*/
+
+#fontsize
+{
+	position: absolute;
+	right: 10px;
+	top: 10px;
+}
+
+#fontsize span
+{
+	position: absolute;
+	left: -500em;
+}
+
+#fontsize img { margin-left: 5px; }

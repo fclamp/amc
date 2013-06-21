@@ -1,0 +1,276 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseQueryForms.php');
+
+$GLOBALS['STRINGS_DIR'] = $WEB_ROOT . "/objects/" . $GLOBALS['BACKEND_TYPE'] . "/" . $GLOBALS['DEPARTMENT'] . "/strings/";
+
+class
+NmnhAnthBasicQueryForm extends BaseBasicQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+<<<<<<< QueryForms.php
+<<<<<<< QueryForms.php
+		'name' => 'IdeObjectName_tab',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+=======
+		'QUERY_OPTION_NAME' => 'IdeObjectName_tab|IdeIndexTerm_tab',
+=======
+		'name' => 'IdeObjectName_tab|IdeIndexTerm_tab',
+>>>>>>> 1.26
+		'place' => 'BioContinentLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioTownshipLocal|BioSiteNameLocal|BioSiteNumberLocal',
+		'person' => 'BioParticipantLocal_tab|AccTransactorLocal_tab',
+<<<<<<< QueryForms.php
+		'number' => 'CatBarcode',
+>>>>>>> 1.23
+=======
+		'number' => 'CatNumber=integer',
+>>>>>>> 1.26
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' and CatMuseumAcronym = 'USNM' and CatDepartment = 'Anthropology'";
+}  // end NmnhAnthBasicQueryForm class
+
+class
+NmnhAnthAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+<<<<<<< QueryForms.php
+		'name' => 'IdeObjectName_tab',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+=======
+		'QUERY_OPTION_NAME' => 'IdeObjectName_tab|IdeIndexTerm_tab',
+		'place' => 'BioContinentLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioTownshipLocal|BioSiteNameLocal|BioSiteNumberLocal',
+		'person' => 'BioParticipantLocal_tab|AccTransactorLocal_tab',
+<<<<<<< QueryForms.php
+		'number' => 'CatBarcode',
+>>>>>>> 1.23
+=======
+		'number' => 'CatNumber',
+>>>>>>> 1.26
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' and CatMuseumAcronym = 'USNM' and CatDepartment = 'Anthropology'";
+}  // end NmnhAnthAdvancedQueryForm class
+	
+
+class
+NmnhAnthDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Restriction = "CatMuseum = 'NMNH' and CatMuseumAcronym = 'USNM' and CatDepartment = 'Anthropology'";
+
+	function
+	NmnhAnthDetailedQueryForm()
+	{
+		$catNumber = new QueryField;
+		$catNumber->ColName = 'CatNumber';
+		$catNumber->ColType = 'integer';
+
+		$speciminCount = new QueryField;
+		$speciminCount->ColType = 'integer';
+		$speciminCount->ColName = 'CatSpecimenCount';
+
+		$expStartDate = new QueryField;
+		$expStartDate->ColName = 'ExpStartDate';
+		$expStartDate->ColType = 'date';
+
+		$dateIdentified = new QueryField;
+		$dateIdentified->ColType = 'date';
+		$dateIdentified->ColName = 'IdeDateIdentified0';
+
+
+
+		$this->Fields = array
+		(	
+<<<<<<< QueryForms.php
+			'CatBarcode',
+			'CatOtherNumbersValue_tab',
+=======
+			'CatBarcode',
+			$catNumber,
+>>>>>>> 1.23
+			'CatDivision',
+			'CatCatalog',
+			'IdeClassIndex_tab|IdeIndexTerm_tab|IdeSubType_tab|IdeVariety_tab|IdeTerm_tab|IdeObjectName_tab',
+<<<<<<< QueryForms.php
+			'ArcObjectDate_tab',
+			'CulCultureLocal_tab',
+=======
+			//'ArcObjectDate_tab',
+			'CulCulture2Local_tab|CulCulture3Local_tab|CulCulture4Local_tab|CulCulture5Local_tab',
+			'BioContinentLocal|BioCountryLocal|BioProvinceStateLocal|BioDistrictCountyShireLocal|BioTownshipLocal|BioSiteNameLocal|BioSiteNumberLocal',
+			'BioContinentLocal',
+>>>>>>> 1.23
+			'BioCountryLocal',
+			'BioProvinceStateLocal',
+<<<<<<< QueryForms.php
+			'BioPreciseLocationLocal',
+			'BioSiteNameLocal|BioSiteNumberLocal',
+			'ArcClassification1_tab|ArcClassification2_tab|ArcClassification3_tab|ArcClassification4_tab',
+=======
+			'BioDistrictCountyShireLocal',
+			'BioTownshipLocal',
+			'BioSiteNameLocal',
+			'BioSiteNumberLocal',
+			//'CatOtherNumbersType_tab',
+			'CatOtherNumbersValue_tab',
+>>>>>>> 1.23
+			'BioParticipantLocal_tab',
+			'BioVerbatimDateLocal',
+			'AccTransactorLocal_tab',
+			'AccAccessionLotNumber',
+			'AccAccessionDateOwnership',
+		);
+	
+		$this->BaseDetailedQueryForm();
+
+
+		$this->Hints = array
+		(	
+<<<<<<< QueryForms.php
+			'CatBarcode' 							=> '[e.g. 00012345]',
+			'CatOtherNumbersValue_tab'					=> '[e.g. ]',
+			'CatDivision' 							=> '[Select from list]',
+			'IdeClassIndex_tab|IdeIndexTerm_tab|IdeSubType_tab|IdeVariety_tab|IdeTerm_tab|IdeObjectName_tab' 	=> '[e.g. ]',
+=======
+			'CatNumber'							=> '[numbers only, e.g. 1396, 10155]',
+			'CatBarcode' 							=> '[include letters, e.g. A1396, EJ10155-0]',
+			'CatDivision' 							=> '[Select from list: Archaeology or Ethnology]',
+			'CatCatalog' 							=> '[Select from list]',
+			'IdeClassIndex_tab|IdeIndexTerm_tab|IdeSubType_tab|IdeVariety_tab|IdeTerm_tab|IdeObjectName_tab' 	=> '[e.g. Atlatl, Hat, Canoe, Bowl]',
+>>>>>>> 1.23
+			'ArcObjectDate_tab' 						=> '[format dd-mm-yyyy, partial entry works]',
+<<<<<<< QueryForms.php
+			'CulCultureLocal_tab' 						=> '[e.g. ]',
+			'BioCountryLocal' 						=> '[Select from list]',
+			'BioProvinceStateLocal' 					=> '[e.g. ]',
+			'BioPreciseLocationLocal' 					=> '[e.g. ]',
+			'BioSiteNameLocal|BioSiteNumberLocal' 				=> '[e.g. ]',
+			'ArcClassification1_tab|ArcClassification2_tab|ArcClassification3_tab|ArcClassification4_tab' 		=> '[e.g. ]',
+			'BioParticipantLocal_tab' 					=> '[e.g. ]',
+			'BioVerbatimDateLocal' 						=> '[e.g. ]',
+			'AccTransactorLocal_tab'					=> '[e.g. ]',
+			'AccAccessionLotNumber' 					=> '[e.g. ]',
+			'AccAccessionDateOwnership' 					=> '[format dd-mm-yyyy, partial entry works]',
+=======
+			'CulCulture2Local_tab|CulCulture3Local_tab|CulCulture4Local_tab|CulCulture5Local_tab' 	=> '[e.g. Olmec, Kiowa]',
+			'BioContinentLocal|BioCountryLocal|BioProvinceStateLocal|BioDistrictCountyShireLocal|BioTownshipLocal|BioSiteNameLocal|BioSiteNumberLocal' 										    => '[Search all geographic fields below, e.g. Ungava Bay, Tahiti]',
+			'BioContinentLocal' 						=> '[e.g. Polynesia, Africa]',
+			'BioCountryLocal' 						=> '[Select from list, e.g. Egypt, Panama]',
+			'BioProvinceStateLocal' 					=> '[e.g. Wisconsin, Quebec, Yucatan]',
+			'BioDistrictCountyShireLocal' 					=> '[e.g. Collier, Montgomery]',
+			'BioTownshipLocal' 						=> '[e.g. Beijing, Point Barrow]',
+			'BioSiteNameLocal' 						=> '[e.g. Pueblo Bonito, Signal Butte]',
+			'BioSiteNumberLocal' 						=> '[e.g. 22UN500, 25SF1]',
+			'CatOtherNumbersType_tab' 					=> '[Select from list]',
+			'CatOtherNumbersValue_tab' 					=> '[Field or photo negative number, e.g. 78-15832]',
+			'BioParticipantLocal_tab' 					=> '[e.g. Sanborn or River Basin Survey. For best results avoid quotes]',
+			'BioVerbatimDateLocal' 						=> '[e.g. 1966]',
+			'AccTransactorLocal_tab'					=> '[e.g. Bureau of American Ethnology or Edward Palmer. For best results avoid quotes]',
+			'AccAccessionLotNumber' 					=> '[e.g. 8451286 or 67A00050]',
+			'AccAccessionDateOwnership' 					=> '[e.g. 1867]',
+			'DesMaterial_tab' 						=> '[Select from list]',
+>>>>>>> 1.23
+		);
+
+
+		$this->DropDownLists = array
+		(	
+<<<<<<< QueryForms.php
+			'CatDivision' 			=> 'eluts:Collection Custody[4]', 
+=======
+			'CatDivision' 			=> '|Archaeology|Ethnology', 
+<<<<<<< QueryForms.php
+>>>>>>> 1.23
+=======
+			'CatCatalog' 			=> '|Archaeobiology', 
+>>>>>>> 1.26
+			'BioCountryLocal' 		=> 'eluts:Continent[2]', 
+<<<<<<< QueryForms.php
+=======
+			'DesMaterial_tab' 		=> '|ceramic|stone|basketry|fibers', 
+			'BioContinentLocal' 		=> '|Africa|Asia|Australia|Caribbean|Central America|Europe|Melanesia|Micronesia|North America|Oceania|Polynesia|South America', 
+			'BioCountryLocal' 		=> '|Afghanistan|Algeria|Angola|Antigua|Argentina|Armenia|Aruba|Australia|Austria|Azerbaijan|Bahamas|Bangladesh|Barbados|Barbuda|Belgium|Belize|Benin|Bermuda|Bhutan|Bolivia|Botswana|Brazil|British Virgin Islands|Bulgaria|Burkina Faso|Burma|Burundi|Cambodia|Cameroon|Canada|Cape Verde|Cayman Islands|Central|Central African Republic|Chad|Chile|China|Colombia|Comoros|Cook Islands|Costa Rica|Côte d\'Ivoire|Cuba|Cyprus|Czechoslovakia|Democratic Republic of the Congo|Denmark|Dominica|Dominican Republic|Ecuador|Egypt|El Salvador|Equatorial Guinea|Eritrea|Ethiopia|Federated States of Micronesia|Fiji|Finland|France|French Guiana|Gabon|Gambia|Georgia|Germany|Ghana|Greece|Greenland|Grenada|Guatemala|Guinea|Guinea-Bissau|Guyana|Haiti|Honduras|Hungary|Iceland|India|Indonesia|Iran|Iraq|Ireland|Israel|Italy|Jamaica|Japan|Jordan|Kazakstan|Kenya|Kiribati|Korea|Kuwait|Laos|Lebanon|Lesotho|Liberia|Libya|Lithuania|Madagascar|Malawi|Malaysia|Mali|Marshall Islands|Martinique|Mauritania|Mauritius|Mexico|Mongolia|Morocco|Mozambique|Namibia|Nepal|Netherlands|Netherlands Antilles|New Zealand|Nicaragua|Niger|Nigeria|Niue|North Korea|Norway|Oman|Pakistan|Palau|Palestine|Panama|Papua New Guinea|Paraguay|Peru|Philippines|Poland|Portugal|Republic of the Congo|Romania|Russia|Rwanda|Samoa|Sao Tome And Principe|Saudi Arabia|Senegal|Seychelles|Sierra Leone|Singapore|Solomon Islands|Somalia|South Africa|South Korea|Spain|Sri Lanka|St. Kitts|St. Lucia|St. Vincent|Sudan|Suriname|Swaziland|Sweden|Switzerland|Syria|Taiwan|Tanzania|Thailand|Tibet|Togo|Tonga|Trinidad and Tobago|Tunisia|Turkey|Tuvalu|Uganda|Ukraine|United Kingdom|United States|Uruguay|Uzbekistan|Vanuatu|Venezuela|Vietnam|Yemen|Zambia|Zimbabwe', 
+			'CatOtherNumbersType_tab' 	=> '|black/white|color digital|color negative|color transparency|negative number|slide number|field number', 
+>>>>>>> 1.23
+		);
+
+		$this->LookupLists = array
+		(
+		);
+	}
+
+	function
+        generateDropDown($fld, $htmlFieldName)
+        {
+                print "&nbsp;&nbsp;<select class=\"WebSelect\" name=\"$htmlFieldName\">\n";
+
+                $matches = array();
+                if (preg_match('/^eluts:(.*?)\[?(\d*)\]?$/', $this->DropDownLists[$fld], $matches))
+                {
+                        $tablename = $matches[1];
+                        if (isset($matches[2]) && $matches[2] != '')
+                                $level = $matches[2];
+                        else
+                                $level = 1;
+                        $value = sprintf('Value%02d0', (int) ($level - 1));
+                        $qry = new ConfiguredQuery();
+                        $qry->SelectedLanguage = $this->LanguageData;
+
+                        $restriction = $this->getLookupRestriction($tablename);
+                        if ($restriction == "")
+                            $restriction = "true";
+
+                        //$qry->Texql = "distinct(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500}";
+                        $qry->Texql = "order(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) on $value asc";
+
+                        $recs = $qry->Fetch();
+                        $dropdownlisttmp = array();
+                        foreach ($recs as $rec)
+                        {
+                                $dropdownitem = preg_replace('/[\?\*\"]/', ' ', $rec->{$value});
+                                $dropdownitem = trim($dropdownitem);
+                                if ($dropdownitem == '')
+                                        continue;
+                                array_push($dropdownlisttmp, $dropdownitem);
+                        }
+                        $dropdownlist = array_unique($dropdownlisttmp);
+
+                        print "            <option></option>\n";
+                        $hasEntry = 0;
+                        foreach ($dropdownlist as $option)
+                        {
+                                if (strlen($option) > $this->MaxDropDownLength)
+                                        $option = $this->trimOption($option, $this->MaxDropDownLength);
+                                if ($option != '')
+                                {
+                                        print "            <option>$option</option>\n";
+                                        $hasEntry = 1;
+                                }
+                        }
+                        if (! $hasEntry)
+                                print "            <option>--- None Available ---</option>\n";
+                }
+                else
+                {
+                        foreach (split('\|', $this->DropDownLists[$fld]) as $option)
+                        {
+                                print "            <option>$option</option>\n";
+                        }
+                }
+        }
+} // End NmnhAnthDetailedQueryForm class
+?>
+

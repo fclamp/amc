@@ -1,0 +1,478 @@
+<?php
+/*
+*   Copyright (c) 1998-2012 KE Software Pty Ltd
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'texquery.php');
+
+/**
+**	Build a "Where" clause given word logic.
+**/
+
+class
+QueryItem
+{
+	var $ColName = '';
+	var $ColType = 'text';	// text, date, time, other
+	var $QueryTerm = '';
+	var $IsLower = 0;
+	var $IsUpper = 0;
+}
+
+/*
+*  Example:
+*	$querybuilder = new StandardQueryBuilder;
+*	
+*	$mydate = new QueryItem
+*	$mydate->ColName = "TitDate";
+*	$mydate->ColType = "date";
+*	$mydate->QueryTerm = ">1/1/2003";
+*
+*	$mytext = new QueryItem
+*	$mytext->ColName = "TitTitle";
+*	$mytext->ColType = "text";
+*	$mytext->QueryTerm = "the cat in the hat";
+*
+*	$querybuilder->QueryItems = array($mytext, $mydate);
+*	$texqlwhere = $querybuilder->Generate();
+*
+*
+*/
+class
+StandardQueryBuilder
+{
+	var $Intranet	= 0;
+	var $Logic 	= 'AND';	// Logic between fields AND|OR
+	var $QueryItems = array();	// An Array of QueryItems
+
+	function
+	_buildRangeQuery($type, $col, $term)
+	{
+		$where = '';
+		$ltVal = $gtVal = '';
+		$ltEqual = $gtEqual = 0;
+
+		$matches = array();
+		if (preg_match('/(<\s*=|<)([^<>]+)/', $term, $matches))
+		{
+			if ($matches[1] != '<')
+				$ltEqual = 1;
+			$ltVal = trim($matches[2]);
+		}
+		if (preg_match('/(>\s*=|>)([^<>]+)/', $term, $matches))
+		{
+			if ($matches[1] != '>')
+				$gtEqual = 1;
+			$gtVal = trim($matches[2]);
+		}
+
+		if ($ltVal != '')
+		{
+			if ($type == 'DATE')
+				$condition = "$col < DATE '$ltVal'";
+			else
+				$condition = "$col < $ltVal";
+				
+			if ($ltEqual)
+			{
+				if ($type == 'DATE')
+					$condition = "(" . $condition . " OR $col LIKE '$ltVal')";
+				else
+					$condition = "(" . $condition . " OR $col = $ltVal)";
+			}
+			$where .= $condition;
+		}
+		if ($gtVal != '')
+		{
+			if ($type == 'DATE')
+				$condition = "$col > DATE '$gtVal'";
+			else
+				$condition = "$col > $gtVal";
+			if ($gtEqual)
+			{
+				if ($type == 'DATE')
+					$condition = "(" . $condition . " OR $col LIKE '$gtVal')";
+				else
+					$condition = "(" . $condition . " OR $col = $gtVal)";
+			}
+
+			if ($where != '')
+				$where .= ' AND ';
+			$where .= $condition;
+		}
+		if ($ltVal == '' && $gtVal == '')
+		{
+			if ($type == 'DATE')
+				$where = "$col LIKE DATE '$term'";
+			elseif ($type == 'LONGITUDE')
+				$where = "$col LIKE LONGITUDE '$term'";
+			elseif ($type == 'LATITUDE')
+				$where = "$col LIKE LATITUDE '$term'";
+			else
+				$where = "$col = $term";
+		}
+
+		return($where);
+	}
+
+	function
+	_buildTerm($queryItem)
+	{
+		if ($queryItem->QueryTerm == '')
+			return 'true';
+		$matches = array();
+		$where = '';
+		if (preg_match('/^(.+)->(.+)->(.+)$/', $queryItem->ColName, $matches))
+		{
+			// do with recursion call to this function.
+			$ref = $matches[1];
+			$db = $matches[2];
+			$col = $matches[3];
+
+			$subQryItem = new QueryItem;
+			$subQryItem->ColName = $col;
+			$subQryItem->ColType = $queryItem->ColType;
+			$subQryItem->QueryTerm = $queryItem->QueryTerm;
+			$subQryGenerator = new StandardQueryBuilder;
+			$subQryGenerator->Intranet = $this->Intranet;
+			$subQryGenerator->QueryItems = array($subQryItem);
+
+			$subqry = new Query;
+			$subqry->Select = array('irn');
+			$subqry->From = $db;
+			$subqry->Limit = $GLOBALS['SUB_QUERY_LIMIT'];
+			$subqry->Intranet = $this->Intranet;
+			$subqry->Where = $subQryGenerator->Generate();
+
+			$recs = $subqry->Fetch();
+			$j = 1;
+			$rwhere = '';
+			foreach($recs as $rec)
+			{
+				if ($rec->irn_1 != '')
+				{
+					if ($j > 1)
+						$rwhere .= ' OR ';
+					elseif ($j > 100)
+						break;  	//TODO - Limit ???
+					if (preg_match('/^(.+?)_tab$/', $ref, $matches))
+					{
+						$subcol = $matches[1];
+						$rwhere .= "EXISTS($ref WHERE $subcol=" . $rec->irn_1 . ")";
+					}
+					else
+						$rwhere .= "$ref=" . $rec->irn_1;
+					$j++;
+				}
+			}
+			if ($rwhere != '')
+				$where = "($rwhere)";
+			else
+				$where = "irn=999999999"; 
+				// TODO - This is a fake false as the texql optimisation for 'false' is stuffed!;
+		}
+		elseif (preg_match('/^(.+?)_tab$/', $queryItem->ColName, $matches)
+				|| preg_match('/^([^:]+?)0$/', $queryItem->ColName, $matches) )
+		{
+			$subcol = $matches[1];
+			$col = $queryItem->ColName;
+			$term = stripslashes($queryItem->QueryTerm);
+
+			if ($queryItem->IsLower)
+				$term = $this->_fixLower($term);
+			if ($queryItem->IsUpper)
+				$term = $this->_fixUpper($term);
+
+			switch ($queryItem->ColType)
+			{
+			    case 'text':
+				$where = "EXISTS($col WHERE $subcol contains '$term') ";
+				break;
+			    case 'date':
+				$where = "EXISTS($col WHERE " . $this->_buildRangeQuery('DATE', $subcol, $term) . ") ";
+				break;
+			    case 'integer':
+			    case 'float':
+				$where = "EXISTS($col WHERE " . $this->_buildRangeQuery('INT', $subcol, $term) . ") ";
+				//$where = "EXISTS($col WHERE $subcol= $term) ";
+				break;
+			    case 'string':
+				$where = "EXISTS($col WHERE $subcol = '$term') ";
+				break;
+			    case 'longitude':
+				$where = "EXISTS($col WHERE " . $this->_buildRangeQuery('LONGITUDE', $subcol, $term) . ") ";
+				break;
+			    case 'latitude':
+				$where = "EXISTS($col WHERE " . $this->_buildRangeQuery('LATITUDE', $subcol, $term) . ") ";
+				break;
+			    case 'time':
+				$where = "EXISTS($col WHERE $subcol = TIME '$term') ";
+				break;
+			    default:
+				$where = "EXISTS($col WHERE $subcol = '$term') ";
+				break;
+			}
+		}
+		else
+		{
+			$col = $queryItem->ColName;
+			$term = stripslashes($queryItem->QueryTerm);
+
+			if ($queryItem->IsLower)
+				$term = $this->_fixLower($term);
+			if ($queryItem->IsUpper)
+				$term = $this->_fixUpper($term);
+
+			if ($term == '*')
+				$where = "$col IS NOT NULL ";
+			elseif ($term == '!*')
+				$where = "$col IS NULL ";
+			else
+			{
+				switch ($queryItem->ColType)
+				{
+				    case 'text':
+					$where = "$col contains '$term' ";
+					break;
+				    case 'date':
+					$where = $this->_buildRangeQuery('DATE', $col, $term);
+					break;
+				    case 'integer':
+				    case 'float':
+					$where = $this->_buildRangeQuery('INT', $col, $term);
+					break;
+				    case 'string':
+					$where = "$col = '$term' ";
+					break;
+				    case 'longitude':
+					$where = $this->_buildRangeQuery('LONGITUDE', $col, $term);
+					break;
+				    case 'latitude':
+					$where = $this->_buildRangeQuery('LATITUDE', $col, $term);
+					break;
+				    case 'time':
+					$where = "$col = TIME '$term' ";
+					break;
+				    default:
+					$where = "$col = '$term' ";
+					break;
+				}
+			}
+		}
+		return ($where);
+	}
+
+	function
+	_fixLower($term)
+	{
+		/*  We need to check whether a range character (<=>) is
+		**  on the front of the term. If not then add it in.
+		*/
+		if (! preg_match('/\s*[<=>]+/', $term))
+			$term = ">= " .$term;
+		return($term);
+	}
+
+	function
+	_fixUpper($term)
+	{
+		/*  We need to check whether a range character (<=>) is
+		**  on the front of the term. If not then add it in.
+		*/
+		if (! preg_match('/\s*[<=>]+/', $term))
+			$term = "<= " .$term;
+		return($term);
+	}
+
+	function
+	Generate()
+	{
+		// Check arguments
+		if (strtolower(get_class($this->QueryItems[0])) != 'queryitem')
+		{
+			return;
+		}
+
+		$where = '';
+		$i = 1;
+		foreach ($this->QueryItems as $queryItem)
+		{
+			if ($i > 1)
+				$where .= ' ' . $this->Logic . ' ';
+			$i++;
+
+			// If the ColName contains more than one field (has a | )
+			// then we need to do an OR on each field
+			//    This is a hack - feel free to FIXME
+			if (strpos($queryItem->ColName, '|') > 1)
+			{
+				$where .= '(';
+				$j = 1;
+				$colnames = split('\|', $queryItem->ColName);
+				foreach ($colnames as $colname)
+				{
+					if ($j > 1)
+						$where .= " OR ";
+					$j++;
+					$queryItem->ColName = $colname;
+					$where .= $this->_buildTerm($queryItem);
+				}
+				$where .= ')';
+			}
+			else
+			{
+				// normal query
+				$where .= $this->_buildTerm($queryItem);
+			}
+		} //end foreach look
+		return ($where);
+	}
+} // End StandardQueryBuilder
+
+
+
+/*
+* Example: 
+* $qrybuilder = new AdvancedQueryBuilder;
+* $qrybuilder->All = "testA testB testC";
+* $qrybuilder->Phrase = "testB testE testF";
+* $qrybuilder->Any = "testG testH testI";
+* $qrybuilder->Without = "testJ testK testL";
+* $qrybuilder->SoundsLike = "testM testN testO";
+* $qrybuilder->OnFields = array('Field1', 'Field2', 'Field3');
+* 
+* print $qrybuilder->Generate();
+*/
+class
+AdvancedQueryBuilder
+{
+	var $All;
+	var $Phrase;
+	var $Any;
+	var $Without;
+	var $SoundsLike;		
+	var $OnFields = array();	// Array of strings
+
+	function
+	_makeContains($field, $contains)
+	{
+		$matches = array();
+		if (preg_match('/^(.+)->(.+)->(.+)$/', $field, $matches))
+		{
+			// do with recursion call to this function.
+			$ref = $matches[1];
+			$db = $matches[2];
+			$col = $matches[3];
+
+			$subqry = new Query;
+			$subqry->Select = array('irn');
+			$subqry->From = $db;
+			$subqry->Limit = $GLOBALS['SUB_QUERY_LIMIT'];
+			$subqry->Where = $this->_makeContains($col, $contains);
+
+			$recs = $subqry->Fetch();
+			$j = 1;
+			$rwhere = '';
+			$submatches = array();
+			$singlefield = "";
+			if (preg_match("/^(.+)_tab$/", $ref, $matches))
+			{
+				$singlefield = $matches[1];
+			}
+			foreach($recs as $rec)
+			{
+				if ($rec->irn_1 != '')
+				{
+					if ($j > 1)
+						$rwhere .= ' OR ';
+					elseif ($j > 50)
+						break;  	//FIXME - Limit ???
+					
+					if (!empty($singlefield))
+					{
+						$rwhere .= "EXISTS($ref WHERE ";
+						$rwhere .= "$singlefield=" . $rec->irn_1;
+						$rwhere .= ")";
+					}
+					else
+						$rwhere .= "$ref=" . $rec->irn_1;
+					$j++;
+				}
+			}
+			if ($rwhere != '')
+				$where .= "($rwhere)";
+			else 
+				$where = "irn=999999999";
+
+			return($where);
+		}
+		elseif (preg_match('/^(.+)_tab$/', $field, $matches)) 
+		{
+			$subfld = $matches[1];
+			return("EXISTS($field WHERE $subfld contains '$contains') ");
+		}
+
+		else
+			return("$field contains '$contains'");
+
+	}
+	
+	function
+	Generate()
+	{
+		$contains = $where = '';
+		if ($this->All != '')
+			$contains .= $this->All . ' ';
+		if ($this->Phrase != '')
+			$contains .= '"' . $this->Phrase . '" ';
+		if ($this->Without != '')
+			$contains .= preg_replace('/(\w+)/', '!\\1', $this->Without) . ' ';
+		if ($this->SoundsLike != '')
+			$contains .= preg_replace('/(\w+)/', '@\\1', $this->SoundsLike) . ' ';
+		$contains = trim($contains);
+
+		if ($this->Any != '')
+			$anyArray = split(' +', $this->Any);
+		else
+			$anyArray = array();
+
+		$fldnum = 1;
+		foreach ($this->OnFields as $fld)
+		{
+			if ($fldnum > 1)
+				$where .= ' OR ';
+		
+			$fldnum++;
+			$anywhere = '';
+			$anynum = 1;
+			foreach ($anyArray as $word)
+			{
+				if ($anynum > 1)
+					$anywhere .= ' OR ';
+				$anywhere .= $this->_makeContains($fld, $word);
+				$anynum++;
+			}
+
+			if ($contains != '' && $anywhere != '')
+				$where .= '(' . $this->_makeContains($fld, $contains) . " AND ($anywhere))"; 
+			elseif ($anywhere != '')
+				$where .= "($anywhere)"; 
+			elseif ($contains != '')
+				$where .= $this->_makeContains($fld, $contains);
+			else
+				$fldnum--;
+
+		}
+		if ($where == '')
+			return ('');
+		else
+			return("($where)");
+	}
+
+} //End AdvancedQueryBuilder class
+
+
+
+?>

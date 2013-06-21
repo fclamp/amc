@@ -1,0 +1,1196 @@
+<?php
+
+/* CURRENTLY THIS STUFF IS UNDER CONSTRUCTION */
+
+/*
+ *  Copyright (c) 2005 - KE Software Pty Ltd
+ */
+
+
+// NB this file probably best viewed with tabspace=3 if using 80
+// character line terminal
+
+/* Implements a Generic Mapper service */
+
+
+
+if (!isset($WEB_ROOT))
+        $WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once($LIB_DIR . 'common.php');
+require_once ($WEB_ROOT . '/objects/common/SourceFactory.php');
+require_once ($WEB_ROOT . "/objects/common/WebServiceObject.php");
+require_once ($WEB_ROOT . "/objects/common/DigirTranslator.php");
+require_once ($WEB_ROOT . "/objects/common/DataCacher.php");
+require_once ($WEB_ROOT . "/objects/common/Portal.php");
+
+class SimpleMapper extends WebServiceObject
+{
+
+	var $systemName = "KE Software EMu Mapper Version 4";
+	var $mapObject = null;
+	var $mapUrl = '';
+	var $response = '';
+	var $_cacher   = null;
+	var $_maxCoords   = array(0,0,0,0);
+
+	function SimpleMapper($backendType,$webRoot,$webDirName,$mapFile)
+	{
+		WebServiceObject::WebServiceObject($backendType,$webRoot,$webDirName);
+		$this->serviceName = 'SimpleMapper';
+
+
+		$mapFile = $this->webRoot ."/../maps/config/$mapFile";
+
+		if ( ! is_file($mapFile))
+			$this->errorResponse("Error in map component: mapfile: '$mapFile' not a file");
+
+		if (! ($this->mapObject =  ms_newMapObj($mapFile)))
+			$this->errorResponse("Error in map component: cannot create map object");
+
+		$this->_cacher = new DataCacher($this->backendType,$this->webRoot,$this->webDirName);
+	}
+
+	function describe()
+	{
+		return	
+			"A Simple Mapper is a basic map generation Web Service Object\n\n".
+			Parent::describe();
+	}
+
+	function sendResults()
+	{
+		//  Send the generated results back to the client.
+
+		$this->_log("<action>sendResults</action>");
+		return $this->response;
+	}
+
+	function setSize($width,$height)
+	{
+		$this->mapObject->setSize($width,$height);
+	}
+
+	function setExtent($minLong,$minLat,$maxLong,$maxLat)
+	{
+		$this->mapObject->setExtent($minLong,$minLat,$maxLong,$maxLat);
+		$this->maxCoords[0] = $minLong;
+		$this->maxCoords[1] = $minLat;
+		$this->maxCoords[2] = $maxLong;
+		$this->maxCoords[3] = $maxLat;
+	}
+
+	function getSymbol($index)
+	{
+		$shape = Array('circle','triangle','square');
+		return $shape[$index % count($shape)];
+	}
+
+
+	function _makePointLayer($symbol,$size,$colour,$name)
+	{
+		// creates a layer that can be drawn on
+
+		$symbolIdx = $this->mapObject->getsymbolbyname($symbol);
+
+		if ( ! $layer = ms_newLayerObj($this->mapObject))
+			$this->errorResponse("Error Creating new layer obj");
+		$layer->set("name","dynamic_layer_$name");
+		$layer->set("type",MS_LAYER_POINT);
+		$layer->set("status",MS_ON);
+		$layer->set("template","bogus.html");
+
+		$class = ms_newClassObj($layer);
+		$class->set('name',$name);
+		$class->label->set('size',MS_MEDIUM);
+
+		$style = ms_newStyleObj($class);
+		$style->set("size",10);
+		$style->set("symbol",$symbolIdx);
+		$style->set("symbolname",$symbol);
+
+		if (! preg_match('/#([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})/i',$colour,$rgb))
+			$rgb = array(0,0,0,0);
+
+		$style->color->setRGB(hexdec($rgb[1]),hexdec($rgb[2]),hexdec($rgb[3]));
+		$style->outlinecolor->setRGB(0,0,0);
+		$style->backgroundcolor->setRGB(127,127,127);
+
+
+		return $layer;
+	}
+
+	function _drawPoint($lat,$long,$description,$shp)
+	{
+		// take point with given lat/longs and add it to the shape object
+
+		if (! $point = ms_newPointObj())
+			$this->errorResponse("Error Creating new point obj");
+		$point->setXY($long,$lat);
+
+
+		// add point to line, line to shape, shape to layer and
+		// then draw the point
+
+		$line = ms_newLineObj();
+		$line->add($point);
+		$shp->add($line);
+		$shp->set('text',$description);
+
+		return $point;
+	}
+
+
+	function addPoints($name,$records,$colour,$symbol,$expandExtent=false,$ignoreZeroLatLongs=true)
+	{
+		// $records can either be xml or array of xml records
+
+		if (is_array($records))
+		{
+			$xml = implode("\n",$records);
+			$xml = "<records>$xml</records>";
+		}
+		else
+			$xml = $records;
+
+
+		$translator = new DigirTranslator($this->backendType,$this->webRoot,$this->webDirName);
+		$translator->latitudeElement = 'latitude';
+		$translator->longitudeElement = 'longitude';
+
+		$translator->translate($xml);
+
+		$img = $this->mapObject->prepareImage();
+		$layer = $this->_makePointLayer($symbol,$size,$colour,$name);
+
+		$shp = ms_newShapeObj(MS_SHAPE_POINT);
+
+		while ($translator->nextRecord())
+		{
+			$lat = $translator->getLatitude();
+			$long = $translator->getLongitude();
+			$description = $translator->getDescription();
+		
+			if ($lat != NULL && $long != NULL)
+			{
+				if (($lat && $long) || ! $ignoreZeroLatLongs)
+				{
+					if ($expandExtent)
+					{
+						if ($lat < $this->maxCoords[1])
+							$this->maxCoords[1] = $lat;
+						if ($lat > $this->maxCoords[3])
+							$this->maxCoords[3] = $lat;
+						if ($long < $this->maxCoords[0])
+							$this->maxCoords[0] = $long;
+						if ($long > $this->maxCoords[2])
+							$this->maxCoords[2] = $long;
+					}		
+
+					$point = $this->_drawPoint($lat,$long,$description,$shp);
+				}
+			}	
+		}
+		if ($layer->addFeature($shp) != MS_SUCCESS)
+			$this->errorResponse("Error Adding shape to layer");
+
+	}
+
+
+	function request()
+	{
+		$this->mapObject->setExtent(
+			$this->maxCoords[0],
+			$this->maxCoords[1],
+			$this->maxCoords[2],
+			$this->maxCoords[3]
+			);
+
+		if ($imgObject = $this->mapObject->draw())
+		{
+			$index = $this->_currentInstance;
+			$fileName = $this->_cacher->makeFileName($index);
+			$fileName = $fileName . ".gif";
+			$url = $this->_cacher->getUrlOfFile($fileName);
+			if ($imgObject->saveImage($fileName,$this->mapObject) == MS_SUCCESS)
+				$this->mapUrl = $url;
+			else	
+				$this->errorResponse("Error Saving map image");
+		}
+		else
+			$this->errorResponse("Error Drawing map");
+
+		$this->response = "<mapper><map>". $this->mapUrl ."</map></mapper>";
+
+		return $this->mapUrl;
+	}
+
+
+	function test()
+	{
+		if (isset($_REQUEST['testCall']))
+		{
+			print $this->makeTestResponse($_REQUEST['recordSet']);
+		}
+		else	
+		{
+			header("Content-type: text/html",1);
+			print $this->makeTestPage();
+		}
+	}
+
+	function makeTestResponse($set)
+	{
+		$colour = 0xff0000;
+		$i = 0;
+		foreach ($set as $recordSet)
+		{
+			$hexSt = '#' . dechex($colour);
+			$this->addPoints("Set $i",$recordSet,$hexSt,$this->getSymbol($i++));
+			$colour += 0x00ff00;
+		}
+
+
+		$mapFile = 'simple.map';
+		if ($_REQUEST['mapfile'])
+			$mapFile = $_REQUEST['mapfile'];
+		$mapFile = $this->webRoot ."/../maps/config/$mapFile";
+
+		$width = 500;
+		$height = 250;
+
+		if ($_REQUEST['width'])
+			$width = $_REQUEST['width'];
+		if ($_REQUEST['height'])
+			$height = $_REQUEST['height'];
+
+		$this->setSize($width,$height);
+
+		$minlat = -90;
+		$minlong = -180;
+		$maxlat = 90;
+		$maxlong = 180;
+
+		if ($_REQUEST['minlat'])
+			$minlat = $_REQUEST['minlat'];
+		if ($_REQUEST['minlong'])
+			$minlong = $_REQUEST['minlong'];
+		if ($_REQUEST['maxlat'])
+			$maxlat = $_REQUEST['maxlat'];
+		if ($_REQUEST['maxlong'])
+			$maxlong = $_REQUEST['maxlong'];
+
+		$this->setExtent($minlong,$minlat,$maxlong,$maxlat);
+		$imageRef = $this->request();
+
+		$vars = array();
+		$vars["class"] = "SimpleMapper";
+		$args["Map"] = "<img src='$imageRef' alt='generatedImage' />";
+		return $this->makeDiagnosticPage(
+			"Test Map Response",
+			'',
+			'',
+			'',
+			$args,
+			'',
+			$vars,
+			$this->describe()
+			);
+	}
+
+	function makeTestPage()
+	{
+		$title = "Quick Test for KE Simple Map Object: ". $this->serviceName;
+		$args = array();
+
+		$args['Image Size'] = 
+			"width : <input type='text' name='width' value='500' size='4'/> px<br/>".
+			"height: <input type='text' name='height' value='250' size='4' /> px";
+
+		$args['Map Extent'] = 
+			"Min Lat: <input type='text' name='minlat' value='-90' size='4'/><br/>".
+			"Min Long: <input type='text' name='minlong' value='-180' size='4' /><br/>".
+			"Max Lat: <input type='text' name='maxlat' value='90' size='4'/><br/>".
+			"Max Long: <input type='text' name='maxlong' value='180' size='4' />";
+
+		$args['Mapfile'] =
+			"<input type='text' name='mapfile' value='simple.map' size='25'/>";
+
+		$args['Data Set 1'] = "<textarea cols='40' rows='15' name='recordSet[]'>".
+			"<records>\n".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>123456:117</CatalogNumber>\n".
+			"	<ScientificName>Culumbodina occidentalis</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Conodonta</Phylum>\n".
+			"	<Family>Culumbodinadae</Family>\n".
+			"	<Genus>Culumbodina</Genus>\n".
+			"	<Species>occidentalis</Species>\n".
+			"	<longitude>115.41639</longitude>\n".
+			"	<latitude>-9.16139</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>123456:118</CatalogNumber>\n".
+			"	<ScientificName>Pseudobelodina kirki</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Conodonta</Phylum>\n".
+			"	<Family>Pseudobelodindae</Family>\n".
+			"	<Genus>Pseudobelodina</Genus>\n".
+			"	<Species>kirki</Species>\n".
+			"	<longitude>152.91639</longitude>\n".
+			"	<latitude>-34.26339</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>123456:119</CatalogNumber>\n".
+			"	<ScientificName>Pseudobelodina vulgaris</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Conodonta</Phylum>\n".
+			"	<Family>Pseudobelodindae</Family>\n".
+			"	<Genus>Pseudobelodina</Genus>\n".
+			"	<Species>vulgaris</Species>\n".
+			"	<longitude>150.51640</longitude>\n".
+			"	<latitude>-42.17139</latitude>\n".
+			"</record>".
+			"</records>".
+			"</textarea>";
+
+		$args['Data Set 2'] = "<textarea cols='40' rows='15' name='recordSet[]'>".
+			"<records>\n".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>523456:117</CatalogNumber>\n".
+			"	<ScientificName>Xidazoon stephanus</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Vetulicolia</Phylum>\n".
+			"	<Genus>Xidazoon</Genus>\n".
+			"	<Species>stephanus</Species>\n".
+			"	<longitude>130.41639</longitude>\n".
+			"	<latitude>-31.16139</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>223456:118</CatalogNumber>\n".
+			"	<ScientificName>Didazoon haoae</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Vetulicolia</Phylum>\n".
+			"	<Genus>Didazoon</Genus>\n".
+			"	<Species>haoae</Species>\n".
+			"	<longitude>149.91639</longitude>\n".
+			"	<latitude>-30.26339</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>323456:119</CatalogNumber>\n".
+			"	<ScientificName>Vetulicola cuneata</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Vetulicolia</Phylum>\n".
+			"	<Genus>Vetulicola</Genus>\n".
+			"	<Species>cuneata</Species>\n".
+			"	<longitude>110.4351</longitude>\n".
+			"	<latitude>-32.18139</latitude>\n".
+			"</record>".
+			"</records>".
+			"</textarea>";
+
+		$vars = array();
+		$vars["class"] = "SimpleMapper";
+		$vars["testCall"] = "true";
+
+		$submission = "<input type='submit' name='action' value='Map' />";
+		return $this->makeDiagnosticPage(
+				$title,
+				'',
+				'',
+				'./Mapper.php',
+				$args,
+				$submission,
+				$vars,
+				$this->describe()
+				);
+	}
+
+}
+
+class StandardMapper extends SimpleMapper
+{
+
+	var $mapObject = null;
+	var $mapUrl = '';
+	var $scaleUrl = '';
+	var $refMapUrl = '';
+	var $dataUrl = '';
+	var $queryTerms = Array(
+			'Genus',
+			'Species',
+	);
+
+	var $standardSchema = '';
+	var $standardStylesheet = '/pages/common/standardmap.xsl';
+	var $standardTransform = '';
+
+	var $_portal = null;
+
+	var $_cacher   = null;
+	var $_maxCoords   = array(0,0,0,0);
+
+	function StandardMapper($backendType,$webRoot,$webDirName,$mapFile)
+	{
+		WebServiceObject::WebServiceObject($backendType,$webRoot,$webDirName);
+		$this->serviceName = 'StandardMapper';
+
+		$mapFile = $this->webRoot ."/../maps/config/$mapFile";
+
+		if ( ! is_file($mapFile))
+			$this->errorResponse("Error in map component: mapfile: '$mapFile' not a file");
+
+		if (! ($this->mapObject =  ms_newMapObj($mapFile)))
+			$this->errorResponse("Error in map component: cannot create map object");
+
+		$this->_cacher = new DataCacher($this->backendType,$this->webRoot,$this->webDirName);
+
+
+
+		$this->_portal = new Portal($this->backendType,$this->webRoot,$this->webDirName);
+
+	}
+
+	function describe()
+	{
+		return	
+			"A Standard Mapper is a general map generation object\n".
+			"that extends a SimpleMapper \n\n".  Parent::describe();
+	}
+
+	function sendResults()
+	{
+		//  Send the generated results back to the client.
+
+		$this->_log("<action>sendResults</action>");
+		return $this->response;
+	}
+
+	function addPoints($name,$records,$colour,$symbol,$expandExtent=false,$ignoreZeroLatLongs=true)
+	{
+
+		$img = $this->mapObject->prepareImage();
+		$layer = $this->_makePointLayer($symbol,$size,$colour,$name);
+
+		$shp = ms_newShapeObj(MS_SHAPE_POINT);
+
+		foreach ($records as $record)
+		{
+			$lat = $record['lat'];
+			$long = $record['long'];
+			$description = $record['description'];
+		
+			if ($lat != NULL && $long != NULL)
+			{
+				if (($lat && $long) || ! $ignoreZeroLatLongs)
+				{
+					if ($expandExtent)
+					{
+						if ($lat < $this->maxCoords[1])
+							$this->maxCoords[1] = $lat;
+						if ($lat > $this->maxCoords[3])
+							$this->maxCoords[3] = $lat;
+						if ($long < $this->maxCoords[0])
+							$this->maxCoords[0] = $long;
+						if ($long > $this->maxCoords[2])
+							$this->maxCoords[2] = $long;
+					}		
+	
+					$point = $this->_drawPoint($lat,$long,$description,$shp);
+				}
+			}	
+		}
+		if ($layer->addFeature($shp) != MS_SUCCESS)
+			$this->errorResponse("Error Adding shape to layer");
+
+	}
+
+	function mapXml($xml,$sortBy)
+	{
+		// given xml use this to make map
+	}
+
+	function request()
+	{
+		// query data sources and make map
+
+		if ($_REQUEST['queryScreen'])
+			return $this->queryScreen();
+
+		// need to think better what to treat as insufficient call parameters
+		// - this for time being
+		if (! $_REQUEST['search'])
+			$this->errorResponse("system incorrectly called - no search parameter");
+
+		// get data - use internal portal 
+		$data = $this->_portal->request();			
+
+		$data = preg_replace('/^.+\?>/s','',$data);
+		$this->_cacher->save($this->_currentInstance,$data);
+		$this->dataUrl = $this->_cacher->getUrlOfIndex($this->_currentInstance);
+
+		// process data
+		$this->addTranslatorData($this->_portal->_translators,'Species');
+
+		// make map components
+
+		if ($imgObject = $this->mapObject->draw())
+		{
+			$index = 'map-'. $this->_currentInstance;
+			$fileName = $this->_cacher->makeFileName($index);
+			$fileName = $fileName . ".gif";
+			$url = $this->_cacher->getUrlOfFile($fileName);
+			if ($imgObject->saveImage($fileName,$this->mapObject) == MS_SUCCESS)
+				$this->mapUrl = $url;
+			else	
+				$this->_setError("Error Saving map image");
+		}
+		else
+			$this->_setError("Error Drawing map");
+		
+		if ($imgObject = $this->mapObject->drawReferenceMap())
+		{
+			$index = 'refmap-'. $this->_currentInstance;
+			$fileName = $this->_cacher->makeFileName($index);
+			$fileName = $fileName . ".gif";
+			$url = $this->_cacher->getUrlOfFile($fileName);
+			if ($imgObject->saveImage($fileName,$this->mapObject) == MS_SUCCESS)
+				$this->refMapUrl = $url;
+			else	
+				$this->_setError("Error Saving map image");
+		}
+		else
+			$this->_setError("Error Drawing Reference Map");
+
+		if ($imgObject = $this->mapObject->drawScaleBar())
+		{
+			$index = 'scalebar-'. $this->_currentInstance;
+			$fileName = $this->_cacher->makeFileName($index);
+			$fileName = $fileName . ".gif";
+			$url = $this->_cacher->getUrlOfFile($fileName);
+			if ($imgObject->saveImage($fileName,$this->mapObject) == MS_SUCCESS)
+				$this->scaleUrl = $url;
+			else	
+				$this->_setError("Error Saving scalebar image");
+		}
+		else
+			$this->_setError("Error Drawing Reference Map");
+
+
+		
+		// make xml response
+
+		if (($errors = $this->getError()))
+			$status = 'fail';
+		else
+			$status = 'success';
+
+		$this->response .= "<mapper status='$status'>\n";
+		$this->response .= "<diagnostics>$errors</diagnostics>\n";
+		$this->response .= "<map>". $this->mapUrl ."</map>\n";
+		$this->response .= "<scale>". $this->mapObject->scale ."</scale>\n";
+		$this->response .= "<scalebar>". $this->scaleUrl ."</scalebar>\n";
+		$this->response .= "<referenceMap>". $this->refMapUrl ."</referenceMap>\n";
+		$this->response .= "<data>". $this->dataUrl ."</data>\n";
+
+		$this->response .= "<extent>". 
+				$this->mapObject->extent->minx . ' ' .
+				$this->mapObject->extent->miny . ' ' .
+				$this->mapObject->extent->maxx . ' ' .
+				$this->mapObject->extent->maxy .
+			"</extent>\n";
+		$this->response .= "</mapper>\n";
+
+		// transform response as requested
+
+		$response = $this->formatOutput($_REQUEST);
+		foreach ($this->_headers as $header)
+			header($header,1);
+
+		return $response;
+	}
+
+	function addTranslatorData($translators,$groupBy = 'source')
+	{
+		foreach ($translators as $src => $translator)
+		{
+			$groups =  $translator->getGroups();
+			foreach ($groups as $group)
+				$this->_knownFields[$group]++;
+
+			$groupVal = $src;
+			while ($translator->nextRecord())
+			{
+				$lat = $translator->getLatitude();
+				$long = $translator->getLongitude();
+				$description = $translator->getDescription();
+
+				if ($lat && $long)
+				{
+	
+	
+					$translated = Array();
+					$translated['index'] = $current;
+					$translated['source'] = $src;
+					$translated['description'] = $description;
+					$translated['lat'] = $lat;
+					$translated['long'] = $long;
+					foreach ($groups as $group)
+					{
+						if ($value =  $translator->getGroup($group))
+							$translated[$group] = $value;
+
+						if ($group == $groupBy)	
+							$groupVal = $value;
+						
+						$uniques[$group][$value]++;	
+					}
+
+					if (! $records[$groupVal])
+						$records[$groupVal] = '';
+					
+					$records[$groupVal][] = $translated;
+
+					$current++;
+				}
+			}
+
+		}
+		$colour = 0xff0000;
+		$i = 0;
+		foreach ($records as $group => $pointData)
+		{
+			$hexSt = '#' . dechex($colour);
+			$this->addPoints($group,$pointData,$hexSt,$this->getSymbol($i++),true);
+			$colour += 0x00ff00;
+		}
+	}
+
+	function queryScreen()
+	{
+		// display a query screen to drive mapper
+		// 
+		$orRows = 3;
+
+		$sourceBoxes = array();
+		$sourceQuery = array();
+		$exampleQueries = array();
+
+
+		$sources = $this->_portal->getSources();
+		sort($sources);
+
+		foreach ($sources as $source)
+		{
+			$factory = new SourceFactory($source);
+			if ($factory != null)
+			{
+				$instance =  $factory->getInstance();
+				if ($instance != null)
+				{
+					$sourceQuery[] = $instance->testQueryTerms();
+					$sourceBoxes[] = "<input type='checkbox' name='source[]' value='$source' checked='1' />$source";
+					$exampleQueries[] = $instance->exampleQueryTerms();
+				}	
+			}
+		}	
+		
+		
+		$sources = implode(" &nbsp; ",$sourceBoxes);
+		$schema = $this->standardSchema;
+		$transform = $this->standardTransform;
+		if (preg_match('/Simple/',$transform))
+			$stylesheet = $this->webRoot . $this->standardStylesheet;
+		else
+			$stylesheet = $this->webDirName . $this->standardStylesheet;
+
+
+		$termCount = count($this->queryTerms);
+		for ($row=0; $row < $orRows; $row++)
+			foreach ($this->queryTerms as $term)
+				$qryRows[$term][] = "<input type='text' id='qry_${term}_$row' name='qry_${term}[]' value='' />";
+		
+		foreach ($qryRows as $term => $options)
+		{
+			$term = preg_replace('/.+?:/','',$term);
+			$rows[] = "<td>$term<br/>\n\t" . implode("<br/>\n\t",$options) . "</td>";
+		}
+		$qryBlock = implode("\n",$rows);
+
+		$jsSnippet = "/* dynamically generated js */\n";
+		$jsSnippet .= "\t\t\t\tvar orTerms = '';\n";
+		$jsSnippet .= "\t\t\t\tvar andTerms = '';\n\n";
+		for ($row=0; $row < $orRows; $row++)
+		{
+			$jsSnippet .= "\t\t\t\tandTerms = '';\n";
+			foreach ($this->queryTerms as $term)
+			{
+				$jsSnippet .= "\t\t\t\tinput = document.getElementById('qry_${term}_$row');\n";
+				$jsSnippet .= "\t\t\t\tvalue = input.value;\n";
+				$jsSnippet .= "\t\t\t\tif (value.length > 0)\n";
+				$jsSnippet .= "\t\t\t\t{\n";
+				$jsSnippet .= "\t\t\t\t\tif (andTerms == '')\n";
+				$jsSnippet .= "\t\t\t\t\t\tandTerms = \"<equals><$term>\"+ value +\"</$term></equals>\";\n";
+				$jsSnippet .= "\t\t\t\t\telse\n";
+				$jsSnippet .= "\t\t\t\t\t\tandTerms = \"<and>\\n\"+".
+						"\"<equals><$term>\"+ value +\"</$term></equals>\\n\"+".
+						"andTerms +".
+						"\"</and>\\n\";\n";
+				$jsSnippet .= "\t\t\t\t}\n\n";
+			}	
+			
+			$jsSnippet .= "\t\t\t\tif (orTerms == '')\n";
+			$jsSnippet .= "\t\t\t\t\torTerms = andTerms;\n";
+			$jsSnippet .= "\t\t\t\telse\n";
+			$jsSnippet .= "\t\t\t\t\torTerms = \"<or>\\n\"+ andTerms +\"\\n\"+ orTerms +\"</or>\\n\"\n";
+			$jsSnippet .= "\n\n";
+		}
+
+		$jsSnippet .= "\t\t\t\t<!-- end dynamically generated js -->\n";
+
+		$i = 0;
+		$exampleJs = "/* examples from specific portal sources */\n";
+		$exampleUsed = Array();
+		foreach ($exampleQueries as $examples)
+		{
+			$used = false;
+			if ($i < $orRows)
+			{
+				foreach ($examples as $field => $value)
+				{
+					if (! isset($exampleUsed["$field:$value"]))
+					{
+						$exampleJs .= "\t\t\t\tdocument.getElementById('qry_${field}_$i').value = '$value'\n";
+						$used = true;
+					}
+					$exampleUsed["$field:$value"]++;
+				}
+				if ($used)
+					$i++;
+			}
+			
+		}
+
+		$js = <<<JAVASCRIPT
+			<!-- (C)2000-2005 KE Software -->
+		
+			function makeRequest()
+			{
+				startCountdown();
+
+				showRequest();	
+				if (document.getElementById('search').value.length > 0)
+					document.forms[0].submit();
+				else
+					alert("You must enter query Terms !");
+			}
+
+			function showRequest()
+			{
+				var search = '';
+				var records = '';
+				var start = '';
+				var limit = '';
+				var input = '';
+				var value = '';
+				var termCount = 0;
+		
+				start = document.getElementById('start').value;
+				limit = document.getElementById('limit').value;
+				schema = document.getElementById('schema').value;
+				
+				$jsSnippet
+
+				if (orTerms != '')
+				{
+					search = "<filter>\\n"+ orTerms +"\\n</filter>\\n";
+		
+					records = "<records limit='"+ limit +"' start='"+ start +"'>\\n";
+					records += "<structure schemaLocation='" + schema +"'/>\\n</records>";
+					search += records;
+		
+					document.getElementById('message').innerHTML = "<pre>"+ search.replace(/</g,'&lt;') +"</pre>";
+					document.getElementById('search').value = search.replace(/\\n|\\t/g,'');
+				}	
+				else
+					document.getElementById('message').innerHTML = "<pre>No Query Terms !</pre>";
+			}
+
+			function sampleValues()
+			{
+				$exampleJs;
+			}
+
+			function setMaxTotal(input)
+			{
+				document.getElementById('allLimit').value = input.value * $termCount;
+			}
+
+			function updateTimer()
+			{
+				var timeNow = new Date();
+				var diff = timeNow.getTime() - StartTime.getTime();
+				var diffTime = new Date();
+				diffTime.setTime(diff);
+				var t = 28 - diffTime.getSeconds();
+				if (t <= 5)
+					document.getElementById('timer').style.backgroundColor = '#ADFF2F';
+				if (t <= 0)
+					document.getElementById('timer').style.backgroundColor = '#ff0000';
+				document.getElementById('timer').value = t ;
+			   	setTimeout("updateTimer()", 1000);
+			}
+
+
+			function startCountdown()
+			{
+				StartTime = new Date();
+				document.getElementById('timer').value = "28";
+				document.getElementById('remaining').style.visibility = "visible";
+			   	setTimeout("updateTimer()", 1000);
+			}
+JAVASCRIPT;
+		$perSrcDefault = 50;	
+		$allLimitDefault = $termCount * $perSrcDefault;	
+		print <<<HTML
+		<html>
+			<head>
+				<!-- (C)2000-2005 KE Software -->
+				<title>$this->systemName</title>
+				<style>
+					body {
+					}
+					div {
+						margin-left: auto; 
+						margin-right: auto; 
+					}
+					table { 
+						margin-left: auto; 
+						margin-right: auto; 
+						white-space: nowrap; 
+						border: 1px solid blue;
+						background-color: #aaaaff;
+					}
+					td, th { 
+						white-space: nowrap; 
+						background-color: #eeffff;
+						border: 0px solid black;
+						font-weight: bold;
+					}
+					.fancyLink {
+						border:1px solid red;
+						width=15em;
+						vertical-align: top;
+						text-align: center;
+						background-color: #dddddd;
+					}
+				</style>
+				<script>
+				<!--
+				$js		
+				-->
+				</script>
+			</head>
+			<body>
+			<center>
+				<h2 align='center'>$this->systemName</h2>
+		
+				<!-- NB for configuration.  IE currently gives url file
+					extension higher priority than HTTP Content-type
+					headers.  for this reason if IE browser looks up a php
+					resource that delivers XML it will not run an included
+					XSL stylsheet on the result (because of php suffix).
+					For this reason give the URL an xml suffix and let
+					apache do content negotion to actually use
+					portal.xml.php.
+				-->	
+				<form method='POST' action='/$this->webDirName/webservices/mapper.xml'>
+					<table border='1'>
+						<tr>
+							<td>Data Sources</td>
+							<td colspan='$termCount' align='center'>$sources</td>
+							<td rowspan=10' align='center'>
+ 								<img border="0" alt='discover' src='../objects/images/earth.jpg'/>
+							</td>
+						</tr>
+						<tr>
+							<td>Query Terms<br/><i>blank terms ignored</i></td>
+							$qryBlock
+						</tr>
+						<tr>
+							<td>Records</td>
+							<td colspan='$termCount'>
+								Max Per Source<input type='input' name='limit' id='limit' value='$perSrcDefault' size='2' 
+									onChange='setMaxTotal(this)'/>
+								Max Total <input type='input' id='allLimit' name='allLimit' 
+									style='background-color: #e0e0e0;'
+									value='$allLimitDefault' size='2' readonly='true'/>
+
+								Sample across sources 
+						        	<input type='radio' name='scatter' value='true' checked='true'  />YES
+								<input type='radio' name='scatter' value='false' />NO 
+							</td>
+						</tr>
+						<tr><td>Sort</td><td colspan='$termCount'>By <input type='input' name='sortby' value='ScientificName' size='20' />
+						     Order <input type='input' name='order' value='ascending' size='10' /></td></tr>
+						<tr><td>Timeout per Source</td><td colspan='$termCount'>
+							<input type='input' name='timeout' value='28' size='2' /> seconds
+							&nbsp; <span id='remaining' style='visibility: hidden;'>(<input type='text' name='timer'
+							style='background-color: #eeffff; border: 0px none;'
+ 							id='timer' value='-' size='2' readonly='true' /> remaining)</span></td></tr>
+		
+						<tr>
+							<td>Action</td>
+							<td colspan='$termCount' align='center'>
+								<input type='button' name='action' value='Query' onClick='makeRequest();' />
+								<input type='button' name='action' value='Show Query' onClick='showRequest();' />
+								<input type='button' name='action' value='Fill With Example Values' onClick='sampleValues();' />
+								<input type='reset' value='Clear'/>
+							</td>
+						</tr>
+					</table>
+					<!--Each Source Start--><input type='hidden' name='start' id='start' value='0' />
+					<!--Display Start    --><input type='hidden' name='allStart' id='allStart' value='0' />
+					<!--Schema           --><input type='hidden' name='schema' id='schema' value='$schema' />
+					<!--Stylesheet       --><input type='hidden' name='stylesheet' id='stylesheet' value='$stylesheet' />
+					<!--Transform        --><input type='hidden' name='transform' id='stylesheet' value='$transform' />
+
+
+
+
+					<input type='hidden' name='search' id='search'/>
+				</form>
+				<img border="0" alt="KE EMu" src="/images/productlogo.gif" width="134" height="48"/>
+				<img border="0" alt="KE Software" src="/images/companylogo.gif" width="60" height="50"/>
+				<br/>
+				(C) 2000-2005 KE Software
+				<div id='message' name='message'><div/>
+			</center>
+			</body>
+		</html>
+HTML;
+	}
+
+
+	function makeTestResponse($set)
+	{
+		$colour = 0xff0000;
+		$i = 0;
+		foreach ($set as $recordSet)
+		{
+			$hexSt = '#' . dechex($colour);
+			$this->addPoints("Set $i",$recordSet,$hexSt,$this->getSymbol($i++));
+			$colour += 0x00ff00;
+		}
+
+
+		if ($_REQUEST['mapfile'])
+			$mapFile = $_REQUEST['mapfile'];
+		$mapFile = $this->webRoot ."/../maps/config/$mapFile";
+
+		$width = 500;
+		$height = 250;
+
+		if ($_REQUEST['width'])
+			$width = $_REQUEST['width'];
+		if ($_REQUEST['height'])
+			$height = $_REQUEST['height'];
+
+		$this->setSize($width,$height);
+
+		$minlat = -90;
+		$minlong = -180;
+		$maxlat = 90;
+		$maxlong = 180;
+
+		if ($_REQUEST['minlat'])
+			$minlat = $_REQUEST['minlat'];
+		if ($_REQUEST['minlong'])
+			$minlong = $_REQUEST['minlong'];
+		if ($_REQUEST['maxlat'])
+			$maxlat = $_REQUEST['maxlat'];
+		if ($_REQUEST['maxlong'])
+			$maxlong = $_REQUEST['maxlong'];
+
+		$this->setExtent($minlong,$minlat,$maxlong,$maxlat);
+		return $this->request();
+	}
+
+	function makeTestPage()
+	{
+		$title = "Quick Test for KE Standard Map Object: ". $this->serviceName;
+		$args = array();
+
+		$args['Image Size'] = 
+			"width : <input type='text' name='width' value='500' size='4'/> px<br/>".
+			"height: <input type='text' name='height' value='250' size='4' /> px";
+
+		$args['Map Extent'] = 
+			"Min Lat: <input type='text' name='minlat' value='-90' size='4'/><br/>".
+			"Min Long: <input type='text' name='minlong' value='-180' size='4' /><br/>".
+			"Max Lat: <input type='text' name='maxlat' value='90' size='4'/><br/>".
+			"Max Long: <input type='text' name='maxlong' value='180' size='4' />";
+
+		$args['Mapfile'] =
+			"<input type='text' name='mapfile' value='standard.map' size='15'/>";
+
+		$args['Data Set 1'] = "<textarea cols='30' rows='15' name='recordSet[]'>".
+			"<records>\n".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>123456:117</CatalogNumber>\n".
+			"	<ScientificName>Culumbodina occidentalis</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Conodonta</Phylum>\n".
+			"	<Family>Culumbodinadae</Family>\n".
+			"	<Genus>Culumbodina</Genus>\n".
+			"	<Species>occidentalis</Species>\n".
+			"	<longitude>115.41639</longitude>\n".
+			"	<latitude>-9.16139</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>123456:118</CatalogNumber>\n".
+			"	<ScientificName>Pseudobelodina kirki</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Conodonta</Phylum>\n".
+			"	<Family>Pseudobelodindae</Family>\n".
+			"	<Genus>Pseudobelodina</Genus>\n".
+			"	<Species>kirki</Species>\n".
+			"	<longitude>152.91639</longitude>\n".
+			"	<latitude>-34.26339</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>123456:119</CatalogNumber>\n".
+			"	<ScientificName>Pseudobelodina vulgaris</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Conodonta</Phylum>\n".
+			"	<Family>Pseudobelodindae</Family>\n".
+			"	<Genus>Pseudobelodina</Genus>\n".
+			"	<Species>vulgaris</Species>\n".
+			"	<longitude>150.51640</longitude>\n".
+			"	<latitude>-42.17139</latitude>\n".
+			"</record>".
+			"</records>".
+			"</textarea>";
+
+		$args['Data Set 2'] = "<textarea cols='30' rows='15' name='recordSet[]'>".
+			"<records>\n".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>523456:117</CatalogNumber>\n".
+			"	<ScientificName>Xidazoon stephanus</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Vetulicolia</Phylum>\n".
+			"	<Genus>Xidazoon</Genus>\n".
+			"	<Species>stephanus</Species>\n".
+			"	<longitude>130.41639</longitude>\n".
+			"	<latitude>-31.16139</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>223456:118</CatalogNumber>\n".
+			"	<ScientificName>Didazoon haoae</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Vetulicolia</Phylum>\n".
+			"	<Genus>Didazoon</Genus>\n".
+			"	<Species>haoae</Species>\n".
+			"	<longitude>149.91639</longitude>\n".
+			"	<latitude>-30.26339</latitude>\n".
+			"</record>".
+			"<record>\n".
+			"	<DateLastModified>2005-05-06 17:15:00.00Z</DateLastModified>\n".
+			"	<InstitutionCode>KE</InstitutionCode>\n".
+			"	<CollectionCode>Triantiwontigongolops</CollectionCode>\n".
+			"	<CatalogNumber>323456:119</CatalogNumber>\n".
+			"	<ScientificName>Vetulicola cuneata</ScientificName>\n".
+			"	<Kingdom>Animalia</Kingdom>\n".
+			"	<Phylum>Vetulicolia</Phylum>\n".
+			"	<Genus>Vetulicola</Genus>\n".
+			"	<Species>cuneata</Species>\n".
+			"	<longitude>110.4351</longitude>\n".
+			"	<latitude>-32.18139</latitude>\n".
+			"</record>".
+			"</records>".
+			"</textarea>";
+		$args['stylesheet'] = "<input type='text' name='stylesheet' value='/". 
+				$this->webDirName .
+				"/objects/". 
+				$this->backendType .
+				"/simplemap.xss' />";
+
+		$vars = array();
+		$vars["class"] = "StandardMapper";
+		$vars["testCall"] = "true";
+
+		$submission = "<input type='submit' name='action' value='Map' />";
+		return $this->makeDiagnosticPage(
+				$title,
+				'',
+				'',
+				'./Mapper.php',
+				$args,
+				$submission,
+				$vars,
+				$this->describe()
+				);
+	}
+
+}
+
+if (isset($_REQUEST['test']))
+{
+	if (basename($_SERVER['PHP_SELF']) == 'Mapper.php')
+	{
+		$webObject = null;
+
+		$mapFile = 'simple.map';
+		$standardMapFile = 'standard.map';
+
+		if ($_REQUEST['mapfile'])
+			$mapFile = $_REQUEST['mapfile'];
+
+		if ($_REQUEST["class"] == "SimpleMapper")
+			$webObject = new SimpleMapper($BACKEND_TYPE,$WEB_ROOT,$WEB_DIR_NAME,$mapFile);
+
+		if ($_REQUEST["class"] == "StandardMapper")
+			$webObject = new StandardMapper($BACKEND_TYPE,$WEB_ROOT,$WEB_DIR_NAME,$standardMapFile);
+
+
+		if ($webObject)
+			print $webObject->test();
+	}	
+}
+
+
+?>

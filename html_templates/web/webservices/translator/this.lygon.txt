@@ -1,0 +1,228 @@
+object(TePapaEMuTranslator)#2 (34) {
+  ["serviceName"]=>
+  string(19) "TePapaEMuTranslator"
+  ["recordElement"]=>
+  string(5) "tuple"
+  ["potentialGroups"]=>
+  array(10) {
+    ["ScientificName"]=>
+    string(1) "0"
+    ["Family"]=>
+    string(1) "1"
+    ["Genus"]=>
+    string(1) "2"
+    ["Species"]=>
+    string(1) "3"
+    ["irn"]=>
+    string(1) "4"
+    ["Collector"]=>
+    string(1) "5"
+    ["CollectionMethod"]=>
+    string(1) "6"
+    ["CollectionType"]=>
+    string(1) "7"
+    ["Participants"]=>
+    string(1) "8"
+    ["VesselName"]=>
+    string(1) "9"
+  }
+  ["latitudeElement"]=>
+  string(8) "Latitude"
+  ["longitudeElement"]=>
+  string(9) "Longitude"
+  ["translations"]=>
+  array(17) {
+    ["ecatalogue.atom[name=IdeQualifiedName]"]=>
+    string(14) "ScientificName"
+    ["ecatalogue.atom[name=LatCentroidLatitude]"]=>
+    string(8) "Latitude"
+    ["ecatalogue.atom[name=LatCentroidLongitude]"]=>
+    string(9) "Longitude"
+    ["ecatalogue.atom[name=irn]"]=>
+    string(3) "irn"
+    ["ecatalogue.atom[name=LatCentroidLatitudeDec]"]=>
+    string(8) "Latitude"
+    ["ecatalogue.atom[name=LatCentroidLongitudeDec]"]=>
+    string(9) "Longitude"
+    ["ecatalogue.atom[name=ClaScientificName]"]=>
+    string(14) "ScientificName"
+    ["ecatalogue.atom[name=ClaFamily]"]=>
+    string(6) "Family"
+    ["ecatalogue.atom[name=ClaGenus]"]=>
+    string(5) "Genus"
+    ["ecatalogue.atom[name=ClaSpecies]"]=>
+    string(7) "Species"
+    ["ecatalogue.atom[name=SecDepartment]"]=>
+    string(10) "Department"
+    ["ecatalogue.atom[name=SummaryData]"]=>
+    string(11) "description"
+    ["ecatalogue.atom[name=ColCollectionMethod]"]=>
+    string(16) "CollectionMethod"
+    ["ecatalogue.atom[name=ColParticipantString]"]=>
+    string(9) "Collector"
+    ["ecollectionevents.atom[name=ColCollectionType]"]=>
+    string(14) "CollectionType"
+    ["ecollectionevents.atom[name=SummaryData]"]=>
+    string(10) "VesselName"
+    ["ecollectionevents.atom[name=NamCitedName]"]=>
+    string(12) "Participants"
+  }
+  ["discard"]=>
+  array(1) {
+    ["tuple"]=>
+    int(1)
+  }
+  ["_tupleSelect"]=>
+  array(5) {
+    ["ScientificName"]=>
+    int(1)
+    ["Family"]=>
+    int(1)
+    ["Genus"]=>
+    int(1)
+    ["Species"]=>
+    int(1)
+    ["Participants"]=>
+    int(1)
+  }
+  ["_table"]=>
+  string(10) "ecatalogue"
+  ["parser"]=>
+  NULL
+  ["elementStack"]=>
+  array(0) {
+  }
+  ["data"]=>
+  array(0) {
+  }
+  ["records"]=>
+  array(0) {
+  }
+  ["recordPointer"]=>
+  int(-1)
+  ["_foundRecords"]=>
+  bool(false)
+  ["attributeStack"]=>
+  bool(false)
+  ["recordCount"]=>
+  int(0)
+  ["_continuingCData"]=>
+  bool(false)
+  ["truncate"]=>
+  array(0) {
+  }
+  ["fieldTypes"]=>
+  array(14) {
+    ["ecatalogue.atom[name=irn]"]=>
+    string(7) "integer"
+    ["ecatalogue.atom[name=LatCentroidLatitudeDec]"]=>
+    string(5) "float"
+    ["ecatalogue.atom[name=LatCentroidLongitudeDec]"]=>
+    string(5) "float"
+    ["ecatalogue.atom[name=ClaScientificName]"]=>
+    string(6) "string"
+    ["ecatalogue.atom[name=ClaFamily]"]=>
+    string(6) "string"
+    ["ecatalogue.atom[name=ClaGenus]"]=>
+    string(6) "string"
+    ["ecatalogue.atom[name=ClaSpecies]"]=>
+    string(6) "string"
+    ["ecatalogue.atom[name=SecDepartment]"]=>
+    string(6) "string"
+    ["ecatalogue.atom[name=SummaryData]"]=>
+    string(6) "string"
+    ["ecatalogue.atom[name=ColCollectionMethod]"]=>
+    string(6) "string"
+    ["ecatalogue.atom[name=ColParticipantString]"]=>
+    string(6) "string"
+    ["ecollectionevents.atom[name=ColCollectionType]"]=>
+    string(6) "string"
+    ["ecollectionevents.atom[name=SummaryData]"]=>
+    string(6) "string"
+    ["ecollectionevents.atom[name=NamCitedName]"]=>
+    string(6) "string"
+  }
+  ["_dropNullValues"]=>
+  bool(true)
+  ["_concatField"]=>
+  array(5) {
+    ["ScientificName"]=>
+    array(2) {
+      [0]=>
+      bool(false)
+      [1]=>
+      string(1) "~"
+    }
+    ["Family"]=>
+    array(2) {
+      [0]=>
+      bool(false)
+      [1]=>
+      string(1) "~"
+    }
+    ["Genus"]=>
+    array(2) {
+      [0]=>
+      bool(false)
+      [1]=>
+      string(1) "~"
+    }
+    ["Species"]=>
+    array(2) {
+      [0]=>
+      bool(false)
+      [1]=>
+      string(1) "~"
+    }
+    ["Participants"]=>
+    array(2) {
+      [0]=>
+      bool(false)
+      [1]=>
+      string(1) "~"
+    }
+  }
+  ["_passThrough"]=>
+  array(0) {
+  }
+  ["_passThroughStack"]=>
+  array(0) {
+  }
+  ["backendType"]=>
+  string(6) "tepapa"
+  ["webRoot"]=>
+  string(23) "/home/ke/emu/tepapa/web"
+  ["webDirName"]=>
+  string(12) "emuwebtepapa"
+  ["logName"]=>
+  string(21) "TranslatorFactory.log"
+  ["tmpDir"]=>
+  string(27) "/home/ke/emu/tepapa/web/tmp"
+  ["_logger"]=>
+  object(Logger)#3 (5) {
+    ["_logDir"]=>
+    string(32) "/home/ke/emu/tepapa/web/tmp/logs"
+    ["_logFilePath"]=>
+    string(54) "/home/ke/emu/tepapa/web/tmp/logs/TranslatorFactory.log"
+    ["_logFileHandle"]=>
+    NULL
+    ["_errors"]=>
+    array(0) {
+    }
+    ["_instance"]=>
+    string(36) "TePapaEMuTranslator.11610.1251699219"
+  }
+  ["errorMessage"]=>
+  array(0) {
+  }
+  ["_currentInstance"]=>
+  string(36) "TePapaEMuTranslator.11610.1251699219"
+  ["_debugOn"]=>
+  int(0)
+  ["specialRemotes"]=>
+  array(1) {
+    [0]=>
+    string(9) "127.0.0.1"
+  }
+}
+

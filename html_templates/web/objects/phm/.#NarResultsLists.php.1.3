@@ -1,0 +1,1168 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2003-2005
+*/
+
+/*
+
+Created By: Martin Jujou
+Date: 7/12/2004
+
+*/
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseResultsLists.php');
+
+
+class
+NarPhmStandardResultsList extends BaseStandardResultsList
+{
+	function
+	NarPhmStandardResultsList()
+	{
+		$this->BaseStandardResultsList();
+		$this->Fields = array('NarTitle');
+		$this->Database = 'enarratives';
+	}
+}
+
+class
+NarPhmObjectResultsList extends BaseStandardResultsList
+{
+	function
+	NarPhmObjectResultsList()
+	{
+		$this->BaseStandardResultsList();
+		$this->Database = 'ecatalogue';
+
+	}
+
+
+	function
+	display()
+	{
+		$records =& $this->records;
+		
+		$widthAttrib = '';
+		$backgroundColorAttrib = '';
+		$highlightColorAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		if ($this->BodyColor != '')
+			$backgroundColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor="' . $this->HighlightColor . '"';
+		else
+			$highlightColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->HeaderColor != '')
+			$headerColorAttrib= 'bgcolor="' . $this->HeaderColor . '"';
+		if ($this->BorderColor != '')
+			$borderColorAttrib= 'bgcolor="' . $this->BorderColor . '"';
+
+		// Find out how many coloums (one extra for image coloum)
+		$numcol = count($this->Fields) + 1;
+
+		//Print Table header
+		print "<!--START OBJECT-->\n";
+		print "<table $widthAttrib border=\"0\" cellspacing=\"0\" cellpadding=\"2\">\n";
+		print "<tr><td width=\"25%\" align=\"left\" nowrap=\"nowrap\">";
+		$this->printBackLink();
+		if ($this->ContactSheetPage != '')
+		{
+			$this->printRedisplay($this->ContactSheetPage, 
+				$this->_STRINGS["CONTACT_SHEET"]);
+		}
+		print "</td>";
+		print "<td width=\"75%\" align=\"right\">\n";
+		$this->printNavLinks();
+		print "</td></tr>";
+		print "<tr><td colspan=\"2\">\n";
+		print "<table $borderColorAttrib width=\"100%\" border=\"0\" cellspacing=\"1\" cellpadding=\"4\">\n";
+		// Print the Header Row
+		print "  <tr $headerColorAttrib>\n";
+		if ($this->DisplayThumbnails)
+		{
+			print "    <td width=\"72\" align=\"center\"><b>";
+			PPrint($this->_STRINGS['IMAGE'], 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->HeaderTextColor);
+			print "</b></td>\n";
+		}
+
+		// Loop and display the coloum headings
+		for ($i = 0; $i < $numcol - 1; $i++)
+		{
+			$label = '';
+			if (is_string($this->Fields[$i]))
+			{
+				$label = $this->_STRINGS[$this->Fields[$i]];
+			}
+			elseif (strtolower(get_class($this->Fields[$i])) == 'formatfield')
+			{
+				$label = $this->Fields[$i]->Label;
+			}
+			print "    <td align=\"$this->AlignTitle\"><b>";
+			if ($label == '')
+				print '&nbsp;';
+			else
+				PPrint(	$label, 
+					$this->FontFace, 
+					$this->FontSize, 
+					$this->HeaderTextColor);
+			print "</b></td>\n";
+		}
+
+		print "</tr>\n";
+
+
+		// find the narrative notes fields 
+
+		$narrativeObjNotes = new Query;
+
+		$theList = explode(",", "ObjObjectNotes_tab, ObjObjectsRef_tab");
+
+        	$narrativeObjNotes->Select = $theList;
+        	$narrativeObjNotes->From = 'enarratives';
+        	$narrativeObjNotes->Limit = 1000;
+
+		global $ALL_REQUEST;
+        	$narrativeObjNotes->Where = 'irn=' . $ALL_REQUEST['narIrn'];
+
+		$myRecords = $narrativeObjNotes->Fetch();
+        	$myMatches = $narrativeObjNotes->Matches;
+
+		$numberOfNotes = 0;
+		$number = "";
+		$index = 0;
+	
+		$NOTES = array();
+		$LINKS = array();
+
+		foreach($myRecords as $rec)
+        	{
+
+		    
+
+                reset($rec);
+
+                while (list($key, $val) = each($rec))
+                {
+
+			if(preg_match('/ObjObjectNotes/', $key))
+			{	
+				$index = 0;
+				$number = "";
+
+				while(substr($key, $index, 1) != ':')
+				{
+					$index--;
+				};
+				
+				
+				$number = substr($key, $index+1);
+				$numberOfNotes++;
+
+					
+				$NOTES[$number] = $val;
+			}
+			elseif(preg_match('/ObjObjectsRef/', $key))
+			{
+				$index = 0;
+				$number = "";
+
+				while(substr($key, $index, 1) != ':')
+				{
+					$index--;
+				};
+
+				$number = substr($key, $index+1);
+					
+				$LINKS[$number] = $val;				
+			}
+
+                }
+
+        	}
+
+		// Loop over the results
+		$rownum = 1;
+		foreach ($records as $rec)
+		{
+			if ($rownum > $this->LimitPerPage)
+				break;
+
+			print "<!--START RECORD-->\n";
+
+			$displaylink = $this->displayPageLink($rec);
+
+			if ($rownum % 2 == 0 && $this->HighlightColor != '')
+				print "  <tr $highlightColorAttrib>\n";
+			else
+				print "  <tr $backgroundColorAttrib>\n";
+
+			if ($this->DisplayThumbnails)
+			{
+				print "    <td width=\"72\" align=\"center\" valign=\"middle\">" . "\n";
+				// Display the thumbnail image
+				$image = new MediaImage();
+				$image->Intranet = $this->Intranet;
+				// if we are on the multimedia module then the image IRN is the
+				//  irn of the current record.
+				if ($this->Database == "emultimedia")
+				{
+					$mediairn = $rec->{'irn_1'};
+				}
+				else
+				{
+					$mediairn = $rec->{'MulMultiMediaRef:1'};
+				}
+				$image->IRN = $mediairn;
+				$image->BorderColor = $this->HeaderColor;
+				$image->HighLightColor = $this->HeaderColor;
+				$image->Link = $displaylink;
+				$image->Width = 60;
+				$image->Height = 60;
+				$image->KeepAspectRatio = $this->KeepImageAspectRatio;
+				$image->RefIRN = $rec->{'irn_1'};
+				$image->RefTable = $this->Database;
+				if ($this->ImageDisplayPage != "")
+				{
+					$image->ImageDisplayPage = $this->ImageDisplayPage;
+				}
+				elseif($this->Intranet)
+				{
+					$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+				}	
+				else
+				{
+					$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+				}
+				$image->Show();
+				print "    </td>\n";
+			}
+
+			// Display Other Fields
+
+
+			for ($j = 0; $j < $numcol - 1; $j++)
+			{
+
+				print "    <td align=\"$this->AlignData\">";
+				$fieldData = '';
+
+				if (is_string($this->Fields[$j]))
+				{
+					$fieldData = $rec->{$this->Fields[$j]};
+				}
+				elseif (strtolower(get_class($this->Fields[$j])) == 'formatfield')
+				{
+					$field = $this->Fields[$j]->Format;
+					$fieldData = preg_replace('/{([^}]*)}/e', ' $rec->{"\\1"}', $field);
+				}
+
+				$specialCheck = '';
+
+				// spectacular code :)
+				if($this->Fields[$j] == 'NotNotes')
+				{
+					$theIrn = $rec->{irn_1};
+
+					// for each 
+					foreach($LINKS As $k=>$v)
+					{
+						if($v == $theIrn)
+						{
+							if(isset($NOTES[$k]))
+							{
+								print $NOTES[$k];
+								$specialCheck = "OK";
+							}
+						}
+					}
+
+					if($specialCheck == '')
+					{
+						PPrint($this->_STRINGS['NOT_STATED'],
+						$this->FontFace, 
+						$this->FontSize, 
+						$this->TextColor);
+					}
+				}
+				elseif($fieldData == '')
+				{
+					$fieldData = $this->_STRINGS['NOT_STATED'];
+				}
+
+					
+				// First one is a link to display record
+				if ($j == 0)
+				{
+					print "<a href=\"$displaylink\">";
+						PPrint($fieldData, 
+							$this->FontFace, 
+							$this->FontSize,
+							$this->TextColor, 
+							$this->HighlightTextColor);
+					print '</a>';
+				}
+				elseif ($fieldData != '' && ($this->Fields[$j] != 'NotNotes') )
+				{
+					PPrint($fieldData,
+						$this->FontFace, 
+						$this->FontSize, 
+						$this->TextColor);
+				}
+				else
+				{
+					// field is empty so print space to stop netscape complaining
+					print '&nbsp;';
+				}
+				print "</td>\n";
+			}
+
+			print "  </tr>\n<!--END RECORD-->\n";
+			$rownum++;
+		}
+
+		//End Table
+		print "</table>\n";
+		print "</td></tr>";
+		// Nav Links
+		print "<tr><td width=\"25%\" align=\"left\" nowrap=\"nowrap\">";
+		$this->printBackLink();
+		if ($this->ContactSheetPage != '')
+		{
+			PPrint(' ', 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+			$this->printRedisplay($this->ContactSheetPage, $this->_STRINGS["CONTACT_SHEET"]);
+		}
+		print "</td>";
+		print "<td width=\"75%\" align=\"right\">";
+		$this->printNavLinks();
+		print "</td></tr>";
+		print "</table>\n";
+		print "<!--END OBJECT-->\n";
+
+	}
+
+}
+
+class
+NarPhmNarrativeObjectsResultsList extends BaseStandardResultsList
+{
+	var $NARRATIVE_TITLES = array();
+	var $NARRATIVE_IRNS = array();
+
+	function
+	NarPhmObjectResultsList()
+	{
+		$this->BaseStandardResultsList();
+		$this->Database = 'ecatalogue';
+	}
+
+	// inherit this function to overide the where clause
+	function
+	doQuery ()
+	{
+		/*
+		*  Dynamicall create the specified QueryGenerator and
+		*    call a method corresponding to the QueryName.
+		*    Set the results in the $this->records array for
+		*    use elsewhere.
+		*/
+
+       	global $ALL_REQUEST;
+        $theMasterIrn = array();
+        array_push($theMasterIrn, $ALL_REQUEST['theMasterIrn']);
+
+		// query the sub narratives and get there attached objects
+		$this->Where = $this->returnCatIrns($this->Where, $theMasterIrn);
+
+        // perform one nest query
+        if($this->Where == '')
+        {
+            // query the sub narratives and get there attached objects
+            $this->Where = $this->returnCatIrns($this->Where, $this->NARRATIVE_IRNS);
+        }
+        
+		// only run once
+		if ($this->_queryDone)
+			return;
+		$this->_queryDone = 1;
+
+		// Add mandatory fields to $this->Fields for select
+		$select = array();
+		if (is_array($this->DisplayPage) && 
+				$this->DisplayPage['ConditionField'] != '')
+		{
+			$select = array('irn', 
+					  'MulMultiMediaRef_tab', 
+					  $this->DisplayPage['ConditionField']);
+		}
+		else
+		{
+			if ($this->Database == "emultimedia")
+			{
+				$select = array('irn');
+			}
+			else
+			{
+				$select = array('irn', 'MulMultiMediaRef_tab');
+			}
+		}
+
+		foreach ($this->Fields as $fld)
+		{
+			if (is_string($fld))
+			{
+				array_push($select, $fld);
+			}
+			elseif (strtolower(get_class($fld)) == 'formatfield')
+			{
+				// format in the form "{ColName1} {ColName2}"
+				preg_match_all('/{([^}]*)}/', 
+						$fld->Format, 
+						$matches);
+				foreach ($matches[1] as $colName)
+				{
+					array_push($select, $colName);
+				}
+			}
+		}
+
+		$where = '';
+		if ($this->Where == '')
+		{
+			$qryGenerator = new $this->QueryGenerator;
+			// these properties are used by the RandomQuery
+			$qryGenerator->Database = $this->Database;
+			$qryGenerator->Limit = $this->LimitPerPage;
+			$qryGenerator->Intranet = $this->Intranet;
+			// Use reflection to call query method
+			$queryAttrib = $qryGenerator->{$this->QueryName}();
+			$where = $queryAttrib->Where;
+		}
+		else
+		{
+			$where = $this->Where;
+		}
+
+		if ($this->Restriction != '')
+		{
+			if ($where == "")
+				$where = "true";
+			$where = "($where) AND (" . $this->Restriction . ")";
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $select;
+		$qry->From = $this->Database;
+		$qry->Where = $where;
+		if ( !empty($queryAttrib->RankTerm) || !empty($queryAttrib->RankOn) )
+		{
+			$qry->RankTerm = $queryAttrib->RankTerm;
+			$qry->RankOn = $queryAttrib->RankOn;
+		}
+		// One extra so we know it there are more records
+		$qry->Limit = $this->LimitPerPage + 1;	
+		$qry->Offset = $this->StartAt;
+
+		$this->records = $qry->Fetch();
+		$this->Matches = $qry->Matches;
+		if ($qry->Status == 'failed')
+		{
+			print $qry->Where;
+			WebDie ('Query Error - Texxmlserver: ' . 
+				$qry->Error , 
+				'where: ' . $where);
+		}
+
+		/*
+		** If $this->Order set, and # matches < OrderLimit, perform the same
+		** query again but this time order it.
+		*/
+		if ($this->Order != "" && $this->Matches <= $this->OrderLimit)
+		{
+			if (preg_match("/:\d/", $this->Order) || preg_match("/_tab/", $this->Order))
+				WebDie("Cannot set ordering on multi-valued fields");
+
+			$orderfields = explode("|", $this->Order);
+			foreach ($orderfields as $orderfield)
+			{
+				if (preg_match("/^\+(.*)$/", $orderfield, $matches))
+					$orderstring .= $matches[1] . " asc, ";
+				elseif (preg_match("/^-(.*)$/", $orderfield, $matches))
+					$orderstring .= $matches[1] . " desc, ";
+				else
+					$orderstring .= $orderfield . " asc, ";
+
+				if (array_search($matches[1], $select) === FALSE)
+					array_push($select, $matches[1]);
+
+			}
+			$orderstring = preg_replace("/,\s$/", "", $orderstring);
+			$qry->Select = $select;
+			$qry->Order = $orderstring;
+			$this->records = $qry->Fetch();
+
+			if ($qry->Status == 'failed')
+			{
+				print $qry->Where;
+				WebDie ('Query Error - Texxmlserver: ' . 
+					$qry->Error , 
+					'where: ' . $where);
+			}
+		}
+	}
+
+
+	function
+	display()
+	{
+		$records =& $this->records;
+
+		$widthAttrib = '';
+		$backgroundColorAttrib = '';
+		$highlightColorAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		if ($this->BodyColor != '')
+			$backgroundColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor="' . $this->HighlightColor . '"';
+		else
+			$highlightColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->HeaderColor != '')
+			$headerColorAttrib= 'bgcolor="' . $this->HeaderColor . '"';
+		if ($this->BorderColor != '')
+			$borderColorAttrib= 'bgcolor="' . $this->BorderColor . '"';
+
+		// Find out how many coloums (one extra for image coloum)
+		$numcol = count($this->Fields) + 1;
+
+		//Print Table header
+		print "<!--START OBJECT-->\n";
+		print "<table $widthAttrib border=\"0\" cellspacing=\"0\" cellpadding=\"2\">\n";
+		print "<tr><td width=\"25%\" align=\"left\" nowrap=\"nowrap\">";
+		$this->printBackLink();
+		if ($this->ContactSheetPage != '')
+		{
+			$this->printRedisplay($this->ContactSheetPage, 
+				$this->_STRINGS["CONTACT_SHEET"]);
+		}
+		print "</td>";
+		print "<td width=\"75%\" align=\"right\">\n";
+		$this->printNavLinks();
+		print "</td></tr>";
+		print "<tr><td colspan=\"2\">\n";
+		print "<table $borderColorAttrib width=\"100%\" border=\"0\" cellspacing=\"1\" cellpadding=\"4\">\n";
+		// Print the Header Row
+		print "  <tr $headerColorAttrib>\n";
+		if ($this->DisplayThumbnails)
+		{
+			print "    <td width=\"72\" align=\"center\"><b>";
+			PPrint($this->_STRINGS['IMAGE'], 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->HeaderTextColor);
+			print "</b></td>\n";
+		}
+
+		// Loop and display the coloum headings
+		for ($i = 0; $i < $numcol - 1; $i++)
+		{
+			$label = '';
+			if (is_string($this->Fields[$i]))
+			{
+				$label = $this->_STRINGS[$this->Fields[$i]];
+			}
+			elseif (strtolower(get_class($this->Fields[$i])) == 'formatfield')
+			{
+				$label = $this->Fields[$i]->Label;
+			}
+			print "    <td align=\"$this->AlignTitle\"><b>";
+			if ($label == '')
+				print '&nbsp;';
+			else
+				PPrint(	$label, 
+					$this->FontFace, 
+					$this->FontSize, 
+					$this->HeaderTextColor);
+			print "</b></td>\n";
+		}
+
+
+		// print the narrative titles title for the column
+		print "    <td align=\"$this->AlignTitle\"><b>";
+		$label = "Narrative Titles";
+		PPrint(	$label, 
+					$this->FontFace, 
+					$this->FontSize, 
+					$this->HeaderTextColor);
+		print "</b></td>\n";
+
+
+		print "</tr>\n";
+
+		// Loop over the results
+		$rownum = 1;
+		foreach ($records as $rec)
+		{
+			if ($rownum > $this->LimitPerPage)
+				break;
+
+			print "<!--START RECORD-->\n";
+
+			$displaylink = $this->displayPageLink($rec);
+
+			if ($rownum % 2 == 0 && $this->HighlightColor != '')
+				print "  <tr $highlightColorAttrib>\n";
+			else
+				print "  <tr $backgroundColorAttrib>\n";
+
+			if ($this->DisplayThumbnails)
+			{
+				print "    <td width=\"72\" align=\"center\" valign=\"middle\">" . "\n";
+				// Display the thumbnail image
+				$image = new MediaImage();
+				$image->Intranet = $this->Intranet;
+				// if we are on the multimedia module then the image IRN is the
+				//  irn of the current record.
+				if ($this->Database == "emultimedia")
+				{
+					$mediairn = $rec->{'irn_1'};
+				}
+				else
+				{
+					$mediairn = $rec->{'MulMultiMediaRef:1'};
+				}
+				$image->IRN = $mediairn;
+				$image->BorderColor = $this->HeaderColor;
+				$image->HighLightColor = $this->HeaderColor;
+				$image->Link = $displaylink;
+				$image->Width = 60;
+				$image->Height = 60;
+				$image->KeepAspectRatio = $this->KeepImageAspectRatio;
+				$image->RefIRN = $rec->{'irn_1'};
+				$image->RefTable = $this->Database;
+				if ($this->ImageDisplayPage != "")
+				{
+					$image->ImageDisplayPage = $this->ImageDisplayPage;
+				}
+				elseif($this->Intranet)
+				{
+					$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+				}	
+				else
+				{
+					$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+				}
+				$image->Show();
+				print "    </td>\n";
+			}
+
+			// Display Other Fields
+
+			for ($j = 0; $j < $numcol - 1; $j++)
+			{
+
+				print "    <td align=\"$this->AlignData\">";
+				$fieldData = '';
+
+				if (is_string($this->Fields[$j]))
+				{
+					$fieldData = $rec->{$this->Fields[$j]};
+				}
+				elseif (strtolower(get_class($this->Fields[$j])) == 'formatfield')
+				{
+					$field = $this->Fields[$j]->Format;
+					$fieldData = preg_replace('/{([^}]*)}/e', ' $rec->{"\\1"}', $field);
+				}
+
+				
+				if ($fieldData == '')
+				{
+					$fieldData = $this->_STRINGS['NOT_STATED'];
+				}
+					
+				// First one is a link to display record
+				if ($j == 0)
+				{
+					print "<a href=\"$displaylink\">";
+						PPrint($fieldData, 
+							$this->FontFace, 
+							$this->FontSize,
+							$this->TextColor, 
+							$this->HighlightTextColor);
+					print '</a>';
+				}
+				elseif ($fieldData != '')
+				{
+					PPrint($fieldData,
+						$this->FontFace, 
+						$this->FontSize, 
+						$this->TextColor);
+				}
+				else
+				{
+					// field is empty so print space to stop netscape complaining
+					print '&nbsp;';
+				}
+				print "</td>\n";
+			}
+
+			$this->printNarrativeTitles($rec);
+
+			print "  </tr>\n<!--END RECORD-->\n";
+			$rownum++;
+		}
+
+		//End Table
+		print "</table>\n";
+		print "</td></tr>";
+		// Nav Links
+		print "<tr><td width=\"25%\" align=\"left\" nowrap=\"nowrap\">";
+		$this->printBackLink();
+		if ($this->ContactSheetPage != '')
+		{
+			PPrint(' ', 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+			$this->printRedisplay($this->ContactSheetPage, $this->_STRINGS["CONTACT_SHEET"]);
+		}
+		print "</td>";
+		print "<td width=\"75%\" align=\"right\">";
+		$this->printNavLinks();
+		print "</td></tr>";
+		print "</table>\n";
+		print "<!--END OBJECT-->\n";
+
+	}
+
+	/*
+	This function will print the narrative titles for the narratives the object
+	is attached to.
+
+	Martin Jujou 
+	10/2/2005
+	*/
+	function
+	printNarrativeTitles($rec)
+	{
+		print "    <td align=\"$this->AlignData\">";
+		$fieldData = '';
+
+		
+		$theIrn = $rec->{irn_1};
+
+		if($this->NARRATIVE_TITLES[$theIrn] == '')
+		{
+			PPrint($this->_STRINGS['NOT_STATED'],
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+		}
+		else
+		{
+			$fieldData = $this->NARRATIVE_TITLES[$theIrn];
+		}
+
+		
+		if ($fieldData != '')
+		{
+			PPrint($fieldData,
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+		}
+		else
+		{
+			// field is empty so print space to stop netscape complaining
+			print '&nbsp;';
+		}
+
+		print "</td>\n";
+		
+		
+	}
+
+
+	/*
+
+		This function must query all the narratives attached to the master narrative. 
+		For each narrative it will gather information about its attached objects
+
+		It will also create a hash of objects that are attached to each narrative so that 
+		when an object result is displayed the narratives it belongs to are show as well
+
+		Martin Jujou
+		7/2/2005
+
+	*/
+	function
+	returnCatIrns($masterIrnQuery, $masterIrn)
+	{
+
+		$narrativeObjectQuery = new Query;
+        $whereClause = array();
+        $theWhere = array();
+        $theWhereString = "";
+        
+		$narrativeObjects = explode(",", "irn_1, ObjObjectsRef_tab, NarTitle");
+        
+        foreach($masterIrn as $anIrn)
+        {
+            array_push($theWhere, 'AssMasterNarrativeRef = ' . $anIrn);
+        }
+		
+        $theWhereString = implode(" or ", $theWhere);
+
+        $narrativeObjectQuery->Select = $narrativeObjects;
+        $narrativeObjectQuery->From = 'enarratives';
+        $narrativeObjectQuery->Limit = 1000;
+        $narrativeObjectQuery->Where = $theWhereString;
+        
+		$myRecords = $narrativeObjectQuery->Fetch();
+        $myMatches = $narrativeObjectQuery->Matches;
+        
+
+		$objectSearch = array();
+		$objectIrns = array();
+
+		foreach($myRecords as $rec)
+        {
+			reset($rec);
+
+            while (list($key, $val) = each($rec))
+           	{
+                if($key == "irn_1")
+                {
+    					$theIrn = $val;
+    					
+    					// this array will be used for checking nested narratives
+    					array_push($this->NARRATIVE_IRNS, $theIrn);
+    					
+                }
+    			elseif($key == "NarTitle")
+    			{
+    				foreach($objectIrns as $objIrn)
+    				{
+    					$this->NARRATIVE_TITLES[$objIrn] .= $val . "\n\n";
+    				}
+
+    				$objectIrns = array();
+    			}
+    			else
+    			{
+    				// push object irn onto array
+    				array_push($objectIrns, $val);
+
+    				$theObjectIrn = $val;
+    				$theValue = "(irn_1 == " . $val . ")";
+    				array_push($objectSearch, $theValue);
+    			}
+    			
+            }
+            
+   	    }
+
+		// remove the duplicates
+		$objectSearch = array_unique($objectSearch);
+
+		// return the search for objects
+		$result = implode(" or ", $objectSearch);
+        
+
+		return $result;
+	}
+
+
+
+}
+
+class
+NarPhmNarrativeObjectsContactSheet extends BaseContactSheet
+{
+    var $NARRATIVE_IRNS = array();
+    
+    
+	function
+	NarPhmNarrativeObjectsContactSheet()
+	{
+		$this->BaseContactSheet();
+		$this->Fields = array('SummaryData');
+		$this->Database = 'ecatalogue';
+	}
+
+	// inherit this function to overide the where clause
+	function
+	doQuery ()
+	{
+		/*
+		*  Dynamicall create the specified QueryGenerator and
+		*    call a method corresponding to the QueryName.
+		*    Set the results in the $this->records array for
+		*    use elsewhere.
+		*/
+		
+		
+		global $ALL_REQUEST;
+        $theMasterIrn = array();
+        array_push($theMasterIrn, $ALL_REQUEST['theMasterIrn']);
+
+		// query the sub narratives and get there attached objects
+		$this->Where = $this->returnCatIrns($this->Where, $theMasterIrn);
+
+
+        // perform one nest query
+        if($this->Where == '')
+        {
+            // query the sub narratives and get there attached objects
+            $this->Where = $this->returnCatIrns($this->Where, $this->NARRATIVE_IRNS);
+        }
+        
+
+		// only run once
+		if ($this->_queryDone)
+			return;
+		$this->_queryDone = 1;
+
+		// Add mandatory fields to $this->Fields for select
+		$select = array();
+		if (is_array($this->DisplayPage) && 
+				$this->DisplayPage['ConditionField'] != '')
+		{
+			$select = array('irn', 
+					  'MulMultiMediaRef_tab', 
+					  $this->DisplayPage['ConditionField']);
+		}
+		else
+		{
+			if ($this->Database == "emultimedia")
+			{
+				$select = array('irn');
+			}
+			else
+			{
+				$select = array('irn', 'MulMultiMediaRef_tab');
+			}
+		}
+
+		foreach ($this->Fields as $fld)
+		{
+			if (is_string($fld))
+			{
+				array_push($select, $fld);
+			}
+			elseif (strtolower(get_class($fld)) == 'formatfield')
+			{
+				// format in the form "{ColName1} {ColName2}"
+				preg_match_all('/{([^}]*)}/', 
+						$fld->Format, 
+						$matches);
+				foreach ($matches[1] as $colName)
+				{
+					array_push($select, $colName);
+				}
+			}
+		}
+
+		$where = '';
+		if ($this->Where == '')
+		{
+			$qryGenerator = new $this->QueryGenerator;
+			// these properties are used by the RandomQuery
+			$qryGenerator->Database = $this->Database;
+			$qryGenerator->Limit = $this->LimitPerPage;
+			$qryGenerator->Intranet = $this->Intranet;
+			// Use reflection to call query method
+			$queryAttrib = $qryGenerator->{$this->QueryName}();
+			$where = $queryAttrib->Where;
+		}
+		else
+		{
+			$where = $this->Where;
+		}
+
+		if ($this->Restriction != '')
+		{
+			if ($where == "")
+				$where = "true";
+			$where = "($where) AND (" . $this->Restriction . ")";
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $select;
+		$qry->From = $this->Database;
+		$qry->Where = $where;
+		if ( !empty($queryAttrib->RankTerm) || !empty($queryAttrib->RankOn) )
+		{
+			$qry->RankTerm = $queryAttrib->RankTerm;
+			$qry->RankOn = $queryAttrib->RankOn;
+		}
+		// One extra so we know it there are more records
+		$qry->Limit = $this->LimitPerPage + 1;	
+		$qry->Offset = $this->StartAt;
+
+		$this->records = $qry->Fetch();
+		$this->Matches = $qry->Matches;
+		if ($qry->Status == 'failed')
+		{
+			print $qry->Where;
+			WebDie ('Query Error - Texxmlserver: ' . 
+				$qry->Error , 
+				'where: ' . $where);
+		}
+
+		/*
+		** If $this->Order set, and # matches < OrderLimit, perform the same
+		** query again but this time order it.
+		*/
+		if ($this->Order != "" && $this->Matches <= $this->OrderLimit)
+		{
+			if (preg_match("/:\d/", $this->Order) || preg_match("/_tab/", $this->Order))
+				WebDie("Cannot set ordering on multi-valued fields");
+
+			$orderfields = explode("|", $this->Order);
+			foreach ($orderfields as $orderfield)
+			{
+				if (preg_match("/^\+(.*)$/", $orderfield, $matches))
+					$orderstring .= $matches[1] . " asc, ";
+				elseif (preg_match("/^-(.*)$/", $orderfield, $matches))
+					$orderstring .= $matches[1] . " desc, ";
+				else
+					$orderstring .= $orderfield . " asc, ";
+
+				if (array_search($matches[1], $select) === FALSE)
+					array_push($select, $matches[1]);
+
+			}
+			$orderstring = preg_replace("/,\s$/", "", $orderstring);
+			$qry->Select = $select;
+			$qry->Order = $orderstring;
+			$this->records = $qry->Fetch();
+
+			if ($qry->Status == 'failed')
+			{
+				print $qry->Where;
+				WebDie ('Query Error - Texxmlserver: ' . 
+					$qry->Error , 
+					'where: ' . $where);
+			}
+		}
+	}
+
+
+
+	function
+	returnCatIrns($masterIrnQuery, $masterIrn)
+	{
+		/*
+
+		This function must query all the narratives attached to the master narrative. 
+		For each narrative it will gather information about its attached objects
+
+		Martin Jujou
+		7/2/2005
+		
+		Modified on 10/5/2005 to include nested searching
+
+		*/
+
+		$narrativeObjectQuery = new Query;
+        $whereClause = array();
+        $theWhere = array();
+        $theWhereString = "";
+
+		$narrativeObjects = explode(",", "irn_1, ObjObjectsRef_tab");
+		
+		foreach($masterIrn as $anIrn)
+        {
+            array_push($theWhere, 'AssMasterNarrativeRef = ' . $anIrn);
+        }
+
+        $theWhereString = implode(" or ", $theWhere);
+        
+        $narrativeObjectQuery->Select = $narrativeObjects;
+        $narrativeObjectQuery->From = 'enarratives';
+        $narrativeObjectQuery->Limit = 1000;
+        $narrativeObjectQuery->Where = $theWhereString;
+        	
+		$myRecords = $narrativeObjectQuery->Fetch();
+        $myMatches = $narrativeObjectQuery->Matches;
+
+		$objectSearch = array();
+
+		foreach($myRecords as $rec)
+        {
+			reset($rec);
+
+            while (list($key, $val) = each($rec))
+           	{
+                if($key == "irn_1")
+                {
+    					$theIrn = $val;
+
+    					// this array will be used for checking nested narratives
+    					array_push($this->NARRATIVE_IRNS, $theIrn);
+                }
+                else
+                {
+				    $theValue = "(irn_1 == " . $val . ")";
+				    array_push($objectSearch, $theValue);
+				}
+   	        }
+   	    }
+
+		// remove the duplicates
+		$objectSearch = array_unique($objectSearch);
+
+		// return the search for objects
+		$result = implode(" or ", $objectSearch);
+
+		return $result;
+	}	
+
+}
+
+
+
+class
+NarPhmContactSheet extends BaseContactSheet
+{
+	function
+	NarPhmContactSheet()
+	{
+
+		$this->BaseContactSheet();
+		$this->Fields = array('NarTitle');
+		$this->Database = 'enarratives';
+	}
+} 
+
+
+class
+NarPhmObjectContactSheet extends BaseContactSheet
+{
+	function
+	NarPhmObjectContactSheet()
+	{
+		$this->BaseContactSheet();
+		$this->Fields = array('SummaryData');
+		$this->Database = 'ecatalogue';
+	}
+} 
+
+
+
+?>

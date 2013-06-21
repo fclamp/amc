@@ -1,0 +1,106 @@
+body {
+        font-family: arial, "lucida console", sans-serif;
+	background: #00527c;
+}
+
+a:link {color: #7f7fff}     /* unvisited link */
+a:visited {color: #7f7fff}  /* visited link */
+a:hover {color: #ff0000}   /* mouse over link */
+a:active {color: #ff0000}   /* selected link */
+
+.header {
+        color: white;
+        background: #00527c;
+        font-size: 120%;
+        width: 100%;
+        text-align: center;
+}
+
+/* for anchors in a heading don't change on being visited, active etc */
+.header a  {
+        color: white;
+        font-size: 80%;
+	text-decoration: none;
+}
+
+/* for anchors in a heading change colour on hover */
+.header a:hover  {
+        font-size: 80%;
+        color: red;
+}
+
+.right {
+        color: white;
+        background: #00527c;
+        text-align: right;
+        float: right;
+}
+
+.status {
+        color: white;
+        background: #00527c;
+        border: 0px solid #a0a0a0;
+        font-size: 80%;
+}
+
+.prompt {
+        color:  #00527c;;
+        background: #e0e0e0;
+}
+
+.promptValue {
+        color:  #00527c;
+        background: #e0e0e0;
+	font-weight: bolder;
+}
+
+.notice {
+        color: red;
+        background: #a0a0a0;
+}
+
+.ok {
+        color: #7fff7f;
+        background: #a0a0a0;
+}
+
+.zebraEven {
+        background: #e0e0e0;
+        font-size: 90%;
+}
+
+.zebraOdd {
+        background: #c0c0c0;
+        font-size: 90%;
+}
+
+.control {
+        color: blue;
+        background: #e0e0e0;
+        border: 0px solid #a0a0a0;
+        text-decoration: none;
+}
+
+.display {
+        color: black;
+        background: #00527c;
+	margin: 1px;
+        border: 0px solid #a0a0a0;
+        font-size: 110%;
+}
+
+.fineDisplay {
+        color: black;
+        background: #00527c;
+	margin: 1px;
+        border: 0px solid #a0a0a0;
+        font-size: 80%;
+}
+.footer {
+        color: white;
+        width: 100%;
+        background: #00527c; margin: 1px;
+        border: 0px solid #a0a0a0;
+        text-align: center;
+}
+

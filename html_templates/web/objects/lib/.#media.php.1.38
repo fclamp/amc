@@ -1,0 +1,743 @@
+<?php
+/* Copyright (c) 2001-2007 - KE Software Pty. Ltd. 
+*
+*  	File: media.php
+*	Contains functions/classes used for fetching and manipulating
+*	media files from the EMu system.
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'common.php');
+require_once ($LIB_DIR . 'configuredquery.php');
+require_once ($LIB_DIR . 'serverconnection.php');
+
+
+/*
+*   Class:
+*	MediaRetriever
+*   Properties:
+*	Intranet (1 or 0) 	- Limit security domain to intranet
+*	Watermark (string) 	- Overlay image with watermark text 
+*   Methods:
+*	ShowImage($irn, $size) 	- Cat an image from emultimedia to browser
+*
+*/
+
+/*
+*   Setup code to handle temp file creation and cleanup.
+*	i.e.  Ensure that temp files are removed on script timeout or abort.
+*/
+$TEMP_FILE_NAME = "";
+
+function
+GenerateTempFileName()
+{
+	global $TEMP_FILE_NAME;
+	global $IMAGE_TEMP_DIR;
+	$TEMP_FILE_NAME = tempnam($IMAGE_TEMP_DIR, 'emuweb');
+	return $TEMP_FILE_NAME;
+}
+
+function
+CleanupTempFile()
+{
+	global $TEMP_FILE_NAME;
+	if ($TEMP_FILE_NAME != "")
+		unlink($TEMP_FILE_NAME);
+}
+
+register_shutdown_function('CleanupTempFile');
+
+
+class ImageAttributes
+{
+	var $Height;
+	var $Width;
+	var $Identifier;
+	var $MimeType;
+	var $MimeFormat;
+	var $FileSize;
+	
+	function
+	ImageAttributes($height, $width, $identifier, $mimetype, $mimeformat, $filesize)
+	{
+		$this->Height = $height;
+		$this->Width = $width;
+		$this->Identifier = $identifier;
+		$this->MimeType = $mimetype;
+		$this->MimeFormat = $mimeformat;
+		$this->FileSize = $filesize;
+	}
+
+}
+
+class MediaRetriever
+{
+	var $Intranet 	= 0;
+	var $Watermark;
+	var $WatermarkTextSize = 3;
+	var $WatermarkPhoto;
+	var $WatermarkLogo;
+	var $WatermarkPercentage;
+	var $WatermarkOpacity;
+	var $Imageheight;
+	var $Imagewidth;
+	var $BackendType;
+	var $WatermarkLogoPos;
+
+	function
+	MediaRetriever()
+	{
+		if (isset($GLOBALS['DEFAULT_WATERMARK']))
+		{
+			$this->Watermark = $GLOBALS['DEFAULT_WATERMARK'];
+		}
+		if (isset($GLOBALS['DEFAULT_WATERMARK_PERCENTAGE']))
+                {
+			$this->WatermarkPercentage = $GLOBALS['DEFAULT_WATERMARK_PERCENTAGE'];
+		}
+	 	if (isset($GLOBALS['DEFAULT_WATERMARK_OPACITY']))
+		{
+			$this->WatermarkOpacity = $GLOBALS['DEFAULT_WATERMARK_OPACITY'];
+		}
+		if (isset($GLOBALS['WATERMARK_TEXT_SIZE']) 
+				&& $GLOBALS['WATERMARK_TEXT_SIZE'] != '')
+		{
+			$this->WatermarkTextSize = 
+				$GLOBALS['WATERMARK_TEXT_SIZE'];
+		}
+		// Added for blending and Alpha blending
+		if (isset($GLOBALS['DEFAULT_WATERMARK_LOGO']))
+		{
+			$this->WatermarkLogo = $GLOBALS['DEFAULT_WATERMARK_LOGO'];
+		}
+		if (isset($GLOBALS['BACKEND_TYPE']))
+		{
+			$this->BackendType = $GLOBALS['BACKEND_TYPE'];
+		}
+		if (isset($GLOBALS['DEFAULT_WATERMARK_LOGO_POSITION']))
+		{
+			$this->WatermarkLogoPos = $GLOBALS['DEFAULT_WATERMARK_LOGO_POSITION'];
+		}
+	}
+
+	// Call this to cat image to the browser.
+	// Note: no content can be sent before calling this method.
+	function
+	ShowImage($irn, $size)
+	{
+		$qry = new ConfiguredQuery;
+		$qry->Select = array(	'AdmPublishWebNoPassword',
+					'AdmPublishWebPassword',
+					'DocHeight_tab',
+					'DocWidth_tab',
+					'DocIdentifier_tab',
+					'DocMimeType_tab',
+					'DocMimeFormat_tab',
+					'DocFileSize_tab',
+					'MulIdentifier',
+					'MulMimeType',
+					'MulMimeFormat',
+					'MulDocumentType',
+					'ChaImageWidth',
+					'ChaImageHeight');
+		$qry->From = 'emultimedia';
+		$qry->Intranet = $this->Intranet;
+		$qry->Where = "irn=$irn";
+		$r = $qry->Fetch();
+
+		if ($this->Intranet)
+		{
+			if (strtolower($r[0]->AdmPublishWebPassword) != strtolower($qry->SystemYes))
+			{
+				// Access denied
+				$this->displayNoImageAvaliable($size);
+				exit();
+			}
+		}
+		else
+		{
+			if(strtolower($r[0]->AdmPublishWebNoPassword) != strtolower($qry->SystemYes))
+			{
+				// Access denied
+				$this->displayNoImageAvaliable($size);
+				exit();
+			}
+		}
+
+		$i = 1;
+		$availableSizes = array();
+		$maxside = 0;
+		if ($this->Intranet)
+		{
+			if (isset($GLOBALS["MAX_INTRANET_IMAGE_SIDE"]))
+				$maxside = $GLOBALS["MAX_INTRANET_IMAGE_SIDE"];
+		}
+		else
+		{
+			if (isset($GLOBALS["MAX_INTERNET_IMAGE_SIDE"]))
+				$maxside = $GLOBALS["MAX_INTERNET_IMAGE_SIDE"];
+		}
+		while (1)
+		{
+			if ($r[0]->{"DocHeight:$i"} == '')
+				break;
+
+			$attributes = new ImageAttributes($r[0]->{"DocHeight:$i"},
+			    $r[0]->{"DocWidth:$i"},
+			    $r[0]->{"DocIdentifier:$i"},
+			    $r[0]->{"DocMimeType:$i"},
+			    $r[0]->{"DocMimeFormat:$i"},
+			    $r[0]->{"DocFileSize:$i"}
+			    );
+
+			if ($maxside > 0)
+			{
+				if ($attributes->Height > $maxside || $attributes->Width > $maxside)
+				{
+					$i++;
+					continue;
+				}
+			}
+			array_push($availableSizes, $attributes);
+			$i++;
+		}	
+
+		// added for alpha blending
+		$this->Imageheight = $r[0]->ChaImageHeight;
+		$this->Imagewidth = $r[0]->ChaImageWidth;
+
+		$mimetype = "";
+		if (strtolower($size) == "thumb")
+		{
+			preg_match("/^(.+)\.([^\.]+)$/", $r[0]->MulIdentifier, $matches);
+			$filename = $matches[1] . ".thumb.jpg";
+			$path = $this->constructServerFilePath($irn, $filename);
+			if ($this->filenameExists($path))
+				$mimetype = "image/jpeg"; 
+		}
+		if ($mimetype == "")
+		{
+			$bestsize = $this->findAppropriateSize($size, $availableSizes);
+			if ($bestsize != NULL)
+			{
+				$filename = $bestsize->Identifier;
+				$mimetype = "$bestsize->MimeType/$bestsize->MimeFormat"; 
+			}
+			else
+			{
+				if ($maxside > 0 && ! empty($availableSizes))
+				{
+					// return the largest of $availableSizes
+					$mheight = $mwidth = 0;
+					foreach ($availableSizes as $a)
+					{
+						if ($mheight < $a->Height || $mwidth < $a->Width)
+						{
+							$mheight = $a->Height;
+							$mwidth = $a->Width;
+							$filename = $a->Identifier;
+							$mimetype = "$a->MimeType/$a->MimeFormat"; 
+						}
+					}
+				}
+				elseif (($maxside > 0 && empty($availableSizes)) && $r[0]->MulMimeType == "image")	
+				{
+					// Only size is larger than maximum permitted
+					$this->displayNoImageAvaliable($size);
+					return;
+				}
+				else
+				{
+					$filename = $r[0]->MulIdentifier;
+					$mimetype = $r[0]->MulMimeType . "/" . $r[0]->MulMimeFormat;
+				}
+			}
+		}
+		if (! empty($size) && ! $this->IsImage($mimetype) && ! $this->IsTiffImage($mimetype))
+		{
+			$this->displayFixedTumbnail($mimetype);
+			return;
+		}
+		
+		// This is a nasty hack (because url multimedia records can have a mimetype of image and the image
+		//	doesn't exist on the server) and will be fixed in full when the media code is rewritten to
+		//	merge MediaImage and MediaRetreiver classes.
+		$doctype = $r[0]->MulDocumentType;
+		if (strtolower($doctype) == 'u' && $this->IsImage($mimetype))
+		{
+			$this->displayFixedTumbnail("html");
+			return;
+		}
+			
+		$path = $this->constructServerFilePath($irn, $filename);
+							
+		if ($this->catServerFile($path, $mimetype, $size, $this->Watermark) < 0)
+		{
+			//Error
+			$this->displayNoImageAvaliable($size);
+			return;
+		}
+	}
+
+	function 
+	constructServerFilePath($irn, $filename)
+	{
+
+		$pre = intval($irn / 1000);
+		$suf = sprintf('%03d', $irn % 1000);
+		$dir = "$pre/$suf";
+
+		$path = "$dir/$filename";	
+
+		return $path;
+	}
+
+	function 
+	catLocalFile($filePath)
+	{
+		if (is_readable($filePath))
+		{
+			// Print the header
+			$fp = fopen($filePath, 'r');
+			while (!feof($fp))
+			{
+				print fread($fp, 4096);
+			}
+			fclose($fp);
+		}
+		else
+			WebDie ('Invalid Image', 'webmedia.php');
+	}
+
+	function 
+	catServerFile($path, $mimetype, $size, $watermark)
+	{
+		// Open connection to texxmlserver
+		$conn = new TexxmlserverConnection;
+		$fdserver = $conn->Open();
+		if(!$fdserver)
+			return(-1);
+
+		$path = urlencode($path);
+		fputs($fdserver,"GET file=$path HTTP/1.0\r\n\r\n");
+		fflush($fdserver);
+
+		$data = fread($fdserver, 1024);
+		if (strpos($data, 'Not Found') > 0)
+		{
+			return(-1);
+		}
+		$this->setMimeTypeHeader($mimetype);
+		// FIXME - not sure if this is the best method
+		if (!$this->IsImage($mimetype))
+		{
+			$matches = array();
+			if(preg_match("/([^\\/\\\]+)\.(.+?)$/", $path, $matches));
+			{
+				$file = $matches[1];
+				$suffix = $matches[2];
+				header("Content-Disposition: attachment; filename=$file.$suffix");
+			}
+		}
+
+		// test to see if watermarking is required
+
+		// added for alpha blending
+		
+		if (strtolower($size) != "thumb" 
+				&& $this->WatermarkLogo != ''
+				&& $this->IsImage($mimetype))
+		{
+			// Read in and save a tmp file
+			$tmpfile = GenerateTempFileName();
+			$tmpfp = fopen($tmpfile, "w");
+			fwrite($tmpfp, $data);
+			while (!feof($fdserver))
+			{
+				fwrite($tmpfp, fread($fdserver, 4096));
+			}
+			fclose($tmpfp);
+			$this->imagewatermarker($tmpfile, $mimetype);
+		}
+		
+
+		// this existed before
+
+		elseif (strtolower($size) != "thumb" 
+				&& $watermark != ''
+				&& $this->IsImage($mimetype))
+		{
+			// Read in and save a tmp file
+			$tmpfile = GenerateTempFileName();
+			$tmpfp = fopen($tmpfile, "w");
+			fwrite($tmpfp, $data);
+			while (!feof($fdserver))
+			{
+				fwrite($tmpfp, fread($fdserver, 4096));
+			}
+			fclose($tmpfp);
+			$this->watermarkFileAndPrint($tmpfile, 
+						$mimetype, $watermark);
+		}
+		else
+		{
+			// Just output "as-is"
+			print $data;
+			while (!feof($fdserver))
+			{
+				print fread($fdserver, 4096);
+			}
+		}
+		return (0);
+	}
+
+	function
+	filenameExists($path)
+	{
+		// Open connection to texxmlserver
+		$conn = new TexxmlserverConnection;
+		$fdserver = $conn->Open();
+		if(!$fdserver)
+			return(0);
+
+		$path = urlencode($path);
+		fputs($fdserver,"GET file=$path HTTP/1.0\r\n\r\n");
+		fflush($fdserver);
+
+		$data = fread($fdserver, 1024);
+		$found = 1;
+		if (strpos($data, 'Not Found') > 0)
+			$found = 0;
+		
+		while (!feof($fdserver))
+			$data = fread($fdserver, 8192);
+
+		return $found;
+	}
+		
+
+	function 
+	setMimeTypeHeader($mimetype)
+	{
+		Header("Content-type: $mimetype");
+	}
+
+	function
+	findAppropriateSize($size, $availableSizes)
+	{
+		$best = NULL;
+		if (preg_match("/^(\\d+)x(\\d+)/i", $size, $matches))
+		{
+			$idealWidth = intval($matches[1]);
+			$idealHeight = intval($matches[2]);
+
+			$bestWidth = $bestHeight = -1;
+			foreach ($availableSizes as $a)
+			{
+				if ($a->Width >= $idealWidth && $a->Height >= $idealHeight)
+				{
+					if ($bestWidth < 0 || $bestHeight < 0)
+					{
+						$bestWidth = $a->Width;
+						$bestHeight = $a->Height;
+						$best = $a;
+					}
+					elseif ($a->Width < $bestWidth && $a->Height < $bestHeight)
+					{
+						$bestWidth = $a->Width;
+						$bestHeight = $a->Height;
+						$best = $a;
+					}
+				}
+			}
+		}
+		return $best;
+	}
+
+        /*
+        ** This function added to allow jpeg thumbnails generated from tiffs to
+        ** show in the Display sheet
+        */
+	function  
+	IsTiffImage($mimetype)
+	{
+		if (strpos($mimetype, 'tiff') !== false)
+			return(1);
+		return(0);
+	}
+
+	function  
+	IsImage($mimetype)
+	{
+		if (strpos($mimetype, 'jpeg') !== false)
+			return(1);
+		if (strpos($mimetype, 'gif') !== false)
+			return(1);
+		if (strpos($mimetype, 'png') !== false)
+			return(1);
+		return(0);
+	}
+
+	function 
+	displayNoImageAvaliable($size)
+	{
+		$this->setMimeTypeHeader("image/jpeg");
+		switch (strtolower($size))
+		{
+		    case 'thumb':
+			$path = $GLOBALS['WEB_NOIMAGE_THUMB_FILE'];
+			break;
+		    default:
+			$path = $GLOBALS['WEB_NOIMAGE_GRAPHIC_FILE'];
+			break;
+		}
+		$this->catLocalFile($path);
+	}
+
+	function
+	displayFixedTumbnail($mimetype)
+	{
+
+		$thumbnailGraphic = $GLOBALS['IMAGE_DIR'];
+		$mimetype = 'xx' . $mimetype;
+		if (strpos($mimetype, 'avi') > 0)
+			$thumbnailGraphic .= 'avi.jpg';
+		elseif (strpos($mimetype, 'video') > 0)
+			$thumbnailGraphic .= 'avi.jpg';
+		elseif (strpos($mimetype, 'wav') > 0)
+			$thumbnailGraphic .= 'wav.jpg';
+		elseif (strpos($mimetype, 'midi') > 0)
+			$thumbnailGraphic .= 'midi.jpg';
+		elseif (strpos($mimetype, 'audio/mpeg') > 0)
+			$thumbnailGraphic .= 'mp3.jpg';
+		elseif (strpos($mimetype, 'audio') > 0)
+			$thumbnailGraphic .= 'default.jpg';
+		elseif (strpos($mimetype, 'pdf') > 0)
+			$thumbnailGraphic .= 'pdf.jpg';
+		elseif (strpos($mimetype, 'msword') > 0)
+			$thumbnailGraphic .= 'doc.jpg';
+		elseif (strpos($mimetype, 'xls') > 0)
+			$thumbnailGraphic .= 'xls.jpg';
+		elseif (strpos($mimetype, 'ppt') > 0)
+			$thumbnailGraphic .= 'ppt.jpg';
+		elseif (strpos($mimetype, 'html') > 0)
+			$thumbnailGraphic .= 'url.jpg';
+		else
+			$thumbnailGraphic .= 'default.jpg';
+		
+		$this->setMimeTypeHeader("image/jpeg");
+		$this->catLocalFile($thumbnailGraphic);
+	}
+	
+	function watermarkFileAndPrint($file, $mimetype, $watermark)
+	{
+		// manipulate depending on type
+		if (strpos($mimetype, 'jpeg') > 0)
+		{
+			$image = ImageCreateFromJPEG($file); 
+			$colorwhite = ImageColorClosest($image, 255,255,210);
+			$colorblack = ImageColorClosest($image, 50,50,50);
+			ImageString($image, $this->WatermarkTextSize, 8, 8, 
+					$watermark,
+					$colorblack);
+			ImageString($image, $this->WatermarkTextSize, 7, 7, 
+					$watermark,
+					$colorwhite);
+			ImageJPEG($image);
+			ImageDestroy($image);
+		}
+		elseif (strpos($mimetype, 'gif') > 0)
+		{
+			$image = ImageCreateFromGif($file); 
+			$colorwhite = ImageColorClosest($image, 255,255,210);
+			$colorblack = ImageColorClosest($image, 50,50,50);
+			ImageString($image, $this->WatermarkTextSize, 8, 8, 
+					$watermark,
+					$colorblack);
+			ImageString($image, $this->WatermarkTextSize, 7, 7, 
+					$watermark,
+					$colorwhite);
+			ImageGIF($image);
+			ImageDestroy($image);
+		}
+		elseif (strpos($mimetype, 'png') > 0)
+		{
+			$image = ImageCreateFromPNG($file); 
+			$colorwhite = ImageColorClosest($image, 255,255,210);
+			$colorblack = ImageColorClosest($image, 50,50,50);
+			ImageString($image, $this->WatermarkTextSize, 8, 8, 
+						$watermark,
+						$colorwhite);
+							
+			ImageString($image, $this->WatermarkTextSize, 7, 7, 
+					$watermark, 
+					$colorwhite);
+			ImagePNG($image);
+			ImageDestroy($image);
+		}
+		else
+		{
+			// Can't watermark, Just cat image
+			$tmpfp = fopen($file, "r");
+			while (!feof($tmpfp))
+			{
+				print fread($fd, 4096);
+			}
+			fclose($tmpfp);
+		}
+	}
+
+
+	function imagewatermarker($file, $mimetype)
+	{
+		global $WEB_ROOT;
+
+		// get type of file extension
+		$logosplit = preg_split('/\./', $this->WatermarkLogo);
+		$logotype = $logosplit[1];
+
+		// get full image path
+		$logofullpath = "$WEB_ROOT/pages/$this->BackendType/images/$this->WatermarkLogo";
+		
+		// create image from appropriate file type
+		if ($logotype == 'jpg')
+		{
+			$logoImage = ImageCreateFromJPEG($logofullpath);
+		}
+		elseif ($logotype == 'gif')
+		{
+			$logoImage = ImageCreateFromGIF($logofullpath);
+		}
+		elseif ($logotype == 'png')
+		{
+			$logoImage = ImageCreateFromPNG($logofullpath);
+		}
+		else
+		{
+			exit("unable to open file ($logofullpath)");
+		}
+
+		$photoImage = NULL;
+
+		// manipulate depending on type
+		if (strpos($mimetype, 'jpeg') > 0)
+		{
+			$photoImage = ImageCreateFromJPEG($file);
+		}
+		elseif (strpos($mimetype, 'gif') > 0)
+		{
+			$photoImage = ImageCreateFromGIF($file);
+		}
+		elseif (strpos($mimetype, 'png') > 0)
+		{
+			$photoImage = ImageCreateFromPNG($file);
+		}
+		else
+		{
+			// Can't watermark, Just cat image
+			$tmpfp = fopen($file, "r");
+			while (!feof($tmpfp))
+			{
+				print fread($fd, 4096);
+			}
+
+			return 0;
+		}
+
+		$photoX = ImageSX($photoImage);
+		$photoY = ImageSY($photoImage);
+		$spread = 0;
+
+		// Set the positioning of the watermark
+		if ($this->WatermarkLogoPos != '')
+		{
+			if (strcasecmp($this->WatermarkLogoPos, 'tl') == 0)
+			{
+				$logo_x = 0;
+				$logo_y = 0;
+			}
+			if (strcasecmp($this->WatermarkLogoPos, 'tr') == 0)
+			{
+				$logo_x = $photoX - ImageSX($logoImage);
+				$logo_y = 0;
+			}
+			if (strcasecmp($this->WatermarkLogoPos, 'bl') == 0)
+			{
+				$logo_x = 0;
+				$logo_y = $photoY - ImageSY($logoImage);
+			}
+			if (strcasecmp($this->WatermarkLogoPos, 'br') == 0)
+			{
+				$logo_x = $photoX - ImageSX($logoImage);
+				$logo_y = $photoY - ImageSY($logoImage);
+			}
+			if (strcasecmp($this->WatermarkLogoPos, 'tm') == 0)
+			{
+				$logo_x = (($photoX - ImageSX($logoImage))/2);
+				$logo_y = 0;
+			}
+			if (strcasecmp($this->WatermarkLogoPos, 'bm') == 0)
+			{
+				$logo_x = (($photoX - ImageSX($logoImage))/2);
+				$logo_y = $photoY - ImageSY($logoImage);
+			}
+			if (strcasecmp($this->WatermarkLogoPos, 'center') == 0)
+			{
+				$logo_x = ($photoX / 2 ) - (ImageSX($logoImage) / 2 );
+				$logo_y = ($photoY / 2 ) - (ImageSY($logoImage) / 2 );
+			}
+			if (strcasecmp($this->WatermarkLogoPos, 'spread') == 0)
+			{
+				$spread = 1;
+			}
+		}
+		else
+		{
+			// default - bottom right
+			$logo_x = $photoX - ImageSX($logoImage);
+			$logo_y = $photoY - ImageSY($logoImage);
+			$spread = 0;
+		}
+
+		/*
+		
+		// TO DO - FIX THE CHECKING OF THE GD VERSION BEFORE TURNING ON IMAGEALPHABLENDING
+		// currently there is no way of capturing fatal errors (and thus checking whether 
+		// ImageAlphaBlending() exists) 
+		// So any installation with gd < 2.0 will fall over at this point
+		// Clients must have the latest gd version for ImageAlphaBlending to work
+
+		*/
+		
+		// Percentage of original Image
+	        $opacity 		= $this->WatermarkOpacity;
+		$percentage 		= $this->WatermarkPercentage;
+		
+		// Resize watermark with percentage value from CONFIG.php
+
+		$pc = $photoY / 100;
+		$stamp_y = $pc * $percentage;
+		$ratio = $stamp_y / imagesy($logoImage);
+		$stamp_x = imagesx($logoImage) * $ratio;
+
+		$logo_resised = imagecreatetruecolor($stamp_x, $stamp_y);
+		$background = imagecolorallocate($logo_resised, 0, 0, 0);
+		ImageColorTransparent($logo_resised, $background);
+		imagecopyresampled($logo_resised, $logoImage, 0, 0, 0, 0, $stamp_x, $stamp_y, ImageSX($logoImage) , ImageSY($logoImage));
+		// Get new possiton for resizes logo
+		$stamp_x = $photoX - ImageSX($logo_resised);
+		$stamp_y = $photoY - ImageSY($logo_resised);		
+		// Merge Image and watermark	
+		imagecopymerge($photoImage, $logo_resised, $stamp_x, $stamp_y, 0, 0, $photoX, $photoY, $opacity);
+		// Output to Browser. 
+		ImagePNG($photoImage);
+		ImageDestroy($photoImage);
+		ImageDestroy($logoImage);
+		ImageDestroy($tcImage);
+	}
+}
+
+?>

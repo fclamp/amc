@@ -1,0 +1,217 @@
+/* 
+-----------------------------------------
+banner-home
+-----------------------------------------
+*/
+
+#banner-home
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	height: 245px;
+	position: relative;
+	background: #62A200 url(/images/site/back-banner-home.jpg) no-repeat;
+}
+
+/* 
+-----------------------------------------
+banner-category
+-----------------------------------------
+*/
+
+#banner-category
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	height: 200px;
+	position: relative;
+}
+
+/* 
+-----------------------------------------
+banner-section
+-----------------------------------------
+*/
+
+#banner-section
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	float: left;
+	padding: 0 0 10px;
+	position: relative;
+	background: url(/images/site/back-banner-asset.jpg) no-repeat;
+}
+
+#banner-section img { float: left; }
+
+#banner-section h2
+{
+	margin: 50px 150px .5em 280px;
+	color: #0046ad;
+	font-weight: normal;
+}
+
+#banner-section p
+{
+	margin: 0 100px 0 280px;
+	font-size: 120%;
+}
+
+.members #banner-section
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	float: left;
+	padding: 0 0 20px;
+	position: relative;
+	background: #911101 url(/images/site/back-banner-members.jpg) no-repeat 0 100%;
+}
+
+.members #banner-section h2
+{
+	margin: 30px 150px .5em 280px;
+	color: #fff;
+	font-weight: normal;
+}
+
+.members #banner-section p
+{
+	margin: 0 150px 0 280px;
+	font-size: 120%;
+	color: #fff;
+}
+
+.museum-as-a-venue #banner-section
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	float: left;
+	padding: 0 0 20px;
+	position: relative;
+	background: #245195 url(/images/site/back-banner-venue.gif) no-repeat 0 100%;
+}
+
+.museum-as-a-venue #banner-section h2
+{
+	margin: 30px 150px .5em 280px;
+	color: #fff;
+	font-weight: normal;
+}
+
+.museum-as-a-venue #banner-section p
+{
+	margin: 0 100px 0 280px;
+	font-size: 120%;
+	color: #fff;
+}
+
+.support-us #banner-section
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	float: left;
+	padding: 0 0 70px;
+	position: relative;
+	background: #293861 url(/images/site/back-banner-support.jpg) no-repeat 0 100%;
+}
+
+.support-us #banner-section h2
+{
+	margin: 30px 150px .5em 180px;
+	color: #fff;
+	font-weight: normal;
+}
+
+.support-us #banner-section p
+{
+	margin: 0 200px 0 180px;
+	font-size: 120%;
+	color: #fff;
+}
+
+.lizard-island-research-station #banner-section
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	float: left;
+	padding: 0 0 30px;
+	position: relative;
+	background: #002762 url(/images/site/back-banner-lizard.jpg) no-repeat 0 100%;
+}
+
+.lizard-island-research-station #banner-section h2
+{
+	margin: 30px 150px .5em 280px;
+	color: #fff;
+	font-weight: normal;
+}
+
+.lizard-island-research-station #banner-section p
+{
+	margin: 0 150px 0 280px;
+	font-size: 120%;
+	color: #fff;
+}
+
+
+
+.bugwise #banner-section
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	float: left;
+	padding: 0;
+	height: 237px;
+	position: relative;
+	background: #fff url(/images/site/back-banner-bugwise.jpg) no-repeat 0 100%;
+}
+
+.bugwise #banner-section h2
+{
+	position: absolute;
+	left: -500em;
+	width: 500em;
+}
+
+.bugwise #banner-section p
+{
+	margin: 0;
+	padding: 180px 100px 0 390px;
+	font-size: 120%;
+}
+
+
+/* 
+-----------------------------------------
+banner-asset
+-----------------------------------------
+*/
+
+#banner-asset
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	height: 38px;
+	position: relative;
+	background: #62A200 url(/images/site/back-banner-asset.jpg) no-repeat;
+}
+
+#banner-blog
+{
+	clear: both;
+	width: 940px;
+	margin-left: 20px;
+	height: 200px;
+	position: relative;
+	background: #62A200 url(/images/site/back-banner-blog.jpg) no-repeat;
+}

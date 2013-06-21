@@ -1,0 +1,201 @@
+<html>
+    <head>
+     	    <!-- (c)2000-2006 KE Software -->
+            <meta http-equiv="pragma" content="no-cache">
+            <meta http-equiv="cache-control" content="no-cache">
+            <meta http-equiv="imagetoolbar" content="no">
+
+	<title>KE EMu Web Map</title>
+
+	<link rel="stylesheet" type="text/css" href="./mapper/style/kemapper.css" />
+
+    	<script type='text/javascript'>
+
+		// globals need by javascript.
+		// Values for these set from the XML when processed by the HTML
+		// template mechanism
+		var ImgHeight = [imgHeight];
+		var ImgWidth = [imgWidth];
+		var Map = "[map]";
+		var ReferenceMap = "[referenceMap]";
+		var Scalebar = "[scalebar]";
+		var Referer = "[displayParameters/referer]";
+		var MapperUrl = "[mapperUrl]?instance=[instance]&referer="+ Referer;
+		var MapExtent = "[extent]".split(" ");
+		var Passive = [passive];
+		var ActionRequested = "[displayParameters/actionRequested]";
+		var QueryDataStylesheet = "[displayParameters/queryDataStylesheet]";
+		var ReferredArguments = "[displayParameters/referredArguments]";
+
+		var Sources = new Array();
+
+		<repeatableBlock foreach='dataSource'>
+			Sources.push("[dataSource]");
+		</repeatableBlock>
+    	</script>
+
+    	<script type='text/javascript'  src="./mapper/style/scripts/kemapdisplay.js">
+	</script>
+
+    </head>
+    <body onLoad='init();'>
+	<form id='form' method='post' action='' />
+
+
+        <table id="MasterTable">
+            <tr>
+                <td id="HeaderCell" colspan='2'>
+			KE EMu [systemName]
+		</td>
+            </tr>
+            <tr valign='top'>
+                <td>
+                    <table id="MapTable">
+		                    <tr>
+		                        <td colspan="3">
+						<div id="MapCell"/>
+						<div id='xHairH'></div>
+						<div id='xHairV'></div>
+						<div id="rubberBand"></div>
+		                        </td>
+		                    </tr>
+		                     <tr>
+		                        <td id="ScaleBarCell" colspan="3">
+						<img src='[scalebar]'/>
+		                        </td>
+		                    </tr>
+							 <tr>
+		                        <td id="ButtonsCell">
+						<img
+							src='./mapper/images/zoomin.gif'
+							id='ZoomIn'  name='ZoomIn' value='Zoom In'
+							alt='Zoom In'
+							title='Zoom In'
+							onClick='javascript:selectTool("ZoomIn");'/>
+						<img
+							src='./mapper/images/zoomout.gif'
+							id='ZoomOut'  name='ZoomOut' value='Zoom Out'
+							alt='Zoom Out'
+							title='Zoom Out'
+							onClick='javascript:selectTool("ZoomOut");'/>
+						<img
+							src='./mapper/images/pan.gif'
+							id='Pan'  name='Pan' value='Pan'
+							alt='Pan'
+							title='Pan'
+							onClick=' javascript:selectTool("Pan");'/><br/>
+						<img
+							src='./mapper/images/query.gif'
+							id='Query'  name='Query' value='Query'
+							alt='Query Items'
+							title='Query'
+							onClick='javascript:selectTool("Query");'/>
+						<!--<img
+							src='./mapper/images/areaquery.gif'
+							id='Spatial' name='Spatial' value='Data Search'
+							alt='Area Query'
+							title='Area Query'
+							onClick='javascript:selectTool("Spatial");'/>-->
+						<img
+							src='./mapper/images/redraw.gif'
+							id='ReDraw'  name='ReDraw' value='Re Draw'
+							alt='ReDraw'
+							title='ReDraw'
+							onClick='javascript:selectTool("ReDraw"); mSubmit("ReDraw");'/>
+						<!--<img
+							src='./mapper/images/maps_res_logo_but.gif'
+							id='Google'  name='Google' value='Google Map'
+							alt='Google Map'
+							title='Open a Google Map'
+							onClick='javascript:GoogleMap();'/>-->
+						<img
+							src='./mapper/images/first.gif'
+							id='Initial'  name='Initial' value='Initial Map'
+							alt='First Map'
+							title='Redisplay First Map'
+							onClick='javascript:mSubmit("First");'/>
+						<img
+							src='./mapper/images/back.gif'
+							id='Back'  name='Back' value='Search Again'
+							alt='Search Again'
+							title='Search Again'
+							onClick='javascript:mSubmit("Return");'/>
+		                        </td>
+		                        <td id="LayersCell" rowspan="2" onClick='selectTool("ReDraw");'>
+						show by: <br/>
+							&nbsp;<input type='radio' name='showby' id='sortby_ScientificName' value='ScientificName'/>Scientific Name<br/>
+							&nbsp;<input type='radio' name='showby' id='sortby_Family' value='Family'/>Family<br/>
+							&nbsp;<input type='radio' name='showby' id='sortby_Genus' value='Genus'/>Genus<br/>
+							&nbsp;<input type='radio' name='showby' id='sortby_Species' value='Species'/>Species<br/>
+							&nbsp;<input type='radio' name='showby' id='sortby_Source' value='source'/>Source<br/>
+						<repeatableBlock foreach='staticLayer'>
+							<input type='checkbox' name='[staticLayer/layerName]' 
+								value='on' [staticLayer/status] />
+									[staticLayer/name]  <span style='vertical-align: super; color: green;'>[staticLayer/noteId]</span>
+							<br/>
+						</repeatableBlock>
+					</td>
+		                        <td id="LatLongCell">
+		                        </td>
+		                    </tr>
+							 <tr>
+		                        <td id="ButtonHelpCell" style='visibility: visible;'>
+						Please Wait Until Map Loaded...
+		                        </td>
+		                        <td id="MapSMallCell">
+						<img src='[referenceMap]'/>
+		                        </td>
+		                    </tr>
+							<tr>
+		                         <td id="CopyrightCell" colspan="3">
+				<img border="0" alt="KE EMu" src="Mapper/images/productlogo.gif" />
+				<img border="0" alt="KE Software" src="Mapper/images/companylogo.gif" />
+				<br/>
+				<span style="font-size: 75%;">(C) 2000-2006 KE Software</span>
+			                    </td>  
+							</tr>
+							<tr>
+		                         <td id="FooterCell" colspan="3">
+						<repeatableBlock foreach='layerNotes'>
+							<div style='position:relative; font-size: 75%; width: [imgWidth]px; float: none; clear: both;'> 
+								<span style='color: green;'>[layerNotes/id]</span> [layerNotes/notes]
+							</div>
+						</repeatableBlock>
+		                        </td>
+		                    </tr>
+		                     
+
+                    </table>
+                </td>
+                <td>
+                    <table>
+                    <tr>
+                        <td id="LegendTable">
+				labels: <input type='radio' name='labels' id='labels' value='on' 
+						onClick='selectTool("ReDraw");'/> on
+		        		<input type='radio' name='labels' id='labelsoff' value='off' checked='true'
+						onClick='selectTool("ReDraw");'/> off
+				<br/>
+				records passed: <span class='status'>[recordsPassed]</span> <br/>
+				records without lat/longs: <span class='alert'>[missingLatLongs]</span><br/>
+				<repeatableBlock foreach='warning'>
+					<span class='alert'>[warning]</span><br/>	
+				</repeatableBlock>
+				<repeatableBlock foreach='dynamicLayer'>
+					<a href="http://www.google.com/scholar?q=[dynamicLayer/name]"><img src='./images/info.png' border='0'/></a> 
+					<input type='checkbox' name='[dynamicLayer/layerName]' 
+						value='on' [dynamicLayer/status]  onClick='selectTool("ReDraw");'/>
+					<img src='[dynamicLayer/icon]'/> 
+					<a href='#' class='pseudoAnchor' 
+						onclick='javascript:getInfoOn("[dynamicLayer/name]","[showby]","[emuBackendType]")'>[dynamicLayer/name]</a>
+					<br/>
+				</repeatableBlock>
+                        </td>
+                    </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+	</form>
+    </body>
+</html> 

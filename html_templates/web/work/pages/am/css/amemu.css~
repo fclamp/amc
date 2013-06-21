@@ -1,0 +1,459 @@
+/* general common */
+
+body 
+{
+	margin: 0;
+	padding: 0;
+	font: 85%/1.4 arial, helvetica, sans-serif;
+	background: #fff;
+	color: #222;
+}
+
+h1, h2, h3, h4, h5, p 
+{
+	margin-top: 0;
+}
+
+h2
+{
+	margin: 0 0 .5em;
+	color: #b32317;
+	font-size: 150%;
+	font-weight: normal;
+}
+
+
+h3 
+{
+	margin: 0 0 .5em;
+	color: #b32317;
+	font-size: 130%;
+	font-weight: normal;
+}
+
+
+h4 
+{
+	color: #b32317;
+	font-size: 110%;
+}
+
+
+
+img		{ border: none; }
+p		{ margin-top: 0; }
+
+a		{ color: #114D96; }
+a:link		{ color: #0046ad; }
+a:visited	{ color: #1a79ab; }
+a:hover		{ color: #f00; }
+a:focus, a:active { color: #bf2296; }
+
+table           { display: table }
+tr              { display: table-row }
+thead           { display: table-header-group }
+tbody           { display: table-row-group }
+tfoot           { display: table-footer-group }
+col             { display: table-column }
+colgroup        { display: table-column-group }
+td, th          { display: table-cell }
+caption         { display: table-caption }
+th              { font-weight: bolder; text-align: center }
+
+li		{ text-align: left; }
+
+
+/* pages common */
+
+#header 
+{
+	width: 840px;
+	height: 95px;
+	background: #0140b4 url(http://www.austmus.gov.au/images/site/back-header.jpg) no-repeat;
+	color: white;
+} 
+
+#nav 
+{
+	float: left;
+	clear: both;
+}
+
+#nav ul 
+{
+	margin: 0;
+	padding: 0 0 0 25px;
+	float: left;
+	width: 815px;
+	background: #f6cf46 url(http://www.austmus.gov.au/images/site/back-nav.jpg) repeat-y;
+}
+
+
+#nav li 
+{
+	list-style-type: none;
+	display: inline;
+}
+
+
+#nav li a 
+{
+	display: block;
+	float: left;
+	padding: 3px 10px 2px;
+	border-right: 1px solid #C9B440;
+	background: #f6cf46;
+	color: #111629;
+	text-decoration: none;
+}
+
+
+
+#nav li a:hover 
+{
+	background: #0140b4;
+	color: #fff;
+}
+
+
+.branding 
+{
+	clear: both;
+	border: 0px solid #e0e0e0;
+	margin-top: 20%;
+	margin-left: 10%;
+	margin-right: 10%;
+	width: 80%;
+	text-align: center;
+}
+
+.clearBoth 
+{
+	clear: both;
+}
+
+.fieldData 
+{
+	float: left;
+	font-weight: bolder;
+}
+
+.imageLink { }
+
+.zebraOdd 
+{
+	background: #f0f0f0;
+}
+
+.zebraEven 
+{
+	background: white;
+}
+
+.noul
+{
+	text-decoration: none;
+}
+
+
+/* query/search screens */
+
+.emuWebForm 
+{
+	float: left;
+	clear: both;
+}
+
+.emuWebObject { }
+
+.hint 
+{
+	text-align: left;
+	float: left;
+	background: #e0e0e0;
+}
+
+.pageDescription 
+{
+	float: left;
+	border-width: 1px 1px 0px 1px;
+	border-style: solid;
+	border-color: #e0e0e0;
+	background: url( ../images/greyGradient.jpg ) repeat-x;
+	margin-left: 10%;
+	margin-top: 1%;
+	text-align: center;
+	height: 5em;
+	text-align: left;
+	width: 50%;
+}
+
+.prebuiltSearches 
+{
+	float: left;
+	border-width: 1px 1px 0px 1px;
+	border-style: solid;
+	border-color: #e0e0e0;
+	background: url( ../images/greyGradient.jpg ) repeat-x;
+	margin-top: 1%;
+	margin-left: 2%;
+	text-align: center;
+}
+
+.searchBlock 
+{
+	float: left;
+	clear: both;
+	text-align: center;
+	margin: 5% 10% 5% 10%;
+}
+
+.searchInput 
+{
+	text-align: left;
+	float: left;
+	width: 15em;
+}
+
+.searchPrompt 
+{
+	float: left;
+	clear: left;
+	background: #e0e0e0;
+	width: 15em;
+	text-align: left;
+}
+
+.searchPromptAndInput 
+{
+	background: #e0e0e0;
+}
+
+.submit 
+{
+	clear: both;
+}
+
+
+/* results lists */
+
+.dataCell { }
+
+.dataLink
+{
+	overflow: auto;
+}
+
+.dataRow { }
+
+.dataRow a
+{
+	font-size: smaller;
+	text-decoration: none;
+	color: #222;
+}
+
+.dataRow a:hover
+{
+	font-size: smaller;
+	text-decoration: underline;
+	color: #336699;
+}
+
+.dataTable 
+{
+	float: left;
+	clear: both;
+	width: 100%;
+}
+
+.headerLabel { }
+
+.headerRow 
+{
+	background: gray;
+	color: #f0f0f0;
+}
+
+.movementControls 
+{
+	margin: 0px 1px 0px 1px;
+}
+
+.recordPosition, .movementControls 
+{
+	float: right;
+	clear: both;
+}
+
+.resultsList 
+{
+	margin-left: 10%;
+	margin-right: 10%;
+	width: 80%;
+	text-align: center;
+	clear: both;
+}
+
+.resultsListControls 
+{
+	float: left;
+	clear: both;
+	width: 80%;
+}
+
+
+/* contact sheet view */
+
+.contactData 
+{
+	font-size: smaller;
+	overflow:auto;
+}
+
+.contactImage 
+{
+	height: 100px;
+	width: 100px;
+}
+
+.contactSheetItem 
+{
+	border: 1px solid #c0c0c0;
+	margin-left: 10%;
+	margin-right: 10%;
+	width: 80px;
+}
+
+.contactSheetRow * a 
+{
+	text-decoration: none;
+	color: gray;
+}
+
+.contactThumbnail 
+{
+	width: 100px;
+	height: 100px;
+	margin-left: 10%;
+	margin-right: 10%;
+}
+
+.dataContactSheetTable 
+{
+	float: left;
+	clear: both;
+	border-collapse: collapse;
+	margin-left: 10%;
+	margin-right: 10%;
+	width: 80%;
+	text-align: center;
+}
+
+/* Object Display */
+
+.dataThumbnail { }
+
+.displayMainImage 
+{
+	float: left;
+}
+
+.emuTableData
+{
+	float: left;
+	clear: both;
+	font-weight: normal;
+	margin-left: 10em;
+	width: 80%
+}
+
+.emuTableData *
+{
+	float: left;
+	clear: both;
+	margin: 0 0 1em 0;
+	width: 100%
+}
+
+.fieldLabel 
+{
+	float: left;
+	margin-right: 1em;
+	width: 15em;
+}
+
+.objectDataRow *.fieldData
+{
+	margin-left: 10em;
+	clear: both;
+}
+.fieldData *.emuTableData
+{
+	margin-left: 0em;
+	width: 100%;
+	font-weight: bolder;
+}
+
+.itemDetails 
+{
+	clear: both;
+	float: left;
+	text-align: left;
+	margin: 1em;
+	width: 100%;
+}
+
+.itemHeading 
+{
+	float: left;
+	font-weight: bold;
+	margin: 1em;
+	background: gray;
+	color: #f0f0f0;
+}
+
+.objectData 
+{
+	border: 1px solid #d0d0d0;
+	margin-left: 3%;
+	margin-left: 10%;
+	margin-right: 10%;
+	float: left;
+	width: 80%;
+}
+
+.objectDataRow 
+{
+	margin: 2px;
+	float: left;
+	clear: both;
+	width: 90%;
+}
+
+.thumbnailImage 
+{
+	height: 50px;
+	width: 50px;
+}
+
+.thumbnailRow 
+{
+	float: left;
+	clear: both;
+	border: 1px solid #f0f0f0;
+	width: 90%;
+	background: #f0f0f0;
+}
+
+.thumbnailRow  *.fieldData 
+{
+	float: left;
+	width: 80px;
+}
+
+.imageCredits {
+	font-size: 80%;
+	color: red;
+	border: 1px solid red;
+}

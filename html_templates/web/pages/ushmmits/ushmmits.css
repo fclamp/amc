@@ -1,0 +1,19 @@
+body	{
+		background-color:#D2D7A4;
+		font-family: "Arial";
+		font-size: 1em;
+		color: #00000;
+	}
+
+table	{
+		background-color:#D2D7A4;
+		font-family: "Arial";
+		font-size: 1em;
+		text-align: left;
+		color: #00000;
+	}
+
+a { text-decoration:none; }
+a:link { color:#000000; }
+a:visited { color:#0000FF; }
+a:hover { color:#FFFFFF; }

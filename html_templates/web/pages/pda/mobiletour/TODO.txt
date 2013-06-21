@@ -1,0 +1,42 @@
+Martin Jujou added on 5/2/2004
+Last Modified: 16/4/2004
+
+########################################################################################
+
+Interface for barcode/rfid/infrared/bluetooth scanner where 
+a barcode number is found and the related object can be queried 
+
+File: reader.php
+
+At the moment the page continually checks the position of the mouse.
+This is just for show ..    
+
+There is going to have to be some application which reads the rfid/barcode device port and then 
+queries the other related pages based on tag id (or irn)
+
+Also the field is searching "SummaryData", this will have to be replaced to 
+search a field where barcode/id's are kept. 
+
+
+########################################################################################
+
+
+The multimedia directory needs read and execute permissions for the streaming. 
+So when multimedia is inserted into emu the permissions should be set so that 
+php can read each piece of multimedia without running into permission problems .
+
+
+Multimedia streaming types supported : wma, wmv, asf 
+Still Working on: mpg, mpeg, mp3 
+Image types supported: bmp, jpg, gif, jpeg
+
+
+########################################################################################
+
+
+Probably should make the system a bit more portable so that its easier to set up 
+for new clients. At the moment you are going to have to change alot of links and 
+do alot of mucking around to set up the system for a new client 
+(for example you have to make a link in htdocs which points to the multimedia directory).
+
+

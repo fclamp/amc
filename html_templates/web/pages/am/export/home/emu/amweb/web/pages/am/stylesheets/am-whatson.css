@@ -1,0 +1,314 @@
+/* 
+-----------------------------------------
+whatson-nav styles
+-----------------------------------------
+*/
+
+#whatson-nav1, #whatson-nav2, #whatson-nav3, #whatson-nav4,#whatson-nav5, #whatson-nav6
+{
+	float: left;
+	width: 716px;
+	margin: 0;
+	padding: 0 0 6px;
+}
+
+#whatson-nav1 ul, #whatson-nav2 ul, #whatson-nav3 ul, #whatson-nav4 ul, #whatson-nav5 ul, #whatson-nav6 ul
+{
+	float: left;
+	width: 716px;
+	margin: 0;
+	padding: 0;
+}
+
+#whatson-nav1 { background: #fff url(../images/site/back-whatsonnav-1b.gif) no-repeat 0 100%; }
+#whatson-nav1 ul { background: url(../images/site/back-whatsonnav-1a.jpg) no-repeat; }
+#whatson-nav2 { background: #fff url(../images/site/back-whatsonnav-2b.gif) no-repeat 0 100%; }
+#whatson-nav2 ul { background: url(../images/site/back-whatsonnav-2a.jpg) no-repeat; }
+#whatson-nav3 { background: #fff url(../images/site/back-whatsonnav-3b.gif) no-repeat 0 100%; }
+#whatson-nav3 ul { background: url(../images/site/back-whatsonnav-3a.jpg) no-repeat; }
+#whatson-nav4 { background: #fff url(../images/site/back-whatsonnav-4b.gif) no-repeat 0 100%; }
+#whatson-nav4 ul { background: url(../images/site/back-whatsonnav-4a.jpg) no-repeat; }
+#whatson-nav5 { background: #fff url(../images/site/back-whatsonnav-5b.gif) no-repeat 0 100%; }
+#whatson-nav5 ul { background: url(../images/site/back-whatsonnav-5a.jpg) no-repeat; }
+#whatson-nav6 { background: #fff url(../images/site/back-whatsonnav-6b.gif) no-repeat 0 100%; }
+#whatson-nav6 ul { background: url(../images/site/back-whatsonnav-6a.jpg) no-repeat; }
+
+#whatson-nav1 li, #whatson-nav2 li, #whatson-nav3 li, #whatson-nav4 li, #whatson-nav5 li, #whatson-nav6 li
+{
+	margin: 0;
+	padding: 0;
+	display: inline;
+	list-style-type: none;
+}
+
+#whatson-nav1 li span, #whatson-nav2 li span, #whatson-nav3 li span, #whatson-nav4 li span, #whatson-nav5 li span, #whatson-nav6 li span
+{
+	float: left;
+	display: block;
+	width: 105px;
+	padding: 5px;
+	margin: 0 2px 0 0;
+	text-align: center;
+	font-weight: bold;
+}
+
+#whatson-nav1 li a, #whatson-nav2 li a, #whatson-nav3 li a, #whatson-nav4 li a, #whatson-nav5 li a, #whatson-nav6 li a
+{
+	float: left;
+	display: block;
+	width: 105px;
+	padding: 5px;
+	margin: 0 2px 0 0;
+	text-align: center;
+	font-weight: bold;
+	color: #555;
+	text-decoration: none;
+}
+
+#whatson-nav1 li a:hover, #whatson-nav2 li a:hover, #whatson-nav3 li a:hover, #whatson-nav4 li a:hover, #whatson-nav5 li a:hover, #whatson-nav6 li a:hover { color: #436f07; }
+
+/* 
+-----------------------------------------
+whatson-results styles
+-----------------------------------------
+*/
+
+#whatson-results { padding: 0; }
+#whatson-results h3 { font-size: 130%; }
+
+/* 
+-----------------------------------------
+calendar-options styles
+-----------------------------------------
+*/
+
+#calendar-options
+{
+	float: left;
+	width: 716px;
+	background: url(../images/site/calendar-options-back2.gif) no-repeat 0 100%;
+}
+
+#calendar-options2
+{
+	float: left;
+	width: 716px;
+	padding: 8px 0;
+	background: url(../images/site/calendar-options-back1.gif) no-repeat;
+}
+
+/* 
+-----------------------------------------
+view-by styles
+-----------------------------------------
+*/
+
+#view-by
+{
+	float: left;
+	width: 300px;
+	padding: 0;
+	margin: 0 0 0 20px;
+}
+
+#view-by label
+{
+	width: 55px;
+	float: left;
+}
+
+#view-by-options
+{
+	float: left;
+	width: 120px;
+	margin: 0 5px 0 0;
+}
+
+/* 
+-----------------------------------------
+choose-date styles
+-----------------------------------------
+*/
+
+#choose-date
+{
+	float: right;
+	width: 274px;
+	padding: 0;
+	margin: 0;
+}
+
+#choose-date label
+{
+	width: 85px;
+	float: left;
+}
+
+#choose-date select
+{
+	float: left;
+	margin: 0 5px;
+}
+
+#choose-date-optons
+{
+	width: 100px;
+	float: left;
+	padding: 0;
+	margin: 0 5px 0 0;
+	border: 1px solid #aaa;
+	height: 20px;
+}
+
+#choose-date-icon
+{
+	float: left;
+	margin: 0 5px 0 0;
+}
+
+/* 
+-----------------------------------------
+date-navigation styles
+-----------------------------------------
+*/
+
+#date-navigation
+{
+	clear: both;
+	padding: 10px 0 0;
+	font-weight: bold;
+	font-size: 120%;
+	text-align: center;
+}
+
+#date-navigation a
+{
+	padding: 0 10px;
+	text-decoration: none;
+}
+
+/* 
+-----------------------------------------
+special-item styles
+-----------------------------------------
+*/
+
+#special-items
+{
+	float: left;
+	clear: left;
+	width: 100%;
+}
+
+#special-items div
+{
+	float: left;
+	clear: left;
+	width: 100%;
+	padding: 0 0 10px 0;
+}
+
+#special-items div img
+{
+	float: left;
+	margin: 0 15px 10px 0;
+	padding: 1px;
+	border: 1px solid #c8c8c8;
+}
+
+#special-items div p { margin: 0 0 0 155px; }
+
+#current-items
+{
+	float: left;
+	clear: left;
+	width: 100%;
+}
+
+#current-items div
+{
+	float: left;
+	width: 80px;
+	padding: 0 0 20px;
+}
+
+/* 
+-----------------------------------------
+general-item styles
+-----------------------------------------
+*/
+
+.general-item
+{
+	clear: left;
+	float: left;
+	width: 100%;
+}
+
+.general-item div
+{
+	clear: left;
+	padding: 0 0 5px;
+}
+
+.general-item img
+{
+	float: left;
+	margin: 0 15px 10px 0;
+	padding: 1px;
+	border: 1px solid #c8c8c8;
+}
+
+#general-items div p { margin: 0 0 0 155px; }
+
+/* 
+-----------------------------------------
+.whatson-col1
+-----------------------------------------
+*/
+
+#function-wrapper #whatson-results .whatson-col1 h3, #function-wrapper #whatson-results .whatson-col2 h3
+{
+	font-size: 140%;
+	margin: 0 0 .5em;
+}
+
+#function-wrapper #whatson-results .whatson-col1 h5, #function-wrapper #whatson-results .whatson-col2 h5 { font-size: 110%; }
+
+.whatson-col1
+{
+	clear: left;
+	float: left;
+	width: 320px;
+	padding: 0 15px 0 10px;
+	margin: 0 20px 0 0;
+	border-right: 1px solid #ccc;
+}
+
+.whatson-col2
+{
+	float: left;
+	width: 320px;
+}
+
+.whatson-col1 div, .whatson-col2 div
+{
+	clear: left;
+	float: left;
+	width: 320px;
+	padding: 0 0 20px;
+}
+
+.whatson-col1 img,.whatson-col2 img
+{
+	float: left;
+	width: 60px;
+	height: 60px;
+	padding: 1px;
+	border: 1px solid #c8c8c8;
+}
+
+.whatson-col1 div h3, .whatson-col2 div h3 { color: red; }
+.whatson-col1 div h5, .whatson-col2 div h5 { margin: 0 0 0 75px; }
+.whatson-col1 div p, .whatson-col2 div p { margin: 0 0 0 75px; }
+.whatson-col1 .date, .whatson-col2 .date { font-weight: bold; }

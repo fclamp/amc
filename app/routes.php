@@ -11,31 +11,31 @@
 |
 */
 
-Route::get ( '/', function ()
-{
-	return View::make ( 'hello' );
-} );
+// Our intial routes.
+Route::get('/', 'HomeController@index');
+Route::get('search/results', 'SearchController@results');
+Route::get('info', 'InformationController@index');
+Route::get('object', 'ObjectController@index');
 
-Route::get ( 'imu', function ()
+// IMu test.
+Route::get ('imu-test', function ()
 {
 	try
 	{
-		$mySession = App::make ( 'IMuSession' );
+		$mySession = App::make ( 'ImuSession' );
 		$mySession->host = '203.22.224.29';
 		$mySession->port = 40000;
 		$mySession->connect ();
-		
 		Config::set ( 'imu.module_table', 'eparties' );
-		$parties = App::make ( 'IMuModule' );
-		$search = array('NamLast','Smith');
-		$hits = $parties->findTerms($search);
-
-		$result = $parties->fetch('start',0,10);
-		echo '<Pre>';
-		var_dump($result);
-	} catch ( Exception $e )
-	{
-		var_dump($e);
+		$parties = App::make ( 'ImuModule' );
+		$search = array ('NamLast', 'Smith' );
+		$hits = $parties->findTerms ( $search );
+		$columns = array ('irn', 'NamFirst', 'NamLast' );
+		$result = $parties->fetch ( 'start', 0, 3, $columns );
+		print_r( $result );
 	}
-
-} );
+	catch ( Exception $e )
+	{
+		print ( $e->getMessage() );
+	}
+});

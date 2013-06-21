@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<labels>
+	<module name="ecatalogue">
+		<field name="SummaryData">
+			Summary Data	
+		</field>
+		<field name="irn">
+			Catalogue IRN
+		</field>	
+	</module>
+	<module name="elocations">
+		<field name="PhyLocationX">
+			X
+		</field>
+		<field name="PhyLocationY">
+			Y
+		</field>
+		<field name="PhyLocationZ">
+			Z
+		</field>
+		<field name="LocLocationName">
+			Location Name
+		</field>
+		<field name="irn">
+			Location IRN
+		</field>
+	</module>
+</labels>

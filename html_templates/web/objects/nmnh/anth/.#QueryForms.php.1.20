@@ -1,0 +1,185 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseQueryForms.php');
+
+$GLOBALS['STRINGS_DIR'] = $WEB_ROOT . "/objects/" . $GLOBALS['BACKEND_TYPE'] . "/" . $GLOBALS['DEPARTMENT'] . "/strings/";
+
+class
+NmnhAnthBasicQueryForm extends BaseBasicQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeObjectName_tab',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' and CatMuseumAcronym = 'USNM' and CatDepartment = 'Anthropology'";
+}  // end NmnhAnthBasicQueryForm class
+
+class
+NmnhAnthAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeObjectName_tab',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' and CatMuseumAcronym = 'USNM' and CatDepartment = 'Anthropology'";
+}  // end NmnhAnthAdvancedQueryForm class
+	
+
+class
+NmnhAnthDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Restriction = "CatMuseum = 'NMNH' and CatMuseumAcronym = 'USNM' and CatDepartment = 'Anthropology'";
+
+	function
+	NmnhAnthDetailedQueryForm()
+	{
+		$catNumber = new QueryField;
+		$catNumber->ColName = 'CatNumber';
+		$catNumber->ColType = 'integer';
+
+		$speciminCount = new QueryField;
+		$speciminCount->ColType = 'integer';
+		$speciminCount->ColName = 'CatSpecimenCount';
+
+		$expStartDate = new QueryField;
+		$expStartDate->ColName = 'ExpStartDate';
+		$expStartDate->ColType = 'date';
+
+		$dateIdentified = new QueryField;
+		$dateIdentified->ColType = 'date';
+		$dateIdentified->ColName = 'IdeDateIdentified0';
+
+
+
+		$this->Fields = array
+		(	
+			'CatBarcode',
+			'CatOtherNumbersValue_tab',
+			'CatDivision',
+			'IdeClassIndex_tab|IdeIndexTerm_tab|IdeSubType_tab|IdeVariety_tab|IdeTerm_tab|IdeObjectName_tab',
+			'ArcObjectDate_tab',
+			'CulCultureLocal_tab',
+			'BioCountryLocal',
+			'BioProvinceStateLocal',
+			'BioPreciseLocationLocal',
+			'BioSiteNameLocal|BioSiteNumberLocal',
+			'ArcClassification1_tab|ArcClassification2_tab|ArcClassification3_tab|ArcClassification4_tab',
+			'BioParticipantLocal_tab',
+			'BioVerbatimDateLocal',
+			'AccTransactorLocal_tab',
+			'AccAccessionLotNumber',
+			'AccAccessionDateOwnership',
+		);
+	
+		$this->BaseDetailedQueryForm();
+
+
+		$this->Hints = array
+		(	
+			'CatBarcode' 							=> '[e.g. 00012345]',
+			'CatOtherNumbersValue_tab'					=> '[e.g. ]',
+			'CatDivision' 							=> '[Select from list]',
+			'IdeClassIndex_tab|IdeIndexTerm_tab|IdeSubType_tab|IdeVariety_tab|IdeTerm_tab|IdeObjectName_tab' 	=> '[e.g. ]',
+			'ArcObjectDate_tab' 						=> '[format dd-mm-yyyy, partial entry works]',
+			'CulCultureLocal_tab' 						=> '[e.g. ]',
+			'BioCountryLocal' 						=> '[Select from list]',
+			'BioProvinceStateLocal' 					=> '[e.g. ]',
+			'BioPreciseLocationLocal' 					=> '[e.g. ]',
+			'BioSiteNameLocal|BioSiteNumberLocal' 				=> '[e.g. ]',
+			'ArcClassification1_tab|ArcClassification2_tab|ArcClassification3_tab|ArcClassification4_tab' 		=> '[e.g. ]',
+			'BioParticipantLocal_tab' 					=> '[e.g. ]',
+			'BioVerbatimDateLocal' 						=> '[e.g. ]',
+			'AccTransactorLocal_tab'					=> '[e.g. ]',
+			'AccAccessionLotNumber' 					=> '[e.g. ]',
+			'AccAccessionDateOwnership' 					=> '[format dd-mm-yyyy, partial entry works]',
+		);
+
+
+		$this->DropDownLists = array
+		(	
+			'CatDivision' 			=> 'eluts:Collection Custody[4]', 
+			'BioCountryLocal' 		=> 'eluts:Continent[2]', 
+		);
+
+		$this->LookupLists = array
+		(
+		);
+	}
+
+	function
+        generateDropDown($fld, $htmlFieldName)
+        {
+                print "&nbsp;&nbsp;<select class=\"WebSelect\" name=\"$htmlFieldName\">\n";
+
+                $matches = array();
+                if (preg_match('/^eluts:(.*?)\[?(\d*)\]?$/', $this->DropDownLists[$fld], $matches))
+                {
+                        $tablename = $matches[1];
+                        if (isset($matches[2]) && $matches[2] != '')
+                                $level = $matches[2];
+                        else
+                                $level = 1;
+                        $value = sprintf('Value%02d0', (int) ($level - 1));
+                        $qry = new ConfiguredQuery();
+                        $qry->SelectedLanguage = $this->LanguageData;
+
+                        $restriction = $this->getLookupRestriction($tablename);
+                        if ($restriction == "")
+                            $restriction = "true";
+
+                        //$qry->Texql = "distinct(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500}";
+                        $qry->Texql = "order(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) on $value asc";
+
+                        $recs = $qry->Fetch();
+                        $dropdownlisttmp = array();
+                        foreach ($recs as $rec)
+                        {
+                                $dropdownitem = preg_replace('/[\?\*\"]/', ' ', $rec->{$value});
+                                $dropdownitem = trim($dropdownitem);
+                                if ($dropdownitem == '')
+                                        continue;
+                                array_push($dropdownlisttmp, $dropdownitem);
+                        }
+                        $dropdownlist = array_unique($dropdownlisttmp);
+
+                        print "            <option></option>\n";
+                        $hasEntry = 0;
+                        foreach ($dropdownlist as $option)
+                        {
+                                if (strlen($option) > $this->MaxDropDownLength)
+                                        $option = $this->trimOption($option, $this->MaxDropDownLength);
+                                if ($option != '')
+                                {
+                                        print "            <option>$option</option>\n";
+                                        $hasEntry = 1;
+                                }
+                        }
+                        if (! $hasEntry)
+                                print "            <option>--- None Available ---</option>\n";
+                }
+                else
+                {
+                        foreach (split('\|', $this->DropDownLists[$fld]) as $option)
+                        {
+                                print "            <option>$option</option>\n";
+                        }
+                }
+        }
+} // End NmnhAnthDetailedQueryForm class
+?>
+

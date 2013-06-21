@@ -1,0 +1,76 @@
+<?php
+
+/*
+ *  Copyright (c) 1998-2012 KE Software Pty Ltd
+ */
+
+
+if (!isset($WEB_ROOT))
+{
+	// Fetchers may live in 2 places - the default or the client localised
+	// path.
+	if (preg_match("/portal.fetchers/",realpath(__FILE__)))
+		$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+	else	
+		$WEB_ROOT = dirname(dirname(dirname(dirname(dirname(realpath(__FILE__))))));
+}
+
+
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($WEB_ROOT . '/webservices/portal/DigirFetcher.php');
+
+
+/**
+*
+* A localised Fetcher 
+*
+* Copyright (c) 1998-2012 KE Software Pty Ltd
+*
+* @package EMuWebServices
+*
+*/
+
+class SourceDigirFetcher extends DigirFetcher
+{
+
+	var 	$enabled = true;
+	
+	var 	$serviceName = "SourceDigirFetcher";
+
+	/*  Describe Digir configuration parameters
+	 *  of the source
+	*/
+	var 	$sourceName = "Source Digir Fetcher Sample (EMu-DiGIR.02)";
+	var	$hostname = "localhost";
+	var	$port = 80;
+	var	$provider = "emuweb/webservices/digir.php";
+	var	$resource = "EMu";
+	var 	$exampleQueryTerms = Array(
+			"darwin:Genus = Aus",
+	);
+	var 	$preferredRGB = '#eeffaa';
+	var 	$preferredIcon = '';
+
+	function describe()
+	{
+		return	
+			"A Sample Digir Fetcher is a\n".
+			"Sample implementation of a\n".
+			"Digir Fetcher\n\n".
+			Parent::describe();  
+	}
+
+}
+
+
+if (isset($_REQUEST['test']))
+{
+	if (basename($_SERVER['PHP_SELF']) == 'Fetcher.php')
+	{
+		$source = new SourceDigirFetcher();
+		$source->test(true);
+	}
+}
+
+
+?>

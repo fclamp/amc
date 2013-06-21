@@ -1,0 +1,111 @@
+nav ul { margin:0; padding: 0.6em 0; overflow: auto; }
+nav a 
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+}
+nav a:hover { color:#5abae3;  }
+
+/* List styles */
+.flatList
+{
+	padding: 0;
+	margin: 1em 0 0; 
+	list-style: none;
+}
+
+.flatList li
+{
+	padding: 0; 
+	margin: 0 0 0.3em;
+}
+
+.inlineListBnt, .inlineList { list-style-type: none; padding: 0; overflow: hidden; width: 100%; }
+.inlineList li, .inlineList a, .inlineListBnt li, .inlineListBnt a { float: left; }
+.inlineList li, .inlineList a { margin: 0 0 0.5em 0; }
+
+.objectList li { background: url(../images/object_icon.png) 0 0 no-repeat; padding: 0 0 0 1.8em; margin: 0 0 0.5em 0; }
+.objectList { padding: 0; list-style: none; }
+
+.infosheetsList li { background: url(../images/info_sheet_icon.png) 0 0 no-repeat; padding: 0 0 0 1.8em; margin: 0 0 0.5em 0; }
+.infosheetsList { padding: 0; list-style: none; }
+
+/* Button Styles */
+.bnt,.bnt a { 
+	text-decoration: none; 
+	padding: 0.8em 1.5em; 
+}
+.bnt 
+{
+	-webkit-border-radius:  10px 10px 0 0;
+	-moz-border-radius:  10px 10px 0 0;
+	border-radius:  10px 10px 0 0;
+}
+.bnt a
+{
+	-webkit-border-radius:  10px;
+	-moz-border-radius:  10px;
+	border-radius:  10px;
+}
+.sm_bnt
+{
+	text-decoration: none; 
+	padding: 0.6em 1em; 
+	-webkit-border-radius:  10px;
+	-moz-border-radius:  10px;
+	border-radius:  10px;
+}
+
+.search_bnt
+{
+	-webkit-border-radius:  10px;
+	-moz-border-radius:  10px;
+	border-radius:  10px;
+	border: none; 
+	padding: 0.6em 1em;
+}
+.boxShadow
+{
+	-moz-box-shadow: 0px 1px 10px 0px #333;
+	-webkit-box-shadow: 0px 1px 10px 0px #333;
+	box-shadow: 0px 1px 5px 0px #333;
+}
+
+/* Active home tabs */
+.active-tab
+{
+	background: #e7f2f8; 
+}
+.active-tab a { background: #d7e2e8; color:#231f20; }
+
+/* -----------------------------------
+Explore Image Wrap
+----------------------------------- */
+.box-wrap 
+{ 
+	float: left; 
+	margin-right: 2%; 
+}
+.box-wrap a  { color: #045196; }
+
+.border-radius234
+{
+	-webkit-border-radius:  0 10px 10px 10px;
+	-moz-border-radius:  0 10px 10px 10px;
+	border-radius:  0 10px 10px 10px;
+}
+
+/* -----------------------------------
+Search Form
+----------------------------------- */
+.search-form label { text-align: right; } 
+.box-right input,.box-right select { width: 100%; padding: 0.4em 0; border: 1px solid #818285; } 
+.box-right select { height: 3em; } 
+.box-right p { margin-top: 0.4em; }
+
+/* -----------------------------------
+Box Arrows
+----------------------------------- */
+.arrow-left { padding: 5% 0; width: 21px; }
+.arrow-right {padding: 5% 0; width: 21px; }

@@ -1,0 +1,286 @@
+/* Standard Elements */
+html {
+	margin: 0;
+	padding: 0;
+}
+
+body { 
+	text-align: center;
+	font: 75% georgia, sans-serif;
+	line-height: 1.5;
+	color: #555753;
+	background-color: #ffffff; 
+	margin: 1em;
+	padding: 0em;
+}
+
+a:link { 
+	font-weight: bold; 
+	text-decoration: underline; 
+	color: #7f7f7f;
+}
+a:visited { 
+	font-weight: bold; 
+	text-decoration: underline; 
+	color: #7f7f7f;
+}
+a:hover, a:active { 
+	text-decoration: underline; 
+	color: #7f7f7f;
+}
+
+h1, h2, h3, h4 {
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	width: 80%;
+}
+
+h1 {
+	font-size: 200%;
+}
+
+h2 {
+	font-size: 130%;
+}
+
+h3 {
+	font-size: 110%;
+}
+
+h4 {
+	font-size: 100%;
+}
+
+/* Boxes with Rounded Corners.   */
+/* These used for floating       */
+/* 'tooltip' dialog box on map.  */
+/*                               */
+/* NB no images used - instead   */
+/* the rounded top and bottoms   */
+/* consist of 1px high elements  */
+/* of slightly different margin  */
+/* widths.  A hack but fast and  */
+/* convenient                    */
+
+.b1, .b2, .b3, .b4, .roundBoxContent {
+
+	/* colour of box */
+	background-color: #ffffff;
+
+	/* border around tooltip */
+	border-color: black; 
+	border-width: 0px 1px 0 1px;
+	border-style: solid; 
+}
+
+.b1, .b2, .b3, .b4, .roundBoxContent, .roundBoxContent div {
+	/* the great thing about standards is there are just so many to choose
+	 * from!
+	 */
+	filter:alpha(opacity=85); 
+	-moz-opacity: 0.85; 
+	opacity: 0.85;  
+	/* hack to get IE to do opacity on elements with no width set */
+	zoom: 100%;
+}
+
+.b1, .b2, .b3, .b4 {
+	font-size:1px; 
+	overflow:hidden; 
+	display:block;
+	height: 1px;
+}
+.b1 {
+	margin: 0px 5px;
+	background: black;
+}
+.b2 {
+	margin: 0px 3px 0 3px;
+	border-width: 0 2px 0 2px;
+}
+.b3 {
+	margin: 0px 2px;
+}
+.b4 {
+	margin: 0px 1px;
+	height: 2px;
+}
+.roundBoxContent div {
+	margin: 0px 5px 0px 5px;
+}
+
+/* tabbed bits */
+.tablist {
+	list-style: none;
+	margin: 0px;
+	padding: 1px;
+	color: red;
+	margin-left:12%;
+	margin-right:5%;
+}
+
+.tablist li {
+	background: #f0f0f0;
+	float: left;
+	clear: right;
+	border-style: solid;
+	border-color:  black;
+	border-width: 1px 1px 0 1px;
+	margin: 0 0.25em 0 0;
+	padding: 0 0.5em 0 0.5em ;
+	font-size: larger;
+	font-weight: bold; 
+}
+
+.tablist li.active {
+	background-color: #ffffff; 
+	position: relative;
+	top: 1px;
+}
+
+
+.tablist a {
+	text-decoration: none;
+	color: gray;
+}
+
+.tablist a:hover {
+	background: #d0d0d0;
+	text-decoration: none;
+}
+
+.tablist a:link {
+	text-decoration: none;
+	color: gray;
+}
+.tablist a:active {
+	text-decoration: none;
+	color: gray;
+}
+.tablist a:visited {
+	text-decoration: none;
+	color: gray;
+}
+
+.tablistTable {
+	background-color: #ffffff; 
+	border:1px solid black;
+	float: left;
+	text-align: left;
+	margin-left:5%;
+	margin-right:5%;
+	width: 1000px;
+	clear: both;
+}
+
+
+/* standard text block */
+.para {
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+	border: 1px #7f7f7f solid;
+	background: #f0f0f0; 
+	text-align: left;
+}
+
+/* centred text block */
+.cpara {
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+	border: 1px #7f7f7f solid;
+	background: #f0f0f0; 
+	text-align: center;
+}
+
+.detailText {
+        color: black;
+        background: white;
+	margin-left: auto;
+	margin-right: auto;
+        border: 0px solid #a0a0a0;
+	float: left;
+	clear: both;
+	text-align: center;
+	width: 80%;
+}
+
+.image {
+	margin: 10px 10px 10px 10px; 
+	background: #f0f0f0; 
+	float: right;
+}
+
+.imgBackground {
+	color: #7f7f7f;
+	background: #eeeeee;
+	width: 100%;
+	height: 100%;
+	border: 0px solid grey;
+}
+
+.dontStandOut {
+	font-size: smaller;
+	color: #a0a0a0;
+}
+
+.emphasis {
+	font-weight: bold; 
+}
+
+.notice {
+	font-weight: bold; 
+	color: red;
+	background: yellow;
+}
+
+.alert {
+	color: red;
+	background: #7f7f7f;
+	border: 0px solid black; 
+}
+
+.thumbnails {
+	margin-left: 10px;
+	padding: 2px;
+	float: left;
+	text-align: center;
+	border: 1px solid black; 
+}
+
+.rightLinks {
+	float: right;
+	color: white;
+}
+
+.rbgLink:link, .rbgLink:visited {
+	color:white;
+	font-weight: normal;
+	text-decoration: none;
+}
+.rbgLink:hover {
+	color:white;
+	font-weight:bold
+}
+
+/* Identified Elements */
+/*#banner {
+	color: white;
+	clear: both;
+	border: 0px black solid;
+	height: 44px;
+	color: white;
+	background: #157b94 url(./images/rbgnsw/treetitle.gif)  no-repeat top left;
+}*/
+
+#footer {
+	clear: both;
+	color: white;
+	background: #303030;
+	padding: 2px;
+	margin-top: 10px;
+}
+

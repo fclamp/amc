@@ -1,0 +1,66 @@
+body
+{
+	font-family:tahoma;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 70%;
+	color: #336699;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background-color: white;
+}
+
+.controlButton
+{
+	display: none;
+}
+
+.hideOnPrint
+{
+	display: none;
+}
+
+#ControlsHelp
+{
+	display: none;
+}
+
+#tempMap
+{
+	display: block;
+}
+
+#banner {
+	display: none;
+}
+
+#footer {
+	clear: both;
+	color: #336699;
+	background-color: white;
+	padding: 2px;
+	margin-top: 10px;
+	border: 1px solid gray;
+}
+
+#xHairV {
+	display: none;
+}
+
+#xHairH {
+	display: none;
+}
+
+.FootnoteNumber
+{
+	vertical-align: super; 
+	font-size:90%; 
+	color: Red;
+}
+
+.FootnoteText
+{
+	vertical-align: super; 
+	font-size:90%; 
+	color: Black;
+}

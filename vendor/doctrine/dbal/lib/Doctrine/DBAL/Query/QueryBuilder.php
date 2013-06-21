@@ -50,7 +50,7 @@ class QueryBuilder
     const STATE_CLEAN = 1;
 
     /**
-     * @var Doctrine\DBAL\Connection DBAL Connection
+     * @var \Doctrine\DBAL\Connection DBAL Connection
      */
     private $connection = null;
 
@@ -946,36 +946,22 @@ class QueryBuilder
         $query = 'SELECT ' . implode(', ', $this->sqlParts['select']) . ' FROM ';
 
         $fromClauses = array();
-        $joinsPending = true;
-        $joinAliases = array();
+        $knownAliases = array();
 
         // Loop through all FROM clauses
         foreach ($this->sqlParts['from'] as $from) {
-            $fromClause = $from['table'] . ' ' . $from['alias'];
-
-            if ($joinsPending && isset($this->sqlParts['join'][$from['alias']])) {
-                foreach ($this->sqlParts['join'] as $joins) {
-                    foreach ($joins as $join) {
-                        $fromClause .= ' ' . strtoupper($join['joinType'])
-                                     . ' JOIN ' . $join['joinTable'] . ' ' . $join['joinAlias']
-                                     . ' ON ' . ((string) $join['joinCondition']);
-                        $joinAliases[$join['joinAlias']] = true;
-                    }
-                }
-                $joinsPending = false;
-            }
+            $knownAliases[$from['alias']] = true;
+            $fromClause = $this->connection->quoteIdentifier($from['table']) . ' ' . $from['alias']
+                . $this->getSQLForJoins($from['alias'], $knownAliases);
 
             $fromClauses[$from['alias']] = $fromClause;
         }
 
-        // loop through all JOIN clauses for validation purpose
-        $knownAliases = array_merge($fromClauses,$joinAliases);
         foreach ($this->sqlParts['join'] as $fromAlias => $joins) {
             if ( ! isset($knownAliases[$fromAlias]) ) {
                 throw QueryException::unknownAlias($fromAlias, array_keys($knownAliases));
             }
         }
-
 
         $query .= implode(', ', $fromClauses)
                 . ($this->sqlParts['where'] !== null ? ' WHERE ' . ((string) $this->sqlParts['where']) : '')
@@ -995,7 +981,7 @@ class QueryBuilder
      */
     private function getSQLForUpdate()
     {
-        $table = $this->sqlParts['from']['table'] . ($this->sqlParts['from']['alias'] ? ' ' . $this->sqlParts['from']['alias'] : '');
+        $table = $this->connection->quoteIdentifier($this->sqlParts['from']['table']) . ($this->sqlParts['from']['alias'] ? ' ' . $this->sqlParts['from']['alias'] : '');
         $query = 'UPDATE ' . $table
                . ' SET ' . implode(", ", $this->sqlParts['set'])
                . ($this->sqlParts['where'] !== null ? ' WHERE ' . ((string) $this->sqlParts['where']) : '');
@@ -1010,7 +996,7 @@ class QueryBuilder
      */
     private function getSQLForDelete()
     {
-        $table = $this->sqlParts['from']['table'] . ($this->sqlParts['from']['alias'] ? ' ' . $this->sqlParts['from']['alias'] : '');
+        $table = $this->connection->quoteIdentifier($this->sqlParts['from']['table']) . ($this->sqlParts['from']['alias'] ? ' ' . $this->sqlParts['from']['alias'] : '');
         $query = 'DELETE FROM ' . $table . ($this->sqlParts['where'] !== null ? ' WHERE ' . ((string) $this->sqlParts['where']) : '');
 
         return $query;
@@ -1091,5 +1077,49 @@ class QueryBuilder
         $this->boundCounter++;
         $this->setParameter($this->boundCounter, $value, $type);
         return "?";
+    }
+
+    private function getSQLForJoins($fromAlias, array &$knownAliases)
+    {
+        $sql = '';
+
+        if (isset($this->sqlParts['join'][$fromAlias])) {
+            foreach ($this->sqlParts['join'][$fromAlias] as $join) {
+                $sql .= ' ' . strtoupper($join['joinType'])
+                      . ' JOIN ' . $this->connection->quoteIdentifier($join['joinTable']) . ' ' . $join['joinAlias']
+                      . ' ON ' . ((string) $join['joinCondition']);
+                $knownAliases[$join['joinAlias']] = true;
+
+                $sql .= $this->getSQLForJoins($join['joinAlias'], $knownAliases);
+            }
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Deep clone of all expression objects in the SQL parts.
+     *
+     * @return void
+     */
+    public function __clone()
+    {
+        foreach ($this->sqlParts as $part => $elements) {
+            if (is_array($this->sqlParts[$part])) {
+                foreach ($this->sqlParts[$part] as $idx => $element) {
+                    if (is_object($element)) {
+                        $this->sqlParts[$part][$idx] = clone $element;
+                    }
+                }
+            } else if (is_object($elements)) {
+                $this->sqlParts[$part] = clone $elements;
+            }
+        }
+
+        foreach ($this->params as $name => $param) {
+            if(is_object($param)){
+                $this->params[$name] = clone $param;
+            }
+        }
     }
 }

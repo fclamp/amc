@@ -42,8 +42,8 @@ class ImuServiceProvider extends ServiceProvider
 		
 		$this->app ['IMuModule'] = $this->app->share ( function ($app)
 		{
-			$config = $app['config']['imu'];
-			$module = new IMuModule($config['module_table'],$app['IMuSession']);
+			$config = $app ['config'] ['imu'];
+			$module = new IMuModule ( $config ['module_table'], $app ['IMuSession'] );
 			return $module;
 		} );
 	

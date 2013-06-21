@@ -1,0 +1,35 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*/
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseResultsLists.php');
+require_once ($WEB_ROOT . '/objects/common/LocatorResultsList.php');
+
+class
+GalleryLocatorStandardResultsList extends LocatorResultsList 
+{
+	var $KeepImageAspectRatio = 1;
+	var $Fields = array(	'TitMainTitle',
+				'TitAccessionNo',
+				'CreCreatorLocal:1',
+				'CreDateCreated',
+				'ValAnnualRental',
+				);	
+
+} // end GalleryResultsList class
+
+class
+GalleryContactSheet extends BaseContactSheet
+{
+	var $KeepImageAspectRatio = 1;
+	var $Fields = array(	'TitMainTitle',
+				'TitAccessionNo',
+				);	
+
+} // end GalleryContactSheetResultsList class
+
+?>

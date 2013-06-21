@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-GB" lang="en-GB">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<meta name="description" content="Welcome to Beamish Collections Online. This is a unique opportunity to view an ever expanding selection from the vast object collections held at Beamish Museum." />
+		<meta name="keywords" content="beamish museum, photo archive, transport, photographs, north east, quilts, oral history, trade catalogues, coal mining, enamels, masonic, railway posters, showcards, agriculture, newcastle upon tyne, lead mining, social history, trams, locomotives, education, shipbuilding, coverlets, beamish" />
+
+		<title>Beamish Collections Online</title>
+
+		<link href="css/main.css" rel="stylesheet" type="text/css" />
+
+	</head>
+
+	<body>	
+		<div id="outerWrapper">
+			<div id="innerWrapper">
+				<div id="siteHeader"></div>
+				<div id="siteBanner"></div>
+				<div id="bBase"></div><div id="pageHeader">Welcome to Beamish Collections Online</div>
+				<div id="pageIcon"><img src="graphics/template/pageicons/collections.gif" alt="" width="42" height="27" /></div>
+				<div id="mainSection">
+					<div id="navigation">
+
+						<ul title="Navigation">
+							<li><a href="index.php">Keyword Search</a></li>           
+							<li><a href="advquery.php">Advanced Search</a></li>                        
+							<li><div class="nav_Bottom"></div></li>   
+						</ul>
+
+					</div>
+					<div id="page">

@@ -1,0 +1,50 @@
+/* 
+-----------------------------------------
+primary-navigation
+-----------------------------------------
+*/
+
+#primary-navigation
+{
+	clear: both;
+	margin-left: 20px;
+	width: 940px;
+}
+
+#primary-navigation h3
+{
+	position: absolute;
+	left: -500em;
+}
+
+#primary-navigation ul
+{
+	float: left;
+	width: 940px;
+	margin: 0;
+	padding: 0;
+	background: #0046ad url(../images/site/back-primary-navigation.jpg) no-repeat;
+	border-bottom: 1px solid #fff;
+}
+
+#primary-navigation li
+{
+	display: inline;
+	list-style-type: none;
+}
+
+#primary-navigation li a
+{
+	display: block;
+	float: left;
+	width: 87px;
+	padding: 7px 3px;
+	text-align: center;
+	margin-right: 1px;
+	line-height: 100%;
+	text-decoration: none;
+	color: #fff;
+}
+
+#primary-navigation li.end a { width: 82px; }
+#primary-navigation li a:hover { color: yellow; }

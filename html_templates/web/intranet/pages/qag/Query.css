@@ -1,0 +1,133 @@
+body
+{
+	background-color: #E9E9E9;
+}
+
+A:link
+{	
+	color: purple;	
+}
+
+#HeaderTable
+{
+	width: 100%;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+#HeaderCellLeft
+{
+	width: 30%;
+	text-align: center;
+}
+
+#HeaderImage
+{
+	width: 305px;
+	height: 25px;
+	border: 0;
+	vertical-align: middle;
+}
+
+#HeaderCellMiddle
+{
+	width: 40%;
+}
+
+#HeaderCellRight
+{
+	width: 30%;
+	color: #696969;
+	font-size: 150%;
+	text-align: center;
+}
+
+#MainTable
+{
+	width: 90%;
+	margin-left: 5%;
+	margin-right: 5%;
+	border: 1px solid white;
+	color: #696969;
+	font-weight: bold;
+}
+
+#QueryForm
+{
+	width: 100%;
+	font-size : 13px;
+}
+
+#BrowseTable
+{
+	width: 58%;
+	margin-left: 21%;
+	margin-right: 21%
+	text-align: center;
+	padding-top: 25px;
+	padding-bottom: 5px;
+}
+
+#BrowseCell
+{
+	width: 50%;
+	text-align: left;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	color: #696969;
+}
+
+#ViewTable
+{
+	width: 58%;
+	margin-left: 21%;
+	margin-right: 21%;
+	padding-top: 20px;
+	padding-bottom: 5px;
+}
+
+#SearchView
+{
+	text-align: left;
+	font-family: Tahoma;
+}
+
+#TextHeading
+{
+	margin-left: 5%;
+}
+
+#Text
+{
+	font-weight: Normal;
+	margin-left: 5%;
+}
+
+#WebSelect
+{
+	text-align: right;
+}
+
+table.HasImage
+{
+	width: 15px;
+	height: 15px;
+	margin-left: 10%;
+	margin-right: 10%;
+	border: 1px solid gray;
+    	empty-cells: show;
+}
+tr.ImageYes {
+	background-color: gray;
+	border: 1px solid gray;
+	row-height: 5px;
+	row-width: 5px;
+}
+tr.ImageNo {
+	row-height: 5px;
+	row-width: 5px;
+}
+
+td.ImageYes {
+	border: 1px solid gray;
+}

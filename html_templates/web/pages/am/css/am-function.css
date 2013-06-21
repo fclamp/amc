@@ -1,0 +1,240 @@
+/* 
+-----------------------------------------
+content-function styles
+-----------------------------------------
+*/
+
+#content-function
+{
+	float: left;
+	width: 716px;
+}
+
+/* 
+-----------------------------------------
+ul
+-----------------------------------------
+*/
+
+#content-function ul
+{
+	margin: 0 0 1em;
+	padding: 0;
+}
+
+#content-function li
+{
+	margin: 0 0 .2em 20px;
+	padding: 0 0 0 15px;
+	list-style-type: none;
+	background: url(/images/site/icon-bullet.gif) no-repeat 0 .3em;
+}
+
+/* 
+-----------------------------------------
+function-wrapper styles
+-----------------------------------------
+*/
+
+#function-wrapper
+{
+	float: left;
+	width: 716px;
+	background: url(/images/site/back-functionwrapper-middle.gif) repeat-y;
+	margin: 1em 0 0;
+}
+
+#function-wrapper2
+{
+	float: left;
+	width: 696px;
+	padding: 10px;
+	background: url(/images/site/back-functionwrapper-bottom.gif) no-repeat 0 100%;
+}
+
+/* 
+-----------------------------------------
+pagination styles
+-----------------------------------------
+*/
+
+#function-wrapper .pagination
+{
+	float: left;
+	clear: left;
+	width: 696px;
+	font-size: 90%;
+}
+
+#function-wrapper .pagination p
+{
+	float: left;
+	width: 300px;
+	margin: 0;
+	padding: 0;
+}
+
+#function-wrapper .pagination ul
+{
+	float: right;
+	text-align: right;
+	width: 300px;
+	margin: 0;
+	padding: 0;
+	color: #999;
+}
+
+#function-wrapper .pagination ul li
+{
+	list-style-type: none;
+	display: inline;
+	background: none;
+	padding: 0 0 0 .5em;
+	margin: 0;
+}
+
+#function-wrapper .pagination li.current
+{
+	font-weight: bold;
+	color: #222;
+}
+
+/* 
+-----------------------------------------
+finder-nav styles
+-----------------------------------------
+*/
+
+#finder-nav
+{
+	float: left;
+	width: 716px;
+	margin: 0;
+	padding: 0 0 6px;
+	background: #fff url(/images/site/back-findernav-div.gif) no-repeat 0 100%;
+}
+
+#finder-nav ul
+{
+	float: left;
+	width: 716px;
+	margin: 0;
+	padding: 0;
+	background: url(/images/site/back-findernav-ul.gif) no-repeat;
+}
+
+#finder-nav li
+{
+	margin: 0;
+	padding: 0;
+	display: inline;
+	list-style-type: none;
+}
+
+#finder-nav li span
+{
+	float: left;
+	display: block;
+	width: 140px;
+	padding: 5px;
+	text-align: center;
+	font-weight: bold;
+}
+
+/* 
+-----------------------------------------
+table styles
+-----------------------------------------
+*/
+
+#function-wrapper table
+{
+	clear: both;
+	margin: 30px 0 20px;
+	width: 696px;
+	border-collapse: collapse;
+}
+
+#function-wrapper table td
+{
+	text-align: left;
+	padding: 5px;
+	vertical-align: top;
+	border: 1px solid #c8c8c8;
+}
+
+#function-wrapper table th
+{
+	text-align: left;
+	padding: 5px;
+	vertical-align: top;
+	border: 1px solid #c8c8c8;
+	background: #ddd;
+}
+
+#function-wrapper table th.width300 { width: 300px; }
+#function-wrapper table th.width400 { width: 400px; }
+#function-wrapper table th.width600 { width: 600px; }
+
+/* 
+-----------------------------------------
+function-search styles
+-----------------------------------------
+*/
+
+#related-search
+{
+	margin: 0 0 2em;
+	background: url(/images/site/back-findersearch-bottom.gif) no-repeat 0 100%;
+}
+
+#related-search h3
+{
+	background: url(/images/site/back-findersearch-top.gif) no-repeat;
+	padding: 10px 10px 0;
+}
+
+#function-search
+{
+	margin: 0 0 2em;
+	background: #0247ac url(/images/site/back-findersearch-bottom2.gif) no-repeat 0 100%;
+	color: #fff;
+}
+
+#function-search h3
+{
+	background: url(/images/site/back-findersearch-top2.jpg) no-repeat;
+	padding: 10px 10px 0;
+	color: #fff;
+}
+
+#function-search a { color: #fff; }
+
+#function-search form
+{
+	padding: 0;
+	margin: 0;
+}
+
+#function-search div { padding: 0 10px 10px; }
+#staff-name, #choose-position, #choose-department { width: 170px; }
+#function-search select { width: 170px; }
+
+#choose-position-label, #choose-department-label, #search-again-label, #choose-file-label
+{
+	position: absolute;
+	left: -500em;
+}
+
+#related-search ul
+{
+	margin: 0 10px 10px;
+	padding: 0 0 10px;
+}
+
+#related-search li
+{
+	display: inline;
+	padding: 0;
+	list-style-type: none;
+}

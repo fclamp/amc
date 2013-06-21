@@ -1,0 +1,1018 @@
+<?php
+
+// THIS UNDER DEVELOPMENT
+
+/*
+ *  Copyright (c) 1998-2009 KE Software Pty Ltd
+ */
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($WEB_ROOT . '/webservices/portal/FetcherFactory.php');
+require_once ($WEB_ROOT . '/webservices/lib/WebServiceObject.php');
+require_once ($WEB_ROOT . '/webservices/lib/DataCacher.php');
+require_once ($WEB_ROOT . '/webservices/lib/Transformation.php');
+
+
+
+/**
+ * Class FetcherDriver
+ *
+ * @package EMuWebServices
+ *
+ */
+class FetcherDriver extends WebServiceObject
+{
+
+//public:
+
+	var $systemName = "KE Software EMu FetcherDriverVersion 2";
+	var $serviceDirectory = "webservices/portal";
+	var $serviceName = "FetcherDriver";
+	var $sourceList = Array();
+	var $sourcePriority = Array();
+
+	var $response = Array();
+//private:
+
+	var $_cacher = null;
+	var $_translators = array();
+	var $_knownFields = array();
+	var $_request = array();
+	var $_queryableConcepts = array();
+	var $_sourceStatus = array();
+	var $_sourceDescription = array();
+	var $_excludedFetchers = array();
+
+	var $_description = "";
+
+	function FetcherDriver($backendType='',$webRoot='',$webDirName='',$debugOn=0)
+	{
+		if ($this->phpVersionMinimum("4.3.0"))
+			$this->{get_parent_class(__CLASS__)}($backendType,$webRoot,$webDirName,$debugOn);
+		else
+			$this->{get_parent_class('FetcherDriver')}($backendType,$webRoot,$webDirName,$debugOn);
+
+		$this->_cacher = new DataCacher($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+
+		if ($error = $this->systemFaults())
+		{
+			$this->errorResponse($error);
+		}
+
+		// hack to get working - need to fix how argument cacher in
+		// WebServiceObject splits data on "\n" but leave until done
+		if (isset($_REQUEST['structuredQuery']))
+			$_REQUEST['structuredQuery'] = preg_replace("/\n/"," ",$_REQUEST['structuredQuery']);
+
+		$this->readPassedParameters($_REQUEST);
+
+		$this->_description = "queried data";
+		if (isset($this->_request['dataSetDescription']))
+			$this->_description = $this->_request['dataSetDescription'];
+	}
+
+	function configureInterfaces()
+	{
+		parent::configureInterfaces();
+		$this->setStandardArgument("source","can be used multiple times - use a data source");
+		$this->setStandardArgument("structuredQuery","serialised representation of a query");
+		$this->setStandardArgument("search","query as texql - legacy parameter deprecated use texql or structuredQuery");
+		$this->setStandardArgument("texql","query as texql (for use instead of structuredQuery)");
+		$this->setStandardArgument("queryScreen","generate xml representation of query screen. ".
+					"The value is set as the xsl stylesheet to use to style the xml"); 
+		$this->setStandardArgument("dataSetDescription","description of the data to be returned");
+		$this->setStandardArgument("instance","identifier that can be used to maintain state of previously passed arguments");
+		$this->setStandardArgument("scatter","if true get records across sources, if false get from sources sequentially");
+		$this->setStandardArgument("sortby","field to sort by");
+		$this->setStandardArgument("order","ascending or descending");
+		$this->setStandardArgument("limit","maximum records to return");
+		$this->setStandardArgument("start","record number to start at");
+		$this->setStandardArgument("timeout","max time allowed to get data from any source");
+	} 
+
+	function dropFetcher($exclude)
+	{
+		// hide a fetcher from list of visible fetchers - means this
+		// fetcher will become invisible to this instance
+		$this->_excludedFetchers[$exclude]++;
+	}
+
+	function setQueryableConcept($concept)
+	{
+		$this->_queryableConcepts[$concept]++;
+	}
+
+	function systemFaults()
+	{
+		if ($error = $this->_cacher->systemFaults())
+			return $error;
+		else	
+			return parent::systemFaults();
+	}
+
+
+	function readPassedParameters($request)
+	{
+		// read parameters and accept only allowed ones - merge with
+		// cached parameters.
+		foreach ($request as $parameter => $value)
+		{
+			if (isset($this->standardArguments[$parameter]))
+			{
+				if (isset($request[$parameter]))
+				{
+					$value = $request[$parameter];
+					$this->_request[$parameter] = $value;
+				}
+				else	
+					$this->_request[$parameter] = NULL;
+			}
+		}
+
+		if (isset($request['instance']))
+		{
+			$this->_currentInstance = $request['instance'];
+		
+			if (! $mergedRequest = $this->retrieveCallingParameters($this->_currentInstance,$this->_request))
+			{
+				// no cached parameters - save the current ones
+				$this->_request['action'] = '';
+				$this->saveCallingParameters($_currentInstance,$this->_request);
+			}
+			else
+				$this->_request = $mergedRequest;
+		}
+		else	
+		{
+			$this->_request['action'] = '';
+			$this->_request['instance'] = $this->_currentInstance;
+			$this->saveCallingParameters($this->_currentInstance,$this->_request);
+		}
+	}
+
+
+	function setSystemName($name)
+	{
+		$this->systemName = "KE EMu $name";
+	}
+
+	function describe()
+	{
+		return	"A FetcherDriver is a system to allow querying of multiple\n".
+			"data providers. The system needs to be  configured\n".
+			"to have one or more 'Fetchers' that know how to talk\n".
+			"to data providers.\n\n".
+			parent::describe();
+	}
+
+	function request($rawData=false,$instance=0,$setHeaders=true)
+	{
+		// Create sources via factories
+		if  (isset($this->_request['source']))
+		{
+			// Sources may be prioritised (ie we want system to
+			// first get data from source#1, then #2 etc until have
+			// required number of records) - if a source parameter
+			// in form source=TexxmlSource%3D02 (ie source name has an
+			// appended '=nn') then use the 'nn' to assign priority
+			// to the source (0 = 1st, 2 = 2nd etc).
+			// If no priority given then assume priority = 0
+
+			foreach ($this->_request['source'] as $source)
+			{
+				$factory = new FetcherFactory();
+				if ($factory != null)
+				{
+					List($sourceName,$priority) = preg_split("/=/",$source,2);
+					if ($priority == null)
+					{
+						if (preg_match("/^Default/",$sourceName))
+							$priority = -1;
+						else
+							$priority = 0;
+					}
+
+					$newFetcher =  $factory->getInstance($sourceName);
+					if ($newFetcher != null)
+					{
+						$this->sourceList[$sourceName] = $newFetcher;
+						$this->sourcePriority[$sourceName] = $priority;
+					}	
+					else
+					{
+						$this->_addSourceStatus($sourceName,
+							"Fetcher dropped from query. No configuration found for $sourceName",st_Warn);
+						$this->_log("<warn>Fetcher dropped from query. No configuration found for $sourceName</warn>");
+					}
+				}
+				else
+					$this->_debug("Cannot make instance !",$source,1);
+			}
+		}
+
+		// Start all the sources handling the request.
+		if (isset($this->_request['timeout']))
+			$timeout = $this->_request['timeout'];
+		else
+			$timeout = 0; // 0 == use the default for the source
+	
+	
+		foreach ($this->sourceList as $src => $sourceObj)
+		{
+			if (is_object($sourceObj))
+			{
+				$sourceObj->request($timeout,$this->_request);
+				$this->sourceList[$src] = $sourceObj;
+			}
+			else
+				$this->_debug("Fetcher not properly created: '$src'",$sourceObj,1);
+		}
+	
+		/* 
+		 * Now while they have something to process keep
+		 * going. Timeout is handled in the source itself.
+		 */
+
+		$handling = true;
+		while ($handling)
+		{
+			$handling = false;
+
+			foreach ($this->sourceList as $src => $sourceObj)
+			{
+				if ($sourceObj->getStatus() == st_Reading)
+				{
+					if ($sourceObj->process())
+					{
+						$handling = true;
+					}
+				}	
+				$this->sourceList[$src] = $sourceObj;
+			}
+		}
+
+		// Merge the results and return data processed as requested
+
+		$this->merge($this->_request);
+
+		// clean cache of old records
+		$stats = $this->_cacher->cacheStats(900,true);
+
+		// send response
+		$response = $this->formatOutput($this->_request,$rawData);
+		if ($setHeaders)
+			foreach ($this->_headers as $header)
+				header($header,1);
+
+		return $response;	
+	}
+
+
+	function sendResults()
+	{
+		//  Send the generated results back to the client.
+
+		return "<xml>\n". implode($this->response,"\n"). "</xml>";
+	}
+
+	function getFetchers()
+	{
+		// returns a list of all *potential* fetchers in this client
+		// This will include the client specific fetchers (in
+		// portal/CLIENT/fetchers) and any common fetchers (in
+		// portal/fetchers)
+
+		$fetcherList = Array();
+
+		foreach (Array('fetchers',$this->backendType.'/fetchers') as $path)
+		{
+			$fetcherDir = $this->webRoot .'/webservices/portal/'. $path;
+		
+			if (is_dir($fetcherDir))
+			{
+				if ($dh = opendir($fetcherDir))
+				{
+					while (($file = readdir($dh)) != false)
+					{
+						if (preg_match("/\.php$/",$file))
+						{
+							if (is_file($fetcherDir	. '/'. $file))
+							{
+								$file = preg_replace("/\.php$/",'',$file);
+								if (! isset($this->_excludedFetchers[$file]))
+								{
+									$fetcherList[$file]++;
+								}
+							}
+						}	
+					}
+					closedir($dh);
+				}
+				else
+					$this->errorResponse('Fetcher directory not accessible. Try checking permissions.');
+			}
+		}	
+
+		if (! $fetcherList)
+			$this->errorResponse('No fetchers found. Probably fetcher directories not accessible, missing or empty.');
+
+		return array_keys($fetcherList);
+	}
+
+	/**
+	 * return list of queryable concepts that are common to all fetchers
+	 */
+	function getCommonConcepts($sources)
+	{
+		$instances = Array();
+		$concepts = Array();
+		$allExamples = Array();
+
+		foreach ($sources as $source)
+		{
+			$factory = new FetcherFactory();
+			if ($factory != null)
+			{
+				$instance =  $factory->getInstance($source);
+				if (($instance != null) && ($instance->enabled))
+				{
+					$instances[$source] = $instance;
+					foreach ($instance->getKnownConcepts() as $concept => $mapping)
+					{
+						$srcField = $mapping[0];
+						$example = $mapping[1];
+						$fieldType = $mapping[2];
+						$allExample[$concept][$source] = $example;
+						$concepts["$concept:$fieldType"]++;
+					}
+				}
+			}
+			else
+			{
+				$this->errorResponse('Cannot make fetcher factory');
+			}
+		}
+
+		// get concepts that appear in all sources...
+		$common = Array();
+		$com = Array();
+		$expectedCount = count($instances);
+		foreach ($concepts as $concept => $count)
+		{
+			List($conceptName,$fieldType) = preg_split("/:/",$concept,2);
+			if ($count == $expectedCount)
+			{
+				$common[$concept] = $allExample[$conceptName];
+			}
+		}
+
+
+		if (count($common) == 0)
+		{
+			$info = "Fetchers configured:\n" .  implode("\n",array_keys($instances)) . "\n";
+			foreach ($concepts as $concept => $count)
+			{
+				$info .= "$concept is used by $count fetchers\n";
+			}
+			$this->errorResponse("No common queryable concepts exist across every configured source!\n$info");
+		}
+		// common now hash indexed by common concepts, value is list of
+		// example values for that concept
+		return Array($instances,$common);
+	}
+
+	/**
+	 * Generate XML for Query Screen
+	 *
+	 * returns xml used for assembling a query screen
+	 *
+	 */
+	function queryScreen($name,$suggestedParams,$sources,$mapAvailable=false)
+	{
+		
+		// to make it easier to call up an html query screen
+		// put xsl sheet as value of queryScreen parameter and it will
+		// style the queryscreen xml.  So instead of using parameters:
+		//    queryScreen=true&stylesheet=portal/style/XXX.xsl 
+		// it can be called as:
+		//    queryScreen=XXX.xsl 
+
+		if (! isset($suggestedParams[queryStylesheet]))
+		{
+			$queryStylesheet = $this->webRoot .'/webservices/portal/style/' . $this->_request['queryScreen'];
+			if (is_file($queryStylesheet))
+			{
+				$suggestedParams[queryStylesheet] = 'portal/style/'.$this->_request['queryScreen'];
+				$this->_request[stylesheet] = $suggestedParams[queryStylesheet];
+			}
+			else
+				$suggestedParams[queryStylesheet] = 'portal/style/portal_queryscreen.xsl';
+		}
+		else
+		{
+			$this->_request[stylesheet] = $suggestedParams[queryStylesheet];
+		}
+
+		List($instance,$commonConcepts) = $this->getCommonConcepts($sources);
+
+		if ($this->emuwebRunning())
+			$emuwebRunning = "on";
+		else
+			$emuwebRunning = "off";
+
+		// header
+		$xml = "<queryScreen destinationUrl='$_SERVER[PHP_SELF]'" .
+			" name='$name' statusMapAvailable='$mapAvailable'" .
+			" backendType='$this->backendType' " .
+			" localDbAccess='$emuwebRunning'>\n";
+
+		// sources (in priority order)
+		$orderSources = Array();
+		foreach ($instance as $source => $fetcher)
+		{
+			$priority = $this->sourcePriority[$source];
+			if ($priority == null)
+			{
+				if (preg_match("/^Default/",$source))
+					$priority = -1;
+				else
+					$priority = 0;
+			}
+			$orderedSources[$priority][$source] = $fetcher;
+		}
+		ksort($orderedSources);
+		$xml .= "<sources>\n";
+		$i = 0;
+		foreach ($orderedSources as $priority => $fetchers)
+		{
+			foreach ($fetchers as $src => $fetcher)
+			{
+				$xml .= "<source name='$src' " .
+					"displayName='$fetcher->sourceName' ".
+					"suggestedPriority='$i' " .
+					"foregroundRGB='$fetcher->preferredFgRGB' " .
+					"backgroundRGB='$fetcher->preferredRGB' " .
+					"icon='$fetcher->preferredIcon' />\n";
+					$i++;
+			}
+		}
+		$xml .= "</sources>\n";
+
+		// common queryable fields
+		$xml .= "<queryableFields>\n";
+		foreach ($commonConcepts as $concept => $examples)
+		{
+			List($conceptName,$type) = preg_split("/:/",$concept,2);
+
+			$xml .= "\t<field name='$concept' displayName='$conceptName' type='$type'>\n";
+			foreach ($examples as $src => $example)
+			{
+				if ($example)
+				{
+					$xml .= "\t\t<example src='$src'>" . $example . "</example>\n"; 
+				}
+				else
+				{
+					$xml .= "\t\t<example src='$src' />\n"; 
+				}
+			}
+			$xml .= "\t</field>\n";
+		}
+		$xml .= "</queryableFields>\n";
+
+		$xml .= "<suggestedParameters>\n";
+		foreach ($suggestedParams as $param => $value)
+		{
+			$xml .= "<$param>$value</$param>\n";
+		}
+		$xml .= 
+			"</suggestedParameters>\n".
+			"</queryScreen>";
+		return $xml;
+	}
+
+	function _addSourceStatus($source,$message,$code)
+	{
+		$this->_sourceStatus[$source][] = $message;
+		$this->_log("code:$code : $msg");
+	}
+
+	function sourceDisplayHints($src)
+	{
+		// based on source provide some xml attribute 'hints' about how data from
+		// this source may be displayed
+		$sourceObj = $this->sourceList[$src];
+		return  "sourceName='$sourceObj->sourceName' " .
+			"backgroundRGB='$sourceObj->preferredRGB' " .
+			"foregroundRGB='$sourceObj->preferredFgRGB' " .
+			"icon='$sourceObj->preferredIcon'";
+	}
+
+	function merge($request=null)
+	{
+		/*  Take the list of sources and merge the results of
+		**  all of them into one result set.
+		*/
+
+		$translators = array();
+		$metadata = array();
+
+		foreach ($this->sourceList as $src => $sourceObj)
+		{
+			$status = $sourceObj->getStatus();
+
+			$translator = $sourceObj->getData();
+
+			$translators[$src] = $translator;
+			$metadata[$src] = $sourceObj->metaData();
+			switch($status)
+			{
+				case st_UsingCachedData:
+						$this->_addSourceStatus($src,"Using locally cached Data",$status);
+				case st_Completed:
+						$this->_addSourceStatus($src,"completed",$status);
+					break;
+				case st_Reading:
+						$this->_addSourceStatus($src,"incomplete data",$status);
+					break;
+				case st_TimeOutNoResponse:
+						$this->_addSourceStatus($src,"no response - timed out",$status);
+					break;
+				case st_TimeOutPartialResponse:
+						$this->_addSourceStatus($src,"partial response - timed out",$status);
+					break;
+				case st_Unknown:
+				default:
+						$this->_addSourceStatus($src,"unknown error",$status);
+					break;
+			}
+			//$this->sourceList[$src] = $sourceObj;
+
+		}	
+		$this->_translators = $translators;
+		$this->assembleTranslatedData($this->_translators,$request,$metadata);
+	}
+
+	/**
+	 * Turn data held by translators plus environment etc into XML response
+	 */
+	function assembleTranslatedData($translators,$request,$metadata,$returnUrl='',$rootTag="mergedData")
+	{
+		if (!$returnUrl)
+			$returnUrl = $_SERVER['HTTP_REFERER']. "?instance=". $this->_currentInstance;
+		$returnUrl = preg_replace('/&/','&amp;',$returnUrl);
+
+		$start = $this->_request['start'];
+		$limit = $this->_request['limit'];
+		$sortBy = $this->_request['sortby'];
+		$order = $this->_request['order'];
+		$scatter = ($this->_request['scatter'] == 'true');
+
+		// possible we have not been given parameters - in this case
+		// assume broad criteria
+		if (! isset($start))
+			$start = 0;
+		if (! isset($limit))
+			$limit = -1;
+
+		// get sorted record data
+		List($records,$fieldList,$srcCount) = $this->sortAndAssembleRecordBlock(
+					$translators,
+					$start,
+					$limit,
+					$sortBy,
+					$order,
+					$scatter);
+
+
+		// wrap sorted XML record data in suitable XML
+		$recordCount = count($records);			
+		$recordXml = "<records ".
+				" start='$start' ".
+				" limit='$limit' ".
+				" count='$recordCount' ".
+				" sortBy='$sortBy' ".
+				" sortOrder='$order' >\n".
+				implode ($records,"\n") .
+			"</records>\n";
+
+		// extract fields (or groups) from records
+		$fields = Array();
+		foreach (Array( "description", ) as $field) // could include description, latitude, longitude
+		{	
+				$fields[$field] = "base";
+		}
+		foreach ($fieldList as $field => $used)
+		{
+			$fields[$field] = "extended";
+		}
+
+		if ($this->_currentInstance)
+			$mergeStatus = 'success';
+		else	
+			$mergeStatus = 'expired';
+		
+		// wrap it all up into XML response	
+		$this->response[] = $this->makeXmlResponse($recordXml,$rootTag,$mergeStatus,$srcCount,$fields, $returnUrl);
+	}
+
+	function makeXmlResponse($recordXml,$rootTag,$mergeStatus,$srcCount,$fields, $returnUrl='')
+	{
+		// describe data sources
+		$sources = Array();
+		foreach ($srcCount as $src => $count)
+		{
+			$status = 'unknown';
+			if (isset($this->_sourceStatus[$src]))
+			{
+				$status = implode(",",$this->_sourceStatus[$src]);	
+			}
+			$sourceObj = $this->sourceList[$src];
+			$priority = $this->sourcePriority[$src];
+			$sources[$src] = "<source name='$src' ".
+					"status='$status' ".
+					"sourceOrder='$priority' " .
+					"displayName='$sourceObj->sourceName' ".
+					"recordsUsed='$count' ".
+					"translatorType='$sourceObj->translatorType' ".
+					"backgroundRGB='$sourceObj->preferredRGB' ".
+					"foregroundRGB='$sourceObj->preferredFgRGB' ".
+					"icon='$sourceObj->preferredIcon' ".
+					"/>";
+		}
+
+		$groups = Array();
+		foreach ($fields as $field => $type)
+		{
+			$groups[] = "<group type='$type'>$field</group>";
+		}
+			 
+		$additionalRequestArgumentsXml = $this->argumentsAsXml($this->additionalRequestArguments);
+
+		$response =
+			"<$rootTag>\n".
+			" <statusBlock status='$mergeStatus'>\n".
+			" <instance>". $this->_currentInstance . "</instance>\n".
+			" <systemName>". $this->systemName ."</systemName>\n".
+			" <emuwebBase>". $this->webDirName ."</emuwebBase>\n".
+			" <emuBackendType>". $this->backendType ."</emuBackendType>\n".
+			//" <referer>". urlencode($this->_referer) ."</referer>\n".
+			" <returnUrl>". $returnUrl ."</returnUrl>\n".
+
+			" <description>" . $this->_description . "</description>\n".
+
+			" <sources>\n".
+			"\t\t". implode("\n\t\t",$sources). "\n".
+			" </sources>\n".
+
+			" <groups>\n".
+			"\t\t". implode("\n\t\t",$groups). "\n".
+			" </groups>\n".
+
+			"<!-- NON STANDARD ARGUMENTS -->\n".
+			$additionalRequestArgumentsXml . "\n".
+			"<!--                        -->\n".
+			"</statusBlock>\n\n".
+			
+			"$recordXml\n".
+			"</$rootTag>\n";
+		return $response;
+	}
+
+	function translateCurrentRecord($translator,$sortBy,$src,$id,$groups)
+	{
+		$lat = $translator->getLatitude();
+		$long = $translator->getLongitude();
+
+		$fields = Array();
+		foreach ($groups as $group)
+		{
+			$value =  $translator->getGroup($group);
+			if ($value || $value == "0")
+			{
+				$fields[] = " <group name='$group'>$value</group>\n";
+			}
+		}
+	
+
+		$translated = "<record index='$id' " .
+				$this->sourceDisplayHints($src) . " >\n";
+
+		$translated .= 
+				" <description>" .  $translator->getDescription() . "</description>\n" .
+				" <latitude>$lat</latitude>\n" .
+				" <longitude>$long</longitude>\n";
+		foreach ($fields as $data)
+		{
+			$translated .= $data;
+		}
+		$translated .= "</record>";
+
+
+		$sortValue = $translator->getGroup($sortBy);
+		if (! $sortValue)
+		{
+			$sortValue= $src;
+		}
+		
+		return Array($translated,$sortValue);
+	}
+
+	
+	/**
+	 * takes translators, extracts the xml records from each, sorts
+	 * them and returns those in requested start and limit
+	 * window (limit=-1 means unlimited)
+	 */
+	function sortAndAssembleRecordBlock(
+			$translators,
+			$start=0,
+			$limit=-1,
+			$sortBy='',
+			$order='ascending',
+			$scatter=false)
+	{
+
+
+		// need to traverse translators in order of their 'priority'
+		$orderedTranslators = Array();
+		foreach ($translators as $src => $translator)
+		{
+			// portal may have been using translator prior to this
+			// point so reset it
+			$translator->reset();
+			$priority = $this->sourcePriority[$src];
+			$orderedTranslators[$priority][$src] = $translator;
+		}
+		ksort($orderedTranslators);
+
+		$allTranslators = Array();
+		foreach ($orderedTranslators as $priority => $translators)
+		{
+			foreach ($translators as $src => $translator)
+			{
+				$allTranslators[$src] = $translator;
+			}	
+		}
+		// get all xml from translators (irrespective of requested
+		// viewing window) and record key items
+
+		$records = Array();
+		$index = Array();
+		$srcIndex = Array();
+		$srcCount = Array();
+		$scatterIndex = Array();
+		$current = 0;
+		$totalCount = 0;
+		if (! $scatter)
+		{
+			// get all records from each source in turn
+			foreach ($allTranslators as $src => $translator)
+			{
+				$srcCount[$src] = 0;
+	
+				$groups =  $translator->getGroups();
+				foreach ($groups as $group)
+					$this->_knownFields[$group]++;
+	
+				while ($translator->nextRecord())
+				{
+					List($record,$sortValue) = $this->translateCurrentRecord($translator,$sortBy,$src,$current,$groups);
+					$records[] = $record;
+					$index[$sortValue][] = $current;
+					$srcIndex[$current] = $src;
+					$current++;
+				}	
+			}	
+		}
+		else
+		{
+			// get a record alternatively from each source
+			$exhausted = false;
+			$translatorExhausted = Array();
+			while (! $exhausted)
+			{
+				foreach ($allTranslators as $src => $translator)
+				{
+					if (! $translatorExhausted{$src})
+					{
+						if (! isset($srcCount[$src]))
+							$srcCount[$src] = 0;
+
+						$groups =  $translator->getGroups();
+						foreach ($groups as $group)
+							$this->_knownFields[$group]++;
+	
+						if ($translator->nextRecord())
+						{
+							List($record,$sortValue) = $this->translateCurrentRecord($translator,$sortBy,$src,$current,$groups);
+							$records[] = $record;
+							$index[$sortValue][] = $current;
+							$srcIndex[$current] = $src;
+							$current++;
+						}	
+						else
+						{
+							$translatorExhausted{$src} = true;
+							if (count(array_keys($translatorExhausted)) >= count($allTranslators))
+							{
+								$exhausted = true;
+							}
+						}
+						// save state of translator
+						$allTranslators[$src] = $translator;
+					}	
+				}	
+			}
+		} 
+
+
+		// sort elements
+		if ($order == 'ascending')
+			ksort($index);
+		else	
+			krsort($index);
+
+		// limit = -1 = all records
+		if ($limit == -1)
+			$limit = count($records);
+
+		$sortedRecords = Array();
+		foreach ($index as $value => $pointers)
+		{
+			foreach ($pointers as $pointer)
+			{
+				if (($pointer >= $start-1) && ($pointer <= $limit))
+				{
+					$sortedRecords[] = $records[$pointer];
+					$src = $srcIndex[$pointer];
+					$srcCount[$src]++;
+				}
+			}
+		}
+		return Array($sortedRecords,$this->_knownFields,$srcCount);
+	}
+//-------------------------------------------------------------------------
+	/***************************************/
+	/*  BELOW HERE ARE TESTING COMPONENTS  */
+	/***************************************/
+	function test($clientSpecific=false,$dir='')
+	{
+		if (isset($this->_request['testCall']))
+		{
+			header("Content-type: text/xml",1);
+			print $this->_request(true);
+		}
+		else	
+		{
+			header("Content-type: text/html",1);
+			print $this->makeTestPage('','');
+		}
+	}
+
+
+	function makeTestPage($title,$description)
+	{
+		$sourceBoxes = array();
+		$sourceQuery = array();
+
+		$i = 0;
+		$terms = "";
+		foreach ($this->getFetchers() as $source)
+		{
+			$factory = new FetcherFactory();
+			if ($factory != null)
+			{
+				$instance =  $factory->getInstance($source);
+				if ($instance != null)
+				{
+					$terms .= "<div id='qryRow_$i'>\n";
+					$i++;
+					$terms .= $instance->testQueryTerms() . "\n";
+					$terms .= "<hr/></div>\n";
+					$sourceBoxes[] = "\n<input type='checkbox' name='source[]' value='$source' checked='1' />$instance->sourceName";
+				}	
+			}
+		}	
+
+		//$terms = implode("<br/>\n",$sourceBoxes);
+		$sources = implode ("<br/>\n OR <br/>\n",$sourceBoxes). "\n";
+
+		if (! $title)
+			$title = "Quick Test for KE Portal: ". $this->serviceName;
+
+		$stylesheet = $this->findStylesheet();
+
+		$args['Fetchers'] = $sources;	
+		$args['Query Terms'] = $terms;	
+		$args['Start (per Fetcher)'] = "<input type='input' name='start' id='start' value='0' size='2' />";
+		$args['Limit (per Fetcher)'] = "<input type='input' name='limit' id='limit' value='5' size='2' />";
+		$args['Scatter (sample all or just sequential)'] = 
+			"<input type='radio' name='scatter' value='' checked='true' />NO <br/>\n".
+			"<input type='radio' name='scatter' value='true' />YES<br/>";
+
+		$args['Timeout'] = "<input type='input' name='timeout' value='18' size='2' /> seconds";
+		$args['Translation (client side xslt)'] = 
+			"<input type='radio' name='stylesheet' value='' checked='true' />none <br/>\n".
+			"<input type='radio' name='stylesheet' value='$stylesheet' />$stylesheet<br/>";
+		$submission = "<input type='button' name='action' value='query' onClick='generateStructuredRequest();' />";
+
+		$vars['schema'] = 'http://digir.sourceforge.net/schema/conceptual/darwin/full/2003/1.0/darwin2full.xsd';
+		$vars['testCall'] = 'true';
+		$vars['Queried Data-smap'] = 'false';
+		$vars ['structuredRequest'] = '';
+
+		$js = <<<JAVASCRIPT
+/*------------------------------------------------------------------*/
+function generateStructuredRequest()
+{
+	var input;
+	var rowNum = 5;
+
+	var stack = new Array();
+
+	var orTerms = 0;
+	while (rowNum >= 0)
+	{
+		var rowUsed = 0;
+		var row = document.getElementById("qryRow_" + rowNum);
+		if (row)
+		{
+			var inputs = row.getElementsByTagName("input");
+
+			for (var i=0; i < inputs.length; i++)
+			{
+				input = inputs[i];
+				var field = input.getAttribute("field");
+				var value = input.value;
+				if (value.length > 0)
+				{
+					stack.push("<comparison type='contains'><field>" + field + "</field><value>" + value + "</value></comparison>");
+					if (rowUsed++ > 0)
+					{
+						stack.push("<logicalOperator type='and' />");
+					}
+				}	
+			}
+			if (rowUsed > 0 && orTerms > 0)
+			{
+				stack.push("<logicalOperator type='or' />");
+			}
+			else if (rowUsed > 0)
+			{
+				orTerms++;
+			}
+
+		}
+		rowNum--;
+	}
+
+	var xml = "<query>\\n<select><field>*</field></select>\\n<sources><source>ecatalogue</source></sources>\\n<postfixFilterStack>\\n";
+
+	var l = stack.length;
+	for (var i = 0; i < stack.length; i++)
+	{
+		xml += "<stackItem level='" + --l + "'>" + stack[i] + "</stackItem>\\n";
+	}
+	xml += "</postfixFilterStack>\\n";
+	var start = document.getElementById("start").value;
+	var limit = document.getElementById("limit").value;
+	xml += "<limits from='" + start + "' to='" + limit + "' />";
+	xml += "</query>\\n";
+
+	document.getElementById('structuredRequest').value = xml;
+	document.forms[0].submit();
+}
+/*------------------------------------------------------------------*/
+JAVASCRIPT;
+
+		$instanceToCall = preg_replace("/^.*\//",'./',$_SERVER['PHP_SELF']);
+
+		$page = $this->makeDiagnosticPage(
+					$title,
+					$description,
+					$js,
+					$instanceToCall,
+					$args,
+					$submission,
+					$vars,
+					$this->describe()
+				);
+		print $page;		
+	}
+
+}
+
+if (isset($_REQUEST['test']))
+{
+	if (basename($_SERVER['PHP_SELF']) == 'FetcherDriver.php')
+	{
+		$driver = new FetcherDriver();
+		print $driver->test();
+	}
+}
+
+?>

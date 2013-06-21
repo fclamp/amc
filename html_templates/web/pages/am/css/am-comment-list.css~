@@ -1,0 +1,36 @@
+/* 
+-----------------------------------------
+global styles
+-----------------------------------------
+*/
+
+#comments-list  p
+{
+	padding: 0 0 0 25px;
+	background: url(/images/site/icon-comment.gif) no-repeat 0 3px;
+}
+
+#comments-pagination
+{
+	float: right;
+	text-align: right;
+	width: 300px;
+	margin: 0;
+	padding: 0;
+	color: #999;
+}
+
+#comments-pagination li
+{
+	list-style-type: none;
+	display: inline;
+	background: none;
+	padding: 0 0 0 .5em;
+	margin: 0;
+}
+
+#comments-pagination li.current
+{
+	font-weight: bold;
+	color: #222;
+}

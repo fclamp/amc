@@ -1,0 +1,754 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseQueryForms.php');
+
+$GLOBALS['STRINGS_DIR'] = $WEB_ROOT . "/objects/" . $GLOBALS['BACKEND_TYPE'] . "/" . $GLOBALS['DEPARTMENT'] . "/strings/" . $GLOBALS['BACKEND_ENV'] . "/";
+
+class
+NmnhVzBirdsBasicQueryForm extends BaseBasicQueryForm
+{
+
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+<<<<<<< QueryForms.php
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+=======
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByLocal_tab',
+		'number' => 'CatNumber=integer',
+>>>>>>> 1.35
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Birds'";
+
+}  // end NmnhVzBirdsBasicQueryForm class
+
+class
+NmnhVzFishesBasicQueryForm extends BaseBasicQueryForm
+{
+
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+<<<<<<< QueryForms.php
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+=======
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByLocal_tab',
+		'number' => 'CatNumber=integer',
+>>>>>>> 1.35
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Fishes'";
+
+}  // end NmnhVzFishesBasicQueryForm class
+
+class
+NmnhVzHerpsBasicQueryForm extends BaseBasicQueryForm
+{
+
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+<<<<<<< QueryForms.php
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+=======
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByLocal_tab',
+		'number' => 'CatNumber=integer',
+>>>>>>> 1.35
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Amphibians & Reptiles'";
+
+}  // end NmnhVzHerpsBasicQueryForm class
+
+class
+NmnhVzMammalsBasicQueryForm extends BaseBasicQueryForm
+{
+
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+<<<<<<< QueryForms.php
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+=======
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByLocal_tab',
+		'number' => 'CatNumber=integer',
+>>>>>>> 1.35
+	);
+
+	var $Restriction = "CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Mammals'";
+
+}  // end NmnhVzBasicQueryForm class
+
+// VZ ADVANCED QUERY FORM CLASSES
+
+class
+NmnhVzBirdsAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Birds'";
+
+}  // end NmnhVzBirdsAdvancedQueryForm class
+
+class
+NmnhVzFishesAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Fishes'";
+
+}  // end NmnhVzFishesAdvancedQueryForm class
+
+class
+NmnhVzHerpsAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Amphibians & Reptiles'";
+
+}  // end NmnhVzHerpsAdvancedQueryForm class
+
+class
+NmnhVzMammalsAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array
+	(		
+		'any' => 'SummaryData|AdmWebMetadata',
+		'name' => 'IdeFiledAsName',
+		'place' => 'BioOceanLocal|BioSeaGulfLocal|BioCountryLocal|BioDistrictCountyShireLocal|BioProvinceStateLocal|BioIslandGroupingLocal|BioIslandNameLocal',
+		'person' => 'BioParticipantLocal_tab|IdeIdentifiedByRefLocal_tab',
+		'number' => 'CatNumber',
+	);
+
+	var $Restriction = "CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Mammals'";
+
+}  // end NmnhVzMammalsAdvancedQueryForm class
+	
+
+// VZ DETAILED QUERY FORM CLASSES
+class
+NmnhVzBirdsDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Birds'";
+
+	function
+	NmnhVzBirdsDetailedQueryForm()
+	{
+		$catNumber = new QueryField;
+		$catNumber->ColName = 'CatNumber';
+		$catNumber->ColType = 'integer';
+
+		$dateVistedFrom = new QueryField;
+		$dateVistedFrom->ColName = 'BioDateVisitedFromLocal';
+		$dateVistedFrom->ColType = 'date';
+
+		$this->Fields = array
+		(	
+			$catNumber,
+			'CatCollectionName_tab',
+			'IdeOrderLocal_tab',
+			'IdeFamilyLocal_tab',
+			'IdeScientificNameLocal_tab',
+			'IdeCommonNameLocal_tab',
+			$dateVistedFrom,
+			'BioOceanLocal',
+			'BioCountryLocal',
+			'BioProvinceStateLocal',
+			'BioDistrictCountyShireLocal',
+			'BioParticipantLocal_tab',
+			'BioExpeditionNameLocal',
+			'ZooSex_tab',
+			'ZooStage_tab',
+			'ZooPreparation_tab',
+			'MeaType_tab',
+		);
+	
+		$this->BaseDetailedQueryForm();
+
+
+		$this->Hints = array
+		(	
+
+			$catNumber->ColName 				=> '[USNM number]',
+			'IdeOrderLocal_tab'				=> '[e.g. Apodiformes]',
+			'IdeFamilyLocal_tab'				=> '[e.g. Strigidae; up to 3 leading characters narrows lookup]',
+			'IdeCommonNameLocal_tab'                	=> '[N. American species only; up to 3 leading characters narrows lookup]',
+			'CitTypeStatus_tab' 				=> '[Select from list]',
+			'IdeScientificNameLocal_tab' 			=> '[e.g. Otus asio]',
+			'IdeIdentifiedByRefLocal_tab' 			=> '[eg. Bouchard]',
+			'CatCollectionName_tab'				=> '[Select from list, e.g. Types]',
+			'CatSpecimenCount'				=> '[e.g. 2]',
+			'ZooPreparation_tab' 				=> '[Select from list]',
+			'BioOceanLocal' 				=> '[e.g. North Atlantic, Pacific]',
+			'BioCountryLocal' 				=> '[Select from list]',
+			'BioProvinceStateLocal' 			=> '[e.g. Florida]',
+			'BioDistrictCountyShireLocal'	 		=> '[e.g. Montgomery]',
+			'BioIslandGroupingLocal'			=> '[Select from list]',
+			'BioIslandNameLocal'				=> '[Select from list]',
+			'BioExpeditionNameLocal' 			=> '[e.g. Thayer Expedition; up to 3 leading characters narrows lookup]',
+			'BioVesselNameLocal' 				=> '[e.g. Albatross]',
+			'BioSiteNumberLocal'				=> '[e.g. Z - 22, X054, B212, or 10A]',
+			'BioCruiseNumberLocal' 				=> '[e.g. III, VI, Y7102B, or 21]',
+			'BioParticipantLocal_tab' 			=> '[e.g. Mearns]',
+			'BioDateVisitedFromLocal'			=> '[e.g. format dd-mm-yyyy, partial entry works]',
+			'ZooSex_tab'            			=> '[Select from list]',
+			'ZooStage_tab'            			=> '[Select from list]',
+			'MeaType_tab'            			=> '[Select from list]',
+		);
+
+		$this->DropDownLists = array
+		(	
+			'IdeOrderLocal_tab'				=> 'eluts:Taxonomy[9]',
+			'BioCountryLocal' 				=> 'eluts:Continent[2]', 
+			'BioIslandGroupingLocal'			=> 'eluts:Island Grouping',
+			'BioIslandNameLocal'				=> 'eluts:Island Name',
+			'BioOceanLocal' 				=> 'eluts:Ocean[1]',
+			'CatCollectionName_tab'				=> '|Types',
+			'CitTypeStatus_tab' 				=> 'eluts:Type Status', 
+			'ZooPreparation_tab' 				=> 'eluts:Zoology Preparation', 
+			'ZooSex_tab' 					=> 'eluts:Zoology Sex',
+			'ZooStage_tab' 					=> 'eluts:Zoology Stage',
+			'MeaType_tab'            			=> '|Weight',
+		);
+
+		$this->LookupLists = array
+		(
+			'BioExpeditionNameLocal' 			=> 'Expedition Name',
+			'IdeFamilyLocal_tab'                            => 'Taxonomy[14]',
+			'IdeCommonNameLocal_tab'                	=> 'Common Names',
+		);
+	}
+
+	function
+        generateDropDown($fld, $htmlFieldName)
+        {
+                print "&nbsp;&nbsp;<select class=\"WebSelect\" name=\"$htmlFieldName\">\n";
+
+                $matches = array();
+                if (preg_match('/^eluts:(.*?)\[?(\d*)\]?$/', $this->DropDownLists[$fld], $matches))
+                {
+                        $tablename = $matches[1];
+                        if (isset($matches[2]) && $matches[2] != '')
+                                $level = $matches[2];
+                        else
+                                $level = 1;
+                        $value = sprintf('Value%02d0', (int) ($level - 1));
+                        $qry = new ConfiguredQuery();
+                        $qry->SelectedLanguage = $this->LanguageData;
+
+                        $restriction = $this->getLookupRestriction($tablename);
+                        if ($restriction == "")
+                            $restriction = "true";
+
+                        //$qry->Texql = "distinct(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500}";
+                        $qry->Texql = "order(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) on $value asc";
+
+                        $recs = $qry->Fetch();
+                        $dropdownlisttmp = array();
+                        foreach ($recs as $rec)
+                        {
+                                $dropdownitem = preg_replace('/[\?\*\"]/', ' ', $rec->{$value});
+                                $dropdownitem = trim($dropdownitem);
+                                if ($dropdownitem == '')
+                                        continue;
+                                array_push($dropdownlisttmp, $dropdownitem);
+                        }
+                        $dropdownlist = array_unique($dropdownlisttmp);
+
+                        print "            <option></option>\n";
+                        $hasEntry = 0;
+                        foreach ($dropdownlist as $option)
+                        {
+                                if (strlen($option) > $this->MaxDropDownLength)
+                                        $option = $this->trimOption($option, $this->MaxDropDownLength);
+                                if ($option != '')
+                                {
+                                        print "            <option>$option</option>\n";
+                                        $hasEntry = 1;
+                                }
+                        }
+                        if (! $hasEntry)
+                                print "            <option>--- None Available ---</option>\n";
+                }
+                else
+                {
+                        foreach (split('\|', $this->DropDownLists[$fld]) as $option)
+                        {
+                                print "            <option>$option</option>\n";
+                        }
+                }
+        }
+} // End NmnhVzBirdsDetailedQueryForm class
+
+
+class
+NmnhVzMammalsDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Restriction = "CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Mammals'";
+
+	function
+	NmnhVzMammalsDetailedQueryForm()
+	{
+		$catNumber = new QueryField;
+		$catNumber->ColName = 'CatNumber';
+		$catNumber->ColType = 'integer';
+
+		$dateVistedFrom = new QueryField;
+		$dateVistedFrom->ColName = 'BioDateVisitedFromLocal';
+		$dateVistedFrom->ColType = 'date';
+
+		$this->Fields = array
+		(	
+			'CatMuseum',	
+			$catNumber,
+			'CatObjectType',	
+			'CatCollectionName_tab',
+			'IdeOrderLocal_tab',
+			'IdeFamilyLocal_tab',
+			'IdeScientificNameLocal_tab',
+			//'IdeCommonNameLocal_tab',
+			$dateVistedFrom,
+			'BioOceanLocal',
+			'BioSeaGulfLocal',
+			'BioCountryLocal',
+			'BioIslandNameLocal',
+			'BioProvinceStateLocal',
+			'BioDistrictCountyShireLocal',
+			'BioParticipantLocal_tab',
+			'ZooSex_tab',
+			'ZooStage_tab',
+			'ZooPreparation_tab',
+			'VerCollectionMethod',
+			'MamSexualMaturity',
+			'MamPhysicalMaturity',
+			'MamSpecimenCondition',
+			'MeaType_tab',
+		);
+	
+		$this->BaseDetailedQueryForm();
+
+
+		$this->Hints = array
+		(	
+
+			'CatMuseum'					=> '[leave NMNH for our specimens, blank to include non-specimen whale records]',
+			$catNumber->ColName 				=> '[USNM number]',
+			'CatObjectType'					=> '[Select from list]',
+			'CatCollectionName_tab'				=> '[Select from list; e.g. Types or Whale Collection]',
+			'IdeOrderLocal_tab'				=> '[Select from list; e.g. Rodentia]',
+			'IdeFamilyLocal_tab'				=> '[e.g. Leporidae; up to 3 leading characters narrows lookup]',
+			'IdeScientificNameLocal_tab' 			=> '[e.g. Ailurus fulgens]',
+			//'IdeCommonNameLocal_tab'                	=> '[N. American species only; up to 3 leading characters narrows lookup]',
+			'BioDateVisitedFromLocal'			=> '[e.g. format dd-mm-yyyy, partial entry works]',
+			'BioOceanLocal' 				=> '[e.g. North Atlantic, Pacific]',
+			'BioSeaGulfLocal' 				=> '[Select from list]',
+			'BioCountryLocal' 				=> '[Select from list]',
+			'BioIslandNameLocal'				=> '[Select from list]',
+			'BioProvinceStateLocal' 			=> '[e.g. Ohio]',
+			'BioDistrictCountyShireLocal'	 		=> '[e.g. Fairfax]',
+			'BioParticipantLocal_tab' 			=> '[e.g. Nelson]',
+			'ZooSex_tab'            			=> '[Select from list]',
+			'ZooStage_tab'            			=> '[Select from list]',
+			'ZooPreparation_tab' 				=> '[Select from list]',
+			'VerCollectionMethod' 				=> '[Select from list, for whale records only]',
+			'MamSexualMaturity'	 			=> '[Select from list, for whale records only]',
+			'MamPhysicalMaturity'	 			=> '[Select from list, for whale records only]',
+			'MamSpecimenCondition'	 			=> '[Select from list, for whale records only]',
+			'MeaType_tab'            			=> '[Select from list]',
+		);
+
+		$this->DropDownLists = array
+		(	
+			'CatMuseum'					=> 'NMNH|',
+			'CatObjectType'					=> 'eluts:Object Type[2]',
+			'CatCollectionName_tab'				=> '|Types|Whale Collection',
+			'IdeOrderLocal_tab'				=> 'eluts:Taxonomy[9]',
+			'BioOceanLocal' 				=> 'eluts:Ocean[1]',
+			'BioSeaGulfLocal' 				=> 'eluts:Ocean[2]',
+			'BioCountryLocal' 				=> 'eluts:Continent[2]', 
+			'BioIslandNameLocal'				=> 'eluts:Island Name',
+			'ZooSex_tab' 					=> 'eluts:Zoology Sex',
+			'ZooStage_tab'            			=> '|Adult|Embryo|Fetus|Immature|Juvenile|Neonate|Nestling|Stillborn|Subadult|Yearling|Young',
+			'ZooPreparation_tab' 				=> '|Anatomical|Antler or Horn|Baculum/Baubellum|Baleen|Cast|Fluid|Histological|Mandible|Model|Mounted|Photograph|Skeletal Elements|Skeleton|Skin|Skull|Tissue|Tooth or Tusk', 
+			'VerCollectionMethod'				=> '|Capture|Incidental Catch|Sighting|Stranding|Vessel Collision',
+			'MamSexualMaturity'            			=> '|Calf|Fetus|Juvenile|Lactating|Mature|Maturing|Neonate|Pregnant|Resting',
+			'MamPhysicalMaturity'            		=> '|Closed|Fused|Open',
+			'MamSpecimenCondition'            		=> '|Alive|Dead, advanced decomposition|Dead, condition unknown|Dead, decomposed|Dead, fresh|Dead, moderately decomposed|Old carcass (mummy or skeleton)|Unknown',
+			'MeaType_tab'            			=> '|Length|Weight',
+		);
+
+		$this->LookupLists = array
+		(
+			'IdeFamilyLocal_tab'                            => 'Taxonomy[14]',
+			//'IdeCommonNameLocal_tab'                	=> 'Common Names',
+		);
+	}
+
+	function
+        generateDropDown($fld, $htmlFieldName)
+        {
+                print "&nbsp;&nbsp;<select class=\"WebSelect\" name=\"$htmlFieldName\">\n";
+
+                $matches = array();
+                if (preg_match('/^eluts:(.*?)\[?(\d*)\]?$/', $this->DropDownLists[$fld], $matches))
+                {
+                        $tablename = $matches[1];
+                        if (isset($matches[2]) && $matches[2] != '')
+                                $level = $matches[2];
+                        else
+                                $level = 1;
+                        $value = sprintf('Value%02d0', (int) ($level - 1));
+                        $qry = new ConfiguredQuery();
+                        $qry->SelectedLanguage = $this->LanguageData;
+
+                        $restriction = $this->getLookupRestriction($tablename);
+                        if ($restriction == "")
+                            $restriction = "true";
+
+                        //$qry->Texql = "distinct(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500}";
+                        $qry->Texql = "order(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500} on $value asc";
+
+                        $recs = $qry->Fetch();
+                        $dropdownlisttmp = array();
+                        foreach ($recs as $rec)
+                        {
+                                $dropdownitem = preg_replace('/[\?\*\"]/', ' ', $rec->{$value});
+                                $dropdownitem = trim($dropdownitem);
+                                if ($dropdownitem == '')
+                                        continue;
+                                array_push($dropdownlisttmp, $dropdownitem);
+                        }
+                        $dropdownlist = array_unique($dropdownlisttmp);
+
+                        print "            <option></option>\n";
+                        $hasEntry = 0;
+                        foreach ($dropdownlist as $option)
+                        {
+                                if (strlen($option) > $this->MaxDropDownLength)
+                                        $option = $this->trimOption($option, $this->MaxDropDownLength);
+                                if ($option != '')
+                                {
+                                        print "            <option>$option</option>\n";
+                                        $hasEntry = 1;
+                                }
+                        }
+                        if (! $hasEntry)
+                                print "            <option>--- None Available ---</option>\n";
+                }
+                else
+                {
+                        foreach (split('\|', $this->DropDownLists[$fld]) as $option)
+                        {
+                                print "            <option>$option</option>\n";
+                        }
+                }
+        }
+} // End NmnhVzMammalsDetailedQueryForm class
+
+
+class
+NmnhVzHerpsDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Amphibians & Reptiles'";
+
+	function
+	NmnhVzHerpsDetailedQueryForm()
+	{
+		$catNumber = new QueryField;
+		$catNumber->ColName = 'CatNumber';
+		$catNumber->ColType = 'integer';
+
+		$dateVistedFrom = new QueryField;
+		$dateVistedFrom->ColName = 'BioDateVisitedFromLocal';
+		$dateVistedFrom->ColType = 'date';
+
+		$this->Fields = array
+		(	
+			$catNumber,
+			'CatCollectionName_tab',
+			'IdeFiledAsFamily',
+			'IdeFiledAsQualifiedNameWeb',
+			'BioCountryLocal',
+			'BioProvinceStateLocal',
+		);
+	
+		$this->BaseDetailedQueryForm();
+
+
+		$this->Hints = array
+		(	
+
+			$catNumber->ColName 				=> '[USNM number]',
+			'CatCollectionName_tab'				=> '[Select from list, e.g. Types]',
+			'IdeFiledAsFamily'				=> '[e.g. Hylidae; up to 3 leading characters narrows lookup]',
+			'IdeFiledAsQualifiedNameWeb'			=> '[e.g. Stefania evansi]',
+			'BioCountryLocal' 				=> '[Select from list; e.g. United States]',
+			'BioProvinceStateLocal' 			=> '[e.g. Florida]',
+<<<<<<< QueryForms.php
+=======
+			'BioDistrictCountyShireLocal' 			=> '[e.g. Brevard]',
+>>>>>>> 1.35
+		);
+
+		$this->DropDownLists = array
+		(	
+			'CatCollectionName_tab'				=> '|Types',
+			'BioCountryLocal' 				=> 'eluts:Continent[2]', 
+		);
+
+		$this->LookupLists = array
+		(
+			'IdeFiledAsFamily'                            => 'Taxonomy[14]',
+		);
+	}
+
+	function
+        generateDropDown($fld, $htmlFieldName)
+        {
+                print "&nbsp;&nbsp;<select class=\"WebSelect\" name=\"$htmlFieldName\">\n";
+
+                $matches = array();
+                if (preg_match('/^eluts:(.*?)\[?(\d*)\]?$/', $this->DropDownLists[$fld], $matches))
+                {
+                        $tablename = $matches[1];
+                        if (isset($matches[2]) && $matches[2] != '')
+                                $level = $matches[2];
+                        else
+                                $level = 1;
+                        $value = sprintf('Value%02d0', (int) ($level - 1));
+                        $qry = new ConfiguredQuery();
+                        $qry->SelectedLanguage = $this->LanguageData;
+
+                        $restriction = $this->getLookupRestriction($tablename);
+                        if ($restriction == "")
+                            $restriction = "true";
+
+                        //$qry->Texql = "distinct(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500}";
+                        $qry->Texql = "order(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500} on $value asc";
+
+                        $recs = $qry->Fetch();
+                        $dropdownlisttmp = array();
+                        foreach ($recs as $rec)
+                        {
+                                $dropdownitem = preg_replace('/[\?\*\"]/', ' ', $rec->{$value});
+                                $dropdownitem = trim($dropdownitem);
+                                if ($dropdownitem == '')
+                                        continue;
+                                array_push($dropdownlisttmp, $dropdownitem);
+                        }
+                        $dropdownlist = array_unique($dropdownlisttmp);
+
+                        print "            <option></option>\n";
+                        $hasEntry = 0;
+                        foreach ($dropdownlist as $option)
+                        {
+                                if (strlen($option) > $this->MaxDropDownLength)
+                                        $option = $this->trimOption($option, $this->MaxDropDownLength);
+                                if ($option != '')
+                                {
+                                        print "            <option>$option</option>\n";
+                                        $hasEntry = 1;
+                                }
+                        }
+                        if (! $hasEntry)
+                                print "            <option>--- None Available ---</option>\n";
+                }
+                else
+                {
+                        foreach (split('\|', $this->DropDownLists[$fld]) as $option)
+                        {
+                                print "            <option>$option</option>\n";
+                        }
+                }
+        }
+} // End NmnhVzHerpsDetailedQueryForm class
+
+
+class
+NmnhVzFishesDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Restriction = "CatMuseum = 'NMNH' AND CatMuseumAcronym = 'USNM' AND CatDepartment = 'Vertebrate Zoology' AND CatDivision = 'Fishes'";
+
+	function
+	NmnhVzFishesDetailedQueryForm()
+	{
+		$catNumber = new QueryField;
+		$catNumber->ColName = 'CatNumber';
+		$catNumber->ColType = 'integer';
+
+		$dateVistedFrom = new QueryField;
+		$dateVistedFrom->ColName = 'BioDateVisitedFromLocal';
+		$dateVistedFrom->ColType = 'date';
+
+		$this->Fields = array
+		(	
+			$catNumber,
+			'CatCollectionName_tab',
+			'IdeOrderLocal_tab',
+			'IdeFamilyLocal_tab',
+			'IdeSubfamilyLocal_tab',
+			'IdeFiledAsQualifiedName',
+			'ZooPreparation_tab',
+			'BioSiteVisitNumbersLocal',
+			'BioVesselNameLocal',
+			'BioCruiseNumberLocal',
+			'BioSiteNumberLocal',
+			'BioExpeditionNameLocal',
+			'BioParticipantLocal_tab',
+			$dateVistedFrom,
+			'BioOceanLocal',
+			'BioSeaGulfLocal',
+			'BioIslandNameLocal|BioIslandGroupingLocal|BioArchipelagoLocal',
+			'BioCountryLocal',
+			'BioProvinceStateLocal',
+			'BioDistrictCountyShireLocal',
+			'BioPreciseLocationLocal',
+		);
+	
+		$this->BaseDetailedQueryForm();
+
+
+		$this->Hints = array
+		(	
+
+			$catNumber->ColName 				=> '[USNM number]',
+			'CatCollectionName_tab'				=> '[Select from list]',
+			'IdeOrderLocal_tab'				=> '[Select from list; e.g. Anguilliformes]',
+			'IdeFamilyLocal_tab'				=> '[e.g. Congridae; up to 3 leading characters narrows lookup]',
+			'IdeSubfamilyLocal_tab'				=> '[Select from list; e.g. Congrinae]',
+			'IdeFiledAsQualifiedName' 			=> '[e.g. Conger oceanicus]',
+			'ZooPreparation_tab' 				=> '[Select from list]',
+			'BioSiteVisitNumbersLocal' 	=> '[Number typically assigned by collector, identifies collecting site, e.g. MIN 00-54]',
+			'BioVesselNameLocal' 				=> '[e.g. Albatross]',
+			'BioCruiseNumberLocal' 				=> '[e.g. III, VI, Y7102B, or 21]',
+			'BioSiteNumberLocal' 		=> '[Number assigned to a collecting site in association with a specific vessel and cruise number]',
+			'BioExpeditionNameLocal' 			=> '[e.g. Albatross Expedition]',
+			'BioParticipantLocal_tab' 			=> '[e.g. Jordan, D.S.]',
+			'BioDateVisitedFromLocal'			=> '[format dd-mm-yyyy, partial entry works]',
+			'BioOceanLocal' 				=> '[Select from list]',
+			'BioSeaGulfLocal' 				=> '[e.g. Gulf of Mexico]',
+			'BioIslandNameLocal|BioIslandGroupingLocal|BioArchipelagoLocal' 	=> '[e.g. Dry Tortugas]',
+			'BioCountryLocal' 				=> '[Select from list; e.g. United States]',
+			'BioProvinceStateLocal' 			=> '[e.g. Florida]',
+			'BioDistrictCountyShireLocal'	 		=> '[e.g. Monroe]',
+			'BioPreciseLocationLocal'	 		=> '[e.g. North end Loggerhead Key]',
+		);
+
+		$this->DropDownLists = array
+		(	
+			'CatCollectionName_tab'				=> '|Types',
+			'BioOceanLocal' 				=> 'eluts:Ocean[1]',
+			'BioCountryLocal' 				=> 'eluts:Continent[2]', 
+			'IdeOrderLocal_tab'	                        => 'eluts:Taxonomy[9]',
+			'IdeSubfamilyLocal_tab'                         => 'eluts:Taxonomy[15]',
+			'ZooPreparation_tab' 				=> 'eluts:Zoology Preparation', 
+		);
+
+		$this->LookupLists = array
+		(
+			//'BioVesselNameLocal' 				=> 'Vessel Name',
+			'IdeFamilyLocal_tab'                            => 'Taxonomy[14]',
+		);
+	}
+
+	function
+        generateDropDown($fld, $htmlFieldName)
+        {
+                print "&nbsp;&nbsp;<select class=\"WebSelect\" name=\"$htmlFieldName\">\n";
+
+                $matches = array();
+                if (preg_match('/^eluts:(.*?)\[?(\d*)\]?$/', $this->DropDownLists[$fld], $matches))
+                {
+                        $tablename = $matches[1];
+                        if (isset($matches[2]) && $matches[2] != '')
+                                $level = $matches[2];
+                        else
+                                $level = 1;
+                        $value = sprintf('Value%02d0', (int) ($level - 1));
+                        $qry = new ConfiguredQuery();
+                        $qry->SelectedLanguage = $this->LanguageData;
+
+                        $restriction = $this->getLookupRestriction($tablename);
+                        if ($restriction == "")
+                            $restriction = "true";
+
+                        //$qry->Texql = "distinct(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500}";
+                        $qry->Texql = "order(SELECT $value FROM eluts WHERE Name='$tablename' and Levels=$level and $restriction) {1 to 500} on $value asc";
+
+                        $recs = $qry->Fetch();
+                        $dropdownlisttmp = array();
+                        foreach ($recs as $rec)
+                        {
+                                $dropdownitem = preg_replace('/[\?\*\"]/', ' ', $rec->{$value});
+                                $dropdownitem = trim($dropdownitem);
+                                if ($dropdownitem == '')
+                                        continue;
+                                array_push($dropdownlisttmp, $dropdownitem);
+                        }
+                        $dropdownlist = array_unique($dropdownlisttmp);
+
+                        print "            <option></option>\n";
+                        $hasEntry = 0;
+                        foreach ($dropdownlist as $option)
+                        {
+                                if (strlen($option) > $this->MaxDropDownLength)
+                                        $option = $this->trimOption($option, $this->MaxDropDownLength);
+                                if ($option != '')
+                                {
+                                        print "            <option>$option</option>\n";
+                                        $hasEntry = 1;
+                                }
+                        }
+                        if (! $hasEntry)
+                                print "            <option>--- None Available ---</option>\n";
+                }
+                else
+                {
+                        foreach (split('\|', $this->DropDownLists[$fld]) as $option)
+                        {
+                                print "            <option>$option</option>\n";
+                        }
+                }
+        }
+} // End NmnhVzFishesDetailedQueryForm class
+
+?>

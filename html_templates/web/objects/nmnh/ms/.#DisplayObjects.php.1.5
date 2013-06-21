@@ -1,0 +1,1162 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*
+*	This file contains the following classes.
+*		NmnhMsStandardDisplay - General display
+*		NmnhMsGemStandardDisplay - For Gems & Minerals records
+*		NmnhMsPetStandardDisplay - For Petrology & Volcanology records
+*		NmnhMsMetStandardDisplay - For Meteorite records
+*
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseDisplayObjects.php');
+
+class
+NmnhMsStandardDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+	var $KeepAssociatedImagesAspectRatio = 1;
+
+	//  Default display if division is not filled
+	function
+	NmnhMsStandardDisplay()
+	{
+		$this->BaseStandardDisplay();
+
+		// Don't display images by default
+		$this->DisplayImage = 0;
+
+		// Identified by
+		$ideFiledAsIdentBy = new FormatField;
+		$ideFiledAsIdentBy->Name = 'IdeIdentifiedByRefLocal_tab';
+		$ideFiledAsIdentBy->Format = '{IdeFiledAsRef->eparties->NamBriefName} {IdeFiledAsRef->eparties->NamOrganisation}';
+		// end Identified by
+
+		// Participants
+		$colParticipantRole = new Field;
+		$colParticipantRole->ColName = 'ColParticipantRole_tab';
+		$colParticipantRole->Italics = 1;
+		
+		$colParticipant = new FormatField;
+		$colParticipant->Format = '{ColParticipantRef_tab->eparties->NamBriefName} {ColParticipantRef_tab->eparties->NamOrganisation}';
+		
+		$participantTable = new Table;
+		$participantTable->Name = "ColParticipantRefLocal_tab";
+		$participantTable->Headings = array('', '');
+		$participantTable->Columns = array($colParticipantRole, $colParticipant);
+		// end Participants
+
+		// Citations
+		$citTypeStatus = new Field;
+		$citTypeStatus->ColName = 'CitTypeStatus_tab';
+
+		$citTaxonRefLocal = new Field;
+		$citTaxonRefLocal->ColName = 'IdeScientificNameLocal_tab';
+
+		$typeCitations = new Table;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitations->Columns = array($citTypeStatus, $citTaxonRefLocal);
+		// end Citations
+
+
+		// Other identifications name
+		$ideOtherQualifiedName = new Field;
+		$ideOtherQualifiedName->ColName = 'IdeOtherQualifiedName_tab';
+
+		$ideDateIdentified = new Field;
+		$ideDateIdentified->ColName = 'IdeOtherDateIdentified0';
+
+		$ideIdentifiedBy = new Field;
+		$ideIdentifiedBy->ColName = 'IdeOtherIdentifiedByRef_tab->eparties->NamBriefName';
+
+		$otherIdentTable = new Table;
+		$otherIdentTable->Name = 'IdeOtherQualifiedName_tab';
+		$otherIdentTable->Headings = array('Identification', 'Date Identified', 'Identified By');
+		$otherIdentTable->Columns = array($ideOtherQualifiedName, $ideDateIdentified, $ideIdentifiedBy);
+		// end Other identifications name
+
+		// Specimen Count
+		$catSpecimenCount = new Field;
+		$catSpecimenCount->ColName = 'CatSpecimenCount';
+
+		$catSpecimenCountMod = new Field;
+		$catSpecimenCountMod->ColName = 'CatSpecimenCountModifier';
+
+		$specimenCountTable = new Table;
+		$specimenCountTable->Name = 'SpecCount';
+		$specimenCountTable->Headings = array('', '');
+		$specimenCountTable->Columns = array($catSpecimenCount, $catSpecimenCountMod);
+		// end Specimen Count
+
+
+		$dateCollected = new FormatField;
+		$dateCollected->Format = "{BioDateVisitedFromLocal} - {BioDateVisitedToLocal}";
+		$dateCollected->Name = "DateCollected";
+
+		// cat number 
+		$catNumberFormat = new FormatField;
+		$catNumberFormat->Format = "{CatPrefix} {CatNumber} {CatSuffix}";
+		$catNumberFormat->Name = "CatNumber";
+		// end cat number 
+
+		$aquDepth = new FormatField;
+		$aquDepth->Format = "{BioDepthFromMet} - {BioDepthToMet}";
+		$aquDepth->Name = "Depth(m)";
+
+		$minWeight = new FormatField;
+		$minWeight->Format = "{MinWeight} {MinWeightUnit}";
+		$minWeight->Name = "MinWeight";
+
+		// Eruption details
+		$erupDate = new Field;
+		$erupDate->ColName = 'PetEruptionDate';
+
+		$erupTime = new Field;
+		$erupTime->ColName = 'PetEruptionTime';
+
+		$erupZone = new Field;
+		$erupZone->ColName = 'PetEruptionTimeZone';
+
+		$erupDetails = new Table;
+		$erupDetails->Name = 'ErupDetails';
+		$erupDetails->Headings = array('Date', 'Time','Zone');
+		$erupDetails->Columns = array($erupDate, $erupTime, $erupZone);
+
+		// Flow details
+		$flowDate = new Field;
+		$flowDate->ColName = 'PetFlowTephraDate';
+
+		$flowTime = new Field;
+		$flowTime->ColName = 'PetFlowTephraTime';
+
+		$flowZone = new Field;
+		$flowZone->ColName = 'PetFlowTephraTimeZone';
+
+		$flowDetails = new Table;
+		$flowDetails->Name = 'FlowTephraDetails';
+		$flowDetails->Headings = array('Date', 'Time','Zone');
+		$flowDetails->Columns = array($flowDate, $flowTime, $flowZone);
+
+		// petrology prep details 
+		$zooPrep = new Field;
+		$zooPrep->ColName = 'ZooPreparation_tab';
+
+		$zooPrepBy = new Field;
+		$zooPrepBy->ColName = 'ZooPreparedByRef_tab->eparties->SummaryData';
+
+		$zooCount = new Field;
+		$zooCount->ColName = 'ZooPreparationCount_tab';
+
+		$zooRem = new Field;
+		$zooRem->ColName = 'ZooPreparationRemarks_tab';
+
+		$zooPrepDetails = new Table;
+		$zooPrepDetails->Name = 'zooPrepDetails';
+		$zooPrepDetails->Headings = array('Preparation', 'By', 'Count', 'Remarks');
+		$zooPrepDetails->Columns = array($zooPrep, $zooPrepBy, $zooCount, $zooRem);
+		// end 
+
+		// geolithic age details 
+		$ageSystem = new Field;
+		$ageSystem->ColName = 'AgeGeologicAgeSystem_tab';
+
+		$ageSeries = new Field;
+		$ageSeries->ColName = 'AgeGeologicAgeSeries_tab';
+
+		$ageStage = new Field;
+		$ageStage->ColName = 'AgeGeologicAgeStage_tab';
+
+		$ageAuthority = new Field;
+		$ageAuthority->ColName = 'AgeGeologicAgeAuthorityRef_tab->eparties->SummaryData';
+
+		$geoAgeDetails = new Table;
+		$geoAgeDetails->Name = 'GeoAgeDetails';
+		$geoAgeDetails->Headings = array('System', 'Series', 'Stage', 'Authority');
+		$geoAgeDetails->Columns = array($ageSystem, $ageSeries, $ageStage, $ageAuthority);
+		// end 
+
+
+		// stratigraphy details 
+		$stratGroup = new Field;
+		$stratGroup->ColName = 'AgeStratigraphyGroup_tab';
+
+		$stratFormation = new Field;
+		$stratFormation->ColName = 'AgeStratigraphyFormation_tab';
+
+		$stratMember = new Field;
+		$stratMember->ColName = 'AgeStratigraphyMember_tab';
+
+		$stratAuth = new Field;
+		$stratAuth->ColName = 'AgeStratigraphyAuthorityRef_tab->eparties->SummaryData';
+
+		$geoStratDetails = new Table;
+		$geoStratDetails->Name = 'StratDetails';
+		$geoStratDetails->Headings = array('Group', 'Formation', 'Member', 'Authority');
+		$geoStratDetails->Columns = array($stratGroup, $stratFormation, $stratMember, $stratAuth);
+		// end 
+
+		$this->Fields = array
+		(
+			'IdeFiledAsName',
+			$catNumberFormat,
+			'CatCollectionName_tab',
+			$specimenCountTable,
+			//'IdeFiledAsClass', 		
+			//'IdeFiledAsOrder', 	
+			//'IdeFiledAsFamily', 
+			//'IdeFiledAsGenus', 	
+			//'IdeFiledAsSubGenus', 
+			//'IdeFiledAsSpecies', 
+			//'IdeFiledAsSubSpecies',
+			'IdeTaxonRef_tab->etaxonomy->AutCombAuthorString',
+			$ideFiledAsIdentBy, 
+			$otherIdentTable,
+			$typeCitations,
+			$dateCollected, 
+			'BioOceanLocal', 
+			'BioCountryLocal',
+			'BioSeaGulfLocal',
+			'BioProvinceStateLocal',
+			'BioDistrictCountyShireLocal', 
+			$participantTable,	
+			'BibBibliographyRef_tab->ebibliography->SummaryData', 	
+			'CatOtherNumbersType_tab', 
+			'CatOtherNumbersValue_tab', 
+
+			//Petrology & Volcanology
+			'PetLavaSource',
+			'PetFlowTephra',
+			$erupDetails,
+			$flowDetails,
+			$zooPrepDetails,
+			'PetCommodityMetal_tab',
+			$geoAgeDetails,
+			$geoStratDetails,
+
+			//Minerals
+			'MinName',
+			'MinJeweleryType',
+			'MinCut',
+			'MinColor_tab',
+			'MinCutByRef->eparties->SummaryData',
+			'MinMakerRef->eparties->SummaryData',
+			'MinSynonyms_tab',
+			'MinMicroprobed',
+			'MinXRayed',
+			'MinSynthetic',
+			'MinChemicalModifier',
+			'MinDescribedFigured_tab',
+			//'MinCountry',
+			//'MinState',
+			//$minWeight,
+
+			// Meteorite
+			'MetMeteoriteName',
+			'MetSynonym',
+			'MetMeteoriteType',
+			'MetRecordNumber',
+			'MetFindFall',
+			'MetConditionDetermination',
+		);
+
+		$this->HeaderField = 'IdeFiledAsName';
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+	}
+
+	function
+	Show()
+	{
+		/*
+		**  The Show() method is resposible for sourcing the Language strings
+		**  ($this->_STRINGS) and performing the query before calling display().
+		*/
+		$this->sourceStrings();
+		$this->setupSchema();
+
+		if (!isset($this->IRN))
+		{
+			WebDie('Invalid IRN', 'BaseDisplayObject');
+		}
+
+		// we don't grab the Multimedia ref if we are already in Multimedia
+		if ($this->Database == "emultimedia")
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData'));
+		}
+		else
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData', 'MulMultiMediaRef_tab', 'AdmPublishWebNoPasswordLocal_tab'));
+		}
+		$this->_buildSelectArray($this->Fields);
+		$this->_buildSelectArray($this->AdditionalFields);
+
+		if (count($this->AdditionalFields) > 0)
+		{
+			$this->Fields = array_merge($this->Fields, $this->AdditionalFields);
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $this->selectArray;
+			
+
+		$qry->From = $this->Database;
+		$qry->Where = 'irn=' . $this->IRN;
+		$result = $qry->Fetch();
+
+		if (!isset($result[0]->irn_1) || $result[0]->irn_1 == '')
+		{
+			print "<center>";
+			print "<h2>";
+			PPrint($this->_STRINGS['NO RESULTS'], $this->FontFace, '', $this->BodyTextColor);
+			print"</h2>\n";
+			print "<h3>";
+			PPrint($this->_STRINGS['GO BACK'], $this->FontFace, '', $this->BodyTextColor);
+			print "</h3>\n";
+			print '<br /></center>';
+			return;
+		}
+
+		$this->record = $result[0];
+
+		// Now we call the display function
+		$this->display();
+	}
+
+	function
+	display()
+	{
+
+		$widthAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		$bodyColorAttrib = '';
+		if ($this->BodyColor != '')
+			$bodyColorAttrib	= 'bgcolor=' . $this->BodyColor;
+		$bodyTextColorAttrib = '';
+		if ($this->BodyTextColor != '')
+			$bodyTextColorAttrib	= 'color=' . $this->BodyTextColor;
+		$highlightColorAttrib = '';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor=' . $this->HighlightColor ;
+		$headerTextColorAttrib = '';
+		if ($this->HeaderTextColor != '')
+			$headerTextColorAttrib= 'color=' . $this->HeaderTextColor;
+		$borderColorAttrib = '';
+		$headerColorAttrib = '';
+		if ($this->BorderColor != '')
+		{
+			$borderColorAttrib= 'bordercolor=' . $this->BorderColor;
+			$headerColorAttrib= 'bgcolor=' . $this->BorderColor;
+		}
+		$fontFaceAttrib = '';
+		if ($this->FontFace != '')
+			$fontFaceAttrib= 'face="' . $this->FontFace . '"';
+		$fontSizeAttrib = '';
+		if ($this->FontSize != '')
+			$fontSizeAttrib= 'size="' . $this->FontSize . '"';
+		if ($this->HeaderFontSize == '')
+		{
+			if ($this->FontSize != '')
+				$this->HeaderFontSize = $this->FontSize + 1;
+			else
+				$this->HeaderFontSize = '+1';
+		}
+
+		print "<table $widthAttrib cellpadding=\"2\" cellspacing=\"0\" border=\"0\">\n";
+		print "<tr><td align=\"left\">\n";
+		$link = $this->QueryPage;
+
+		if ($this->DisplayNewSearchLink)
+		{
+			print "&nbsp;<a href=\"$link\">";
+			PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+		foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+		{
+			$link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+			PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "<a href=\"$link\">";
+			PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+
+		print "</td>\n";
+		print "</tr><tr><td colspan=\"2\">\n";
+		$decorator = new HtmlBoxAndTitle;
+		$decorator->BorderColor = $this->BorderColor;
+		$decorator->BodyColor = $this->BodyColor;
+		$decorator->TitleTextColor = $this->HeaderTextColor;
+		$decorator->FontFace = $this->FontFace;
+		$decorator->Width = "100%";
+		$decorator->Title = $this->record->{$this->HeaderField};
+		$decorator->Open();
+
+		if ($this->DisplayImage)
+			$this->DisplayMedia();
+
+		print "       <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\">\n";
+		print "<!-- Start Field Content -->\n";
+
+		// Foreach loop on each item in the $this->Fields var
+		$i = $fieldNum = 0;
+		foreach ($this->Fields as $item)
+		{
+			$fieldNum++;
+			if (is_string($item))
+			{
+				if (isset($this->_STRINGS[$item]))
+					$item = new Field($item, $this->_STRINGS[$item]);
+				else
+					$item = new Field($item, $item);
+			}
+
+			// Don't display if fields security doesn't allow
+			if (isset($item->ValidUsers) 
+				&& strtolower($item->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($item->ValidUsers))
+					continue;
+			}
+
+			// If it's a backreference item, then load data
+			$this->_loadBackReferenceField($item);
+
+			if (! $this->SuppressEmptyFields || $this->_hasData($item))
+			{
+				$i++;
+				if ($fieldNum == 1)
+					continue; // ignore first field as it's used in heading
+				if ($i % 2 == 0)
+					print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+				else
+					print "	<tr align=\"left\" valign=\"top\">\n";
+					
+				// Print field name
+				if ($item->Label != '')
+					$label = $item->Label;
+				elseif ($item->Name != '')
+				{
+					if (isset($this->_STRINGS[$item->Name]))
+						$label = $this->_STRINGS[$item->Name];
+					else
+						$label = $item->Name;
+				}
+				else
+				{
+					if (isset($this->_STRINGS[$item->ColName]))
+						$label = $this->_STRINGS[$item->ColName];
+					else
+						$label = $this->ColName;
+				}
+
+				if ($this->DisplayLabels)
+				{
+					print "	  <td width=\"160\"><b>";
+					print "<font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>";
+					print $label;
+					print "</font></b></td>\n"; 
+				}
+				else
+				{
+					print "	  <td>&nbsp;</td>\n";
+				}
+
+
+				print "	  <td>\n";
+				$this->adjustOutput($item);
+				print "</td>\n";
+				print "	</tr>\n";
+			}
+		}
+
+		
+		// Print the extra multimedia
+		$firstImage = ($this->DisplayImage) ? 2 : 1;
+			
+		$hasMedia = isset($this->record->{"MulMultiMediaRef:$firstImage"});
+		if ($this->DisplayAllMedia && $hasMedia)
+		{
+			if ($i % 2 == 0)
+				print "	<tr align=\"left\" valign=\"top\">\n";
+			else
+				print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+
+			// Print field name (This will normally be multimedia)
+			if ($this->DisplayLabels)
+			{
+				print "	  <td width=\"160\"><b><font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>".
+						$this->_STRINGS['MEDIA'] . "</font></b></td>\n"; 
+			}
+
+			// Display Images
+			print "	  <td>\n";
+			print "<!-- Start a table of thumbnails -->\n";
+			print "<table border=\"0\" cellpadding=\"3\"><tr>\n";
+			$i = $firstImage;
+			$imgcount = 0;
+			$mmField = "MulMultiMediaRef:$i"; 
+			$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+			$imgirn = $this->record->$mmField;
+			$publish = $this->record->$publishField;
+			
+			while ($imgirn != '')
+			{
+				if (strtolower($publish) == "yes")
+				{
+					if ($this->ImagesPerRow > 0 && ($imgcount % $this->ImagesPerRow == 0))
+						print "</tr><tr>";
+
+					print "<td align=\"center\">";
+					$image = new MediaImage;
+					$image->Intranet = $this->Intranet;
+					$image->IRN = $imgirn;
+					$image->BorderColor = $this->BorderColor;
+					if ($this->SuppressImageBorders)
+						$image->ShowBorder = 0;
+					$image->HighLightColor = $this->BorderColor;
+					$image->RefIRN = $this->IRN;
+					$image->RefTable = $this->Database;
+					$image->UseAbsoluteLinks = $this->UseAbsoluteLinks;
+					$image->KeepAspectRatio = $this->KeepAssociatedImagesAspectRatio;
+					$image->Width = 60;
+					$image->Height = 60;
+					if ($this->ImageDisplayPage != "")
+					{
+						$image->ImageDisplayPage = $this->ImageDisplayPage;
+					}
+					elseif($this->Intranet)
+					{
+						$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}	
+					else
+					{
+						$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}
+					$image->Show();
+					$imgcount++;
+					print "</td>";
+				}
+
+				$i++;
+				$mmField = "MulMultiMediaRef:$i"; 
+				$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+				$imgirn = $this->record->$mmField;
+				$publish = $this->record->$publishField;
+			}
+
+			print "</tr></table>";
+			print "</td></tr>\n";
+		}
+		print "       </table>\n";
+		print "<!-- End Field Content -->\n";
+
+		$decorator->Close();
+
+		print "<tr><td align=\"left\">\n";
+                $link = $this->QueryPage;
+
+                if ($this->DisplayNewSearchLink)
+                {
+                        print "&nbsp;<a href=\"$link\">";
+                        PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+                foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+                {
+                        $link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+                        PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "<a href=\"$link\">";
+                        PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+
+                print "</td></tr>\n";
+
+		print "</td></tr>";
+		print "</table>\n";
+
+	}
+}
+
+class
+NmnhMsGemStandardDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+	var $KeepAssociatedImagesAspectRatio = 1;
+
+	// Set default in the constructor
+	function
+	NmnhMsGemStandardDisplay()
+	{
+		$this->BaseStandardDisplay();
+
+		// Don't display images by default
+		$this->DisplayImage = 0;
+
+		// identification list
+		$ideTaxon = new Field;
+		$ideTaxon->ColName = 'IdeTaxonLocal_tab';
+
+		$ideQualifier = new Field;
+		$ideQualifier->ColName = 'IdeQualifier_tab';
+
+		$ideNamedPart = new Field;
+		$ideNamedPart->ColName = 'IdeNamedPart_tab';
+
+		$ideIdentifiedBy = new Field;
+		$ideIdentifiedBy->ColName = 'IdeIdentifiedByRef_tab->eparties->NamBriefName';
+
+		$ideCurrent = new Field;
+		$ideCurrent->ColName = 'IdeCurrent_tab';
+
+		$ideTexture = new Field;
+		$ideTexture->ColName = 'IdeTextureStructure_tab';
+
+		$ideIdentificationList = new Table;
+		$ideIdentificationList->Name = 'Identification List';
+		$ideIdentificationList->Headings = array('Taxon', 'Qualifier', 'Named Part', 'Id By', 'Current', 'Texture/Structure');
+		$ideIdentificationList->Columns = array($ideTaxon, $ideQualifier, $ideNamedPart, $ideIdentifiedBy, $ideCurrent, $ideTexture);
+		// end 
+
+		// Identified by
+		$ideFiledAsIdentBy = new FormatField;
+		$ideFiledAsIdentBy->Name = 'IdeIdentifiedByRefLocal_tab';
+		$ideFiledAsIdentBy->Format = '{IdeFiledAsRef->eparties->NamBriefName} {IdeFiledAsRef->eparties->NamOrganisation}';
+		// end Identified by
+
+		// Participants
+		$colParticipantRole = new Field;
+		$colParticipantRole->ColName = 'ColParticipantRole_tab';
+		$colParticipantRole->Italics = 1;
+		
+		$colParticipant = new FormatField;
+		$colParticipant->Format = '{ColParticipantRef_tab->eparties->NamBriefName} {ColParticipantRef_tab->eparties->NamOrganisation}';
+		
+		$participantTable = new Table;
+		$participantTable->Name = "ColParticipantRefLocal_tab";
+		$participantTable->Headings = array('', '');
+		$participantTable->Columns = array($colParticipantRole, $colParticipant);
+		// end Participants
+
+		// Citations
+		$citTypeStatus = new Field;
+		$citTypeStatus->ColName = 'CitTypeStatus_tab';
+
+		$citTaxonRefLocal = new Field;
+		$citTaxonRefLocal->ColName = 'IdeScientificNameLocal_tab';
+
+		$typeCitations = new Table;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitations->Columns = array($citTypeStatus, $citTaxonRefLocal);
+		// end Citations
+
+
+		// Other identifications name
+		$ideOtherQualifiedName = new Field;
+		$ideOtherQualifiedName->ColName = 'IdeOtherQualifiedName_tab';
+
+		$ideDateIdentified = new Field;
+		$ideDateIdentified->ColName = 'IdeOtherDateIdentified0';
+
+		$ideIdentifiedBy = new Field;
+		$ideIdentifiedBy->ColName = 'IdeOtherIdentifiedByRef_tab->eparties->NamBriefName';
+
+		$otherIdentTable = new Table;
+		$otherIdentTable->Name = 'IdeOtherQualifiedName_tab';
+		$otherIdentTable->Headings = array('Identification', 'Date Identified', 'Identified By');
+		$otherIdentTable->Columns = array($ideOtherQualifiedName, $ideDateIdentified, $ideIdentifiedBy);
+		// end Other identifications name
+
+		// Specimen Count
+		$catSpecimenCount = new Field;
+		$catSpecimenCount->ColName = 'CatSpecimenCount';
+
+		$catSpecimenCountMod = new Field;
+		$catSpecimenCountMod->ColName = 'CatSpecimenCountModifier';
+
+		$specimenCountTable = new Table;
+		$specimenCountTable->Name = 'SpecCount';
+		$specimenCountTable->Headings = array('', '');
+		$specimenCountTable->Columns = array($catSpecimenCount, $catSpecimenCountMod);
+		// end Specimen Count
+
+
+		$dateCollected = new FormatField;
+		$dateCollected->Format = "{BioDateVisitedFromLocal} - {BioDateVisitedToLocal}";
+		$dateCollected->Name = "DateCollected";
+
+		// cat number 
+		$catNumberFormat = new FormatField;
+		$catNumberFormat->Format = "{CatPrefix} {CatNumber} {CatSuffix}";
+		$catNumberFormat->Name = "CatNumber";
+		// end cat number 
+
+		$aquDepth = new FormatField;
+		$aquDepth->Format = "{BioDepthFromMet} - {BioDepthToMet}";
+		$aquDepth->Name = "Depth(m)";
+
+		$minWeight = new FormatField;
+		$minWeight->Format = "{MinWeight} {MinWeightUnit}";
+		$minWeight->Name = "MinWeight";
+
+
+		$this->Fields = array
+		(
+			'IdeFiledAsName',
+			$catNumberFormat,
+			'CatCollectionName_tab',
+			$specimenCountTable,
+			$ideIdentificationList,
+			$typeCitations,
+			'IdeTaxonRef_tab->etaxonomy->AutCombAuthorString',
+			$ideFiledAsIdentBy, 
+			$otherIdentTable,
+			$dateCollected, 
+			'BioOceanLocal', 
+			'BioCountryLocal',
+			'BioSeaGulfLocal',
+			'BioProvinceStateLocal',
+			'BioDistrictCountyShireLocal', 
+			$participantTable,	
+			'AgeGeologicAgeSystem_tab',
+			'AgeStratigraphyFormation_tab',
+			'BibBibliographyRef_tab->ebibliography->SummaryData', 	
+			'CatOtherNumbersType_tab', 
+			'CatOtherNumbersValue_tab', 
+			'MinName',
+			'MinJeweleryType',
+			'MinCut',
+			'MinColor_tab',
+			'MinCutByRef->eparties->SummaryData',
+			'MinMakerRef->eparties->SummaryData',
+			'MinSynonyms_tab',
+			'MinMicroprobed',
+			'MinXRayed',
+			'MinSynthetic',
+			'MinChemicalModifier',
+			'MinDescribedFigured_tab',
+			//'MinCountry',
+			//'MinState',
+			//$minWeight,
+		);
+
+		$this->HeaderField = 'IdeFiledAsName';
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+	}
+}
+
+
+class
+NmnhMsPetStandardDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+	var $KeepAssociatedImagesAspectRatio = 1;
+
+	// Set default in the constructor
+	function
+	NmnhMsPetStandardDisplay()
+	{
+		$this->BaseStandardDisplay();
+
+		// Don't display images by default
+		$this->DisplayImage = 0;
+
+		// identification list
+		$ideTaxon = new Field;
+		$ideTaxon->ColName = 'IdeTaxonLocal_tab';
+
+		$ideQualifier = new Field;
+		$ideQualifier->ColName = 'IdeQualifier_tab';
+
+		$ideNamedPart = new Field;
+		$ideNamedPart->ColName = 'IdeNamedPart_tab';
+
+		$ideIdentifiedBy = new Field;
+		$ideIdentifiedBy->ColName = 'IdeIdentifiedByRef_tab->eparties->NamBriefName';
+
+		$ideCurrent = new Field;
+		$ideCurrent->ColName = 'IdeCurrent_tab';
+
+		$ideTexture = new Field;
+		$ideTexture->ColName = 'IdeTextureStructure_tab';
+
+		$ideIdentificationList = new Table;
+		$ideIdentificationList->Name = 'Identification List';
+		$ideIdentificationList->Headings = array('Taxon', 'Qualifier', 'Named Part', 'Id By', 'Current', 'Texture/Structure');
+		$ideIdentificationList->Columns = array($ideTaxon, $ideQualifier, $ideNamedPart, $ideIdentifiedBy, $ideCurrent, $ideTexture);
+		// end 
+
+		// Identified by
+		$ideFiledAsIdentBy = new FormatField;
+		$ideFiledAsIdentBy->Name = 'IdeIdentifiedByRefLocal_tab';
+		$ideFiledAsIdentBy->Format = '{IdeFiledAsRef->eparties->NamBriefName} {IdeFiledAsRef->eparties->NamOrganisation}';
+		// end Identified by
+
+		// Participants
+		$colParticipantRole = new Field;
+		$colParticipantRole->ColName = 'ColParticipantRole_tab';
+		$colParticipantRole->Italics = 1;
+		
+		$colParticipant = new FormatField;
+		$colParticipant->Format = '{ColParticipantRef_tab->eparties->NamBriefName} {ColParticipantRef_tab->eparties->NamOrganisation}';
+		
+		$participantTable = new Table;
+		$participantTable->Name = "ColParticipantRefLocal_tab";
+		$participantTable->Headings = array('', '');
+		$participantTable->Columns = array($colParticipantRole, $colParticipant);
+		// end Participants
+
+		// Citations
+		$citTypeStatus = new Field;
+		$citTypeStatus->ColName = 'CitTypeStatus_tab';
+
+		$citTaxonRefLocal = new Field;
+		$citTaxonRefLocal->ColName = 'IdeScientificNameLocal_tab';
+
+		$typeCitations = new Table;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitations->Columns = array($citTypeStatus, $citTaxonRefLocal);
+		// end Citations
+
+
+		// Other identifications name
+		$ideOtherQualifiedName = new Field;
+		$ideOtherQualifiedName->ColName = 'IdeOtherQualifiedName_tab';
+
+		$ideDateIdentified = new Field;
+		$ideDateIdentified->ColName = 'IdeOtherDateIdentified0';
+
+		$ideIdentifiedBy = new Field;
+		$ideIdentifiedBy->ColName = 'IdeOtherIdentifiedByRef_tab->eparties->NamBriefName';
+
+		$otherIdentTable = new Table;
+		$otherIdentTable->Name = 'IdeOtherQualifiedName_tab';
+		$otherIdentTable->Headings = array('Identification', 'Date Identified', 'Identified By');
+		$otherIdentTable->Columns = array($ideOtherQualifiedName, $ideDateIdentified, $ideIdentifiedBy);
+		// end Other identifications name
+
+		// Specimen Count
+		$catSpecimenCount = new Field;
+		$catSpecimenCount->ColName = 'CatSpecimenCount';
+
+		$catSpecimenCountMod = new Field;
+		$catSpecimenCountMod->ColName = 'CatSpecimenCountModifier';
+
+		$specimenCountTable = new Table;
+		$specimenCountTable->Name = 'SpecCount';
+		$specimenCountTable->Headings = array('', '');
+		$specimenCountTable->Columns = array($catSpecimenCount, $catSpecimenCountMod);
+		// end Specimen Count
+
+
+		$dateCollected = new FormatField;
+		$dateCollected->Format = "{BioDateVisitedFromLocal} - {BioDateVisitedToLocal}";
+		$dateCollected->Name = "DateCollected";
+
+		// cat number 
+		$catNumberFormat = new FormatField;
+		$catNumberFormat->Format = "{CatPrefix} {CatNumber} {CatSuffix}";
+		$catNumberFormat->Name = "CatNumber";
+		// end cat number 
+
+		$aquDepth = new FormatField;
+		$aquDepth->Format = "{BioDepthFromMet} - {BioDepthToMet}";
+		$aquDepth->Name = "Depth(m)";
+
+		$minWeight = new FormatField;
+		$minWeight->Format = "{MinWeight} {MinWeightUnit}";
+		$minWeight->Name = "MinWeight";
+
+		// Eruption details
+		$erupDate = new Field;
+		$erupDate->ColName = 'PetEruptionDate';
+
+		$erupTime = new Field;
+		$erupTime->ColName = 'PetEruptionTime';
+
+		$erupZone = new Field;
+		$erupZone->ColName = 'PetEruptionTimeZone';
+
+		$erupDetails = new Table;
+		$erupDetails->Name = 'ErupDetails';
+		$erupDetails->Headings = array('Date', 'Time','Zone');
+		$erupDetails->Columns = array($erupDate, $erupTime, $erupZone);
+
+		// Flow details
+		$flowDate = new Field;
+		$flowDate->ColName = 'PetFlowTephraDate';
+
+		$flowTime = new Field;
+		$flowTime->ColName = 'PetFlowTephraTime';
+
+		$flowZone = new Field;
+		$flowZone->ColName = 'PetFlowTephraTimeZone';
+
+		$flowDetails = new Table;
+		$flowDetails->Name = 'FlowTephraDetails';
+		$flowDetails->Headings = array('Date', 'Time','Zone');
+		$flowDetails->Columns = array($flowDate, $flowTime, $flowZone);
+
+		// petrology prep details 
+		$zooPrep = new Field;
+		$zooPrep->ColName = 'ZooPreparation_tab';
+
+		$zooPrepBy = new Field;
+		$zooPrepBy->ColName = 'ZooPreparedByRef_tab->eparties->SummaryData';
+
+		$zooCount = new Field;
+		$zooCount->ColName = 'ZooPreparationCount_tab';
+
+		$zooRem = new Field;
+		$zooRem->ColName = 'ZooPreparationRemarks_tab';
+
+		$zooPrepDetails = new Table;
+		$zooPrepDetails->Name = 'ZooPreparation_tab';
+		$zooPrepDetails->Headings = array('', 'Prepared By', 'Count', 'Remarks');
+		$zooPrepDetails->Columns = array($zooPrep, $zooPrepBy, $zooCount, $zooRem);
+		// end 
+
+		// geolithic age details 
+		$ageSystem = new Field;
+		$ageSystem->ColName = 'AgeGeologicAgeSystem_tab';
+
+		$ageSeries = new Field;
+		$ageSeries->ColName = 'AgeGeologicAgeSeries_tab';
+
+		$ageStage = new Field;
+		$ageStage->ColName = 'AgeGeologicAgeStage_tab';
+
+		$ageAuthority = new Field;
+		$ageAuthority->ColName = 'AgeGeologicAgeAuthorityRef_tab->eparties->SummaryData';
+
+		$geoAgeDetails = new Table;
+		$geoAgeDetails->Name = 'GeoAgeDetails';
+		$geoAgeDetails->Headings = array('System', 'Series', 'Stage', 'Authority');
+		$geoAgeDetails->Columns = array($ageSystem, $ageSeries, $ageStage, $ageAuthority);
+		// end 
+
+
+		// stratigraphy details 
+		$stratGroup = new Field;
+		$stratGroup->ColName = 'AgeStratigraphyGroup_tab';
+
+		$stratFormation = new Field;
+		$stratFormation->ColName = 'AgeStratigraphyFormation_tab';
+
+		$stratMember = new Field;
+		$stratMember->ColName = 'AgeStratigraphyMember_tab';
+
+		$stratAuth = new Field;
+		$stratAuth->ColName = 'AgeStratigraphyAuthorityRef_tab->eparties->SummaryData';
+
+		$geoStratDetails = new Table;
+		$geoStratDetails->Name = 'AgeStratigraphyGroup_tab';
+		$geoStratDetails->Headings = array('Group', 'Formation', 'Member', 'Authority');
+		$geoStratDetails->Columns = array($stratGroup, $stratFormation, $stratMember, $stratAuth);
+		// end 
+
+		$this->Fields = array
+		(
+			'IdeFiledAsName',
+			$catNumberFormat,
+			'CatCollectionName_tab',
+			$specimenCountTable,
+			$ideIdentificationList,
+			$ideFiledAsIdentBy, 
+			$otherIdentTable,
+			$typeCitations,
+			$dateCollected, 
+			'BioOceanLocal', 
+			'BioCountryLocal',
+			'BioSeaGulfLocal',
+			'BioProvinceStateLocal',
+			'BioDistrictCountyShireLocal', 
+			$participantTable,	
+			'BibBibliographyRef_tab->ebibliography->SummaryData', 	
+			'CatOtherNumbersType_tab', 
+			'CatOtherNumbersValue_tab', 
+			'PetLavaSource',
+			'PetFlowTephra',
+			$erupDetails,
+			$flowDetails,
+			$zooPrepDetails,
+			'MinMicroprobed',
+			'MinXRayed',
+			'MinColor_tab',
+			'PetCommodityMetal_tab',
+			$geoAgeDetails,
+			$geoStratDetails,
+		);
+
+		$this->HeaderField = 'IdeFiledAsName';
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+	}
+}
+class
+NmnhMsMetStandardDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+	var $KeepAssociatedImagesAspectRatio = 1;
+
+	// Set default in the constructor
+	function
+	NmnhMsMetStandardDisplay()
+	{
+		$this->BaseStandardDisplay();
+
+		// Don't display images by default
+		$this->DisplayImage = 0;
+
+		// Identified by
+		$ideFiledAsIdentBy = new FormatField;
+		$ideFiledAsIdentBy->Name = 'IdeIdentifiedByRefLocal_tab';
+		$ideFiledAsIdentBy->Format = '{IdeFiledAsRef->eparties->NamBriefName} {IdeFiledAsRef->eparties->NamOrganisation}';
+		// end Identified by
+
+		// Participants
+		$colParticipantRole = new Field;
+		$colParticipantRole->ColName = 'ColParticipantRole_tab';
+		$colParticipantRole->Italics = 1;
+		
+		$colParticipant = new FormatField;
+		$colParticipant->Format = '{ColParticipantRef_tab->eparties->NamBriefName} {ColParticipantRef_tab->eparties->NamOrganisation}';
+		
+		$participantTable = new Table;
+		$participantTable->Name = "ColParticipantRefLocal_tab";
+		$participantTable->Headings = array('', '');
+		$participantTable->Columns = array($colParticipantRole, $colParticipant);
+		// end Participants
+
+		// Citations
+		$citTypeStatus = new Field;
+		$citTypeStatus->ColName = 'CitTypeStatus_tab';
+
+		$citTaxonRefLocal = new Field;
+		$citTaxonRefLocal->ColName = 'IdeScientificNameLocal_tab';
+
+		$typeCitations = new Table;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitations->Columns = array($citTypeStatus, $citTaxonRefLocal);
+		// end Citations
+
+
+		// Other identifications name
+		$ideOtherQualifiedName = new Field;
+		$ideOtherQualifiedName->ColName = 'IdeOtherQualifiedName_tab';
+
+		$ideDateIdentified = new Field;
+		$ideDateIdentified->ColName = 'IdeOtherDateIdentified0';
+
+		$ideIdentifiedBy = new Field;
+		$ideIdentifiedBy->ColName = 'IdeOtherIdentifiedByRef_tab->eparties->NamBriefName';
+
+		$otherIdentTable = new Table;
+		$otherIdentTable->Name = 'IdeOtherQualifiedName_tab';
+		$otherIdentTable->Headings = array('Identification', 'Date Identified', 'Identified By');
+		$otherIdentTable->Columns = array($ideOtherQualifiedName, $ideDateIdentified, $ideIdentifiedBy);
+		// end Other identifications name
+
+		// Specimen Count
+		$catSpecimenCount = new Field;
+		$catSpecimenCount->ColName = 'CatSpecimenCount';
+
+		$catSpecimenCountMod = new Field;
+		$catSpecimenCountMod->ColName = 'CatSpecimenCountModifier';
+
+		$specimenCountTable = new Table;
+		$specimenCountTable->Name = 'SpecCount';
+		$specimenCountTable->Headings = array('', '');
+		$specimenCountTable->Columns = array($catSpecimenCount, $catSpecimenCountMod);
+		// end Specimen Count
+
+
+		$dateCollected = new FormatField;
+		$dateCollected->Format = "{BioDateVisitedFromLocal} - {BioDateVisitedToLocal}";
+		$dateCollected->Name = "DateCollected";
+
+		// cat number 
+		$catNumberFormat = new FormatField;
+		$catNumberFormat->Format = "{CatPrefix} {CatNumber} {CatSuffix}";
+		$catNumberFormat->Name = "CatNumber";
+		// end cat number 
+
+		$aquDepth = new FormatField;
+		$aquDepth->Format = "{BioDepthFromMet} - {BioDepthToMet}";
+		$aquDepth->Name = "Depth(m)";
+
+		$minWeight = new FormatField;
+		$minWeight->Format = "{MinWeight} {MinWeightUnit}";
+		$minWeight->Name = "MinWeight";
+
+		$this->Fields = array
+		(
+			'IdeFiledAsName',
+			$catNumberFormat,
+			'CatCollectionName_tab',
+			$specimenCountTable,
+			$ideFiledAsIdentBy, 
+			$otherIdentTable,
+			$typeCitations,
+			$dateCollected, 
+			'BioOceanLocal', 
+			'BioCountryLocal',
+			'BioSeaGulfLocal',
+			'BioProvinceStateLocal',
+			'BioDistrictCountyShireLocal', 
+			$participantTable,	
+			'AgeGeologicAgeSystem_tab',
+			'AgeStratigraphyFormation_tab',
+			'BibBibliographyRef_tab->ebibliography->SummaryData', 	
+			'CatOtherNumbersType_tab', 
+			'CatOtherNumbersValue_tab', 
+			'MetMeteoriteName',
+			'MetSynonym',
+			'MetMeteoriteType',
+			'MetRecordNumber',
+			'MetFindFall',
+			//'BioLiveSpecimen', 
+			'MetConditionDetermination',
+			//$minWeight,
+		);
+
+		$this->HeaderField = 'IdeFiledAsName';
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+	}
+}
+
+
+class
+NmnhMsPartyDisplay extends BaseStandardDisplay
+{
+	function
+	NmnhMsPartyDisplay()
+	{
+		$this->BaseStandardDisplay();
+		$this->DisplayImage = 0;
+
+		$this->Fields = array
+		(
+			'SummaryData',
+			'NamTitle',
+			'NamFirst',
+			'NamMiddle',
+			'NamLast',
+			'BioBirthPlace',
+			'BioDeathPlace',
+			'BioEthnicity',
+			'NotNotes',
+		);
+		$this->Database = 'eparties';
+	}
+}
+?>

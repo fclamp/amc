@@ -1,0 +1,48 @@
+<html>
+
+<head>
+	<title>Tree Map...</title>
+
+    <link rel="stylesheet" type="text/css" href="mapper/rbgnsw/style/garden.css"/>
+
+    <script type="text/javascript" src="./lib/style/scripts/prototype.js"/>
+    <script type="text/javascript" src="./lib/style/scripts/effects.js"/>
+    <script type="text/javascript" src="./lib/style/scripts/dragdrop.js"/>
+</head>
+
+<body>
+    <form id="form" method="post" action="">
+
+	<div id="page" class="para">
+
+<!-- **************** HEADING ************************ -->
+		<div id="Header">
+			<h1>RBG Garden Map</h1>
+		</div>
+
+		<div id="BottomPanel">
+<!-- **************** KE EMu Branding, Copyright **********************-->
+        		<div id="KE_IP">Powered by: 
+          			<img class="image" alt="KE EMu" src="../webservices/images/productlogo.gif"/>
+          			<img class="image" alt="KE Software" src="../webservices/images/companylogo.gif"/>
+          			&#xA9; 2000-2008 KE Software
+        		</div>
+
+
+<!-- **************** Non KE Copyright and Layer footnotes**************-->
+        		<div id="Footnotes">
+            			<div style="position:relative; width: 780px; float: none; ">
+              				<span>RBG</span>
+            			</div>
+        		</div>
+      		</div>
+
+
+
+
+	</div>
+
+    </form>
+</body>
+
+</html>

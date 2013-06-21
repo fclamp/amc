@@ -1,0 +1,195 @@
+/* 
+-----------------------------------------
+content-wide styles
+-----------------------------------------
+*/
+
+#category-title
+{
+	position: absolute;
+	left: -500em;
+}
+
+/* 
+-----------------------------------------
+featurecol styles
+-----------------------------------------
+*/
+
+#featurecol1
+{
+	float: left;
+	width: 217px;
+	margin: 0 24px 0 0;
+}
+
+#featurecol2
+{
+	float: left;
+	width: 217px;
+	margin: 0 24px 0 0;
+}
+
+#featurecol3
+{
+	float: left;
+	width: 217px;
+	margin: 0 24px 0 0;
+}
+
+#featurecol1 h3,
+#featurecol2 h3,
+#featurecol3 h3
+{
+	border-bottom: 1px solid #c8c8c8;
+	padding-bottom: .3em;
+	margin: 0 0 7px;
+}
+
+/* 
+-----------------------------------------
+teaser-item styles
+-----------------------------------------
+*/
+
+.teaser-item
+{
+	clear: left;
+	float: left;
+	width: 217px;
+	padding: 0 0 20px;
+}
+
+#category .teaser-item img
+{
+	float: left;
+	border: 1px solid #c8c8c8;
+	padding: 1px;
+}
+
+#category .teaser-item p { margin: 0 0 0 68px; }
+#section .teaser-item p { margin: 0 0 .5em; }
+
+#category .teaser-item p.open, #section .teaser-item p.open
+{
+	clear: left;
+	margin: 0;
+	padding: 5px 0;
+}
+
+#category .teaser-item p img
+{
+	float: none;
+	border: none;
+	padding: 0;
+}
+
+#category .teaser-item ul
+{
+	clear: both;
+	margin: 0;
+	padding: 5px 0 0;
+}
+
+#category .teaser-item li
+{
+	margin: .2em 0 0;
+	padding: 1px 0 4px 15px;
+	list-style-type: none;
+	/* background: url(../images/site/icon-plus.gif) no-repeat 0 .2em; */
+}
+
+#category .teaser-item li
+{
+	margin: .2em 0 0;
+	padding: 1px 0 4px 15px;
+	list-style-type: none;
+	background: url(../images/site/icon-minus.gif) no-repeat 0 7px;
+}
+
+#category .teaser-item li li
+{
+	margin: .2em 0 0;
+	padding: 1px 0 4px 20px;
+	list-style-type: none;
+	background: url(../images/site/icon-general.gif) no-repeat 0 .2em;
+}
+
+/* renamed class names to match Asset Type names stored in db */
+#category .teaser-item li li.Animal { background: url(../images/site/icon-special.gif) no-repeat 0 0; }
+#category .teaser-item li li.AnimalFinder { background: url(../images/site/icon-special.gif) no-repeat 0 0; }
+#category .teaser-item li li.Audio { background: url(../images/site/icon-audio.gif) no-repeat 0 0; }
+#category .teaser-item li li.Blog { background: url(../images/site/icon-general.gif) no-repeat 0 0; }
+#category .teaser-item li li.BlogPost { background: url(../images/site/icon-general.gif) no-repeat 0 0; }
+#category .teaser-item li li.Category { background: url(../images/site/icon-category.gif) no-repeat 0 0; }
+#category .teaser-item li li.Comment { background: url(../images/site/icon-comment.gif) no-repeat 0 0; }
+#category .teaser-item li li.Document { background: url(../images/site/icon-document.gif) no-repeat 0 0; }
+#category .teaser-item li li.Event { background: url(../images/site/icon-event.gif) no-repeat 0 0; }
+#category .teaser-item li li.General { background: url(../images/site/icon-general.gif) no-repeat 0 0; }
+#category .teaser-item li li.HtmlPage { background: url(../images/site/icon-html.gif) no-repeat 0 0; }
+#category .teaser-item li li.Image { background: url(../images/site/icon-image.gif) no-repeat 0 0; }
+#category .teaser-item li li.Interactive { background: url(../images/site/icon-interactive.gif) no-repeat 0 0; }
+#category .teaser-item li li.MediaRelease { background: url(../images/site/icon-media.gif) no-repeat 0 0; }
+#category .teaser-item li li.Movie { background: url(../images/site/icon-movie.gif) no-repeat 0 0; }
+#category .teaser-item li li.Publication { background: url(../images/site/icon-publication.gif) no-repeat 0 0; }
+#category .teaser-item li li.ResearchProject { background: url(../images/site/icon-research-project.gif) no-repeat 0 0; }
+#category .teaser-item li li.Restricted { background: url(../images/site/icon-general.gif) no-repeat 0 0; }
+#category .teaser-item li li.Section { background: url(../images/site/icon-section.gif) no-repeat 0 0; }
+#category .teaser-item li li.StaffProfile { background: url(../images/site/icon-staff.gif) no-repeat 0 0; }
+
+#category .teaser-item li li.AudioGallery { background: url(../images/site/icon-gallery-audio.gif) no-repeat 0 0; }
+#category .teaser-item li li.ImageGallery { background: url(../images/site/icon-gallery-image.gif) no-repeat 0 0; }
+#category .teaser-item li li.MovieGallery { background: url(../images/site/icon-gallery-movie.gif) no-repeat 0 0; }
+
+#category .teaser-item li li.InteractiveGallery { background: url(../images/site/icon-interactive.gif) no-repeat 0 0; }
+
+/*
+old styles
+#category .teaser-item li li.event { background: url(../images/site/icon-event.gif) no-repeat 0 0; }
+#category .teaser-item li li.publication { background: url(../images/site/icon-publication.gif) no-repeat 0 0; }
+#category .teaser-item li li.research-project { background: url(../images/site/icon-research-project.gif) no-repeat 0 0; }
+#category .teaser-item li li.staff { background: url(../images/site/icon-staff.gif) no-repeat 0 0; }
+#category .teaser-item li li.general { background: url(../images/site/icon-general.gif) no-repeat 0 0; }
+#category .teaser-item li li.image { background: url(../images/site/icon-image.gif) no-repeat 0 0; }
+#category .teaser-item li li.movie { background: url(../images/site/icon-movie.gif) no-repeat 0 0; }
+#category .teaser-item li li.audio { background: url(../images/site/icon-audio.gif) no-repeat 0 0; }
+#category .teaser-item li li.special { background: url(../images/site/icon-special.gif) no-repeat 0 0; }
+#category .teaser-item li li.media-release { background: url(../images/site/icon-media.gif) no-repeat 0 0; }
+#category .teaser-item li li.document { background: url(../images/site/icon-document.gif) no-repeat 0 0; }
+#category .teaser-item li li.interactive { background: url(../images/site/icon-interactive.gif) no-repeat 0 0; }
+#category .teaser-item li li.comment { background: url(../images/site/icon-comment.gif) no-repeat 0 0; }
+#category .teaser-item li li.section { background: url(../images/site/icon-section.gif) no-repeat 0 0; }
+*/
+
+/* 
+-----------------------------------------
+teaser-item styles
+-----------------------------------------
+*/
+
+#animal-finder
+{
+	margin: 0 0 2em;
+	background: url(../images/site/back-animalfinder1.jpg) no-repeat 0 100%;
+}
+
+#animal-finder h3
+{
+	color: #fff;
+	padding: 10px 10px 0;
+	margin: 0 0 .2em;
+	background: url(../images/site/back-animalfinder2.jpg) no-repeat;
+}
+
+#animal-finder p
+{
+	padding: 0 15px 10px 20px;
+	margin: 0;
+	background: url(../images/site/icon-arrow-white.gif) no-repeat 10px .4em;
+}
+
+#animal-finder a
+{
+	color: #fff;
+	text-decoration: none;
+}

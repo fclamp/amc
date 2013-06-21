@@ -1,0 +1,2430 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*
+*	This file contains the following classes.
+*		NmnhVzStandardDisplay - General display
+*		NmnhVzHerpDisplay - For Herps records
+*		NmnhVzBirdDisplay - For Bird records
+*		NmnhVzFishDisplay - For Fish records
+*		NmnhVzMammalDisplay - For Mammal records
+*
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseDisplayObjects.php');
+
+require_once ($LIB_DIR . 'texquery.php');
+require_once ($WEB_ROOT . '/objects/common/RecordExtractor.php');
+
+$GLOBALS['STRINGS_DIR'] = $WEB_ROOT . "/objects/" . $GLOBALS['BACKEND_TYPE'] . "/" . $GLOBALS['DEPARTMENT'] . "/strings/" . $GLOBALS['BACKEND_ENV'] . "/";
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+class
+NmnhVzFishesDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+        var $KeepAssociatedImagesAspectRatio = 1;
+
+	function
+	NmnhVzFishesDisplay()
+	{
+		$this->BaseStandardDisplay();
+		$this->DisplayImage = 0;
+
+		// cat number 
+                $catNumber = new FormatField;
+                $catNumber->Name = "CatNumber";
+                if (filled('CatSuffix', 'ecatalogue', $this->IRN))
+                        $catNumber->Format = "{CatPrefix}{CatNumber}-{CatSuffix}";
+                else
+                        $catNumber->Format = "{CatPrefix}{CatNumber}";
+		// end cat number 
+
+		// identification
+		$qualifiedName = new Field;
+		$qualifiedName->ColName = 'IdeFiledAsQualifiedName';
+
+		$typeStatus = new Field;
+		$typeStatus->ColName = 'IdeFiledAsTypeStatus';
+
+		$identification = new Table;
+		$identification->Name = 'ID';
+		$identification->Headings = array('', 'Type Status');
+		$identification->Columns = array($qualifiedName, $typeStatus);
+		// end identification 
+		
+		// date visited from and date visited to formatting
+                $dateCollected = new FormatField;
+                $dateCollected->Name = "Date Collected (dd/mm/yyyy)";
+                $ceref = get('BioEventSiteRef', 'ecatalogue', $this->IRN);
+                if (filled('ColDateVisitedFrom', 'ecollectionevents', $ceref) &&
+                    filled('ColDateVisitedTo', 'ecollectionevents', $ceref) &&
+                    filled('ColDateVisitedConjunction', 'ecollectionevents', $ceref))
+                        {
+                                if (get('ColDateVisitedFrom', 'ecollectionevents', $ceref) != get('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                                {
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                                        $dateCollected->Format .= " {BioEventSiteRef->ecollectionevents->ColDateVisitedConjunction} ";
+                                        $dateCollected->Format .= "{BioEventSiteRef->ecollectionevents->ColDateVisitedTo}";
+                                }
+                                else
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                        }
+                elseif (filled('ColDateVisitedFrom', 'ecollectionevents', $ceref) && filled('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                        {
+                                if (get('ColDateVisitedFrom', 'ecollectionevents', $ceref) != get('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                                {
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                                        $dateCollected->Format .= " - ";
+                                        $dateCollected->Format .= "{BioEventSiteRef->ecollectionevents->ColDateVisitedTo}";
+                                }
+                                else
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                        }
+                else
+                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+
+		// depth from - depth to
+		$aquDepth = new FormatField;
+                $aquDepth->Name = 'Depth (m)';
+                if (filled('BioEventSiteRef', 'ecatalogue', $this->IRN))
+                {
+                        $depthFromMet = "";
+                        $depthToMet = "";
+
+                        $ceref = get('BioEventSiteRef', 'ecatalogue', $this->IRN);
+                        if (filled('AquDepthFromMet', 'ecollectionevents', $ceref))
+                                $depthFromMet = get('AquDepthFromMet', 'ecollectionevents', $ceref);
+                        if (filled('AquDepthToMet', 'ecollectionevents', $ceref))
+                                $depthToMet = get('AquDepthToMet', 'ecollectionevents', $ceref);
+
+                        if ($depthFromMet != "" || $depthToMet != "")
+                        {
+                                if ($depthFromMet != "" && $depthToMet != "")
+                                {
+                                        $aquDepth->Format = "{BioEventSiteRef->ecollectionevents->AquDepthFromMet}";
+                                        if ($depthFromMet != $depthToMet)
+                                        {
+                                                $aquDepth->Format .= " - ";
+                                                $aquDepth->Format .= "{BioEventSiteRef->ecollectionevents->AquDepthToMet}";
+                                        }
+                                }
+                                elseif ($depthFromMet != "")
+                                {
+                                        $aquDepth->Format = "{BioEventSiteRef->ecollectionevents->AquDepthFromMet}";
+                                }
+                                else
+                                {
+                                        $aquDepth->Format = "{BioEventSiteRef->ecollectionevents->AquDepthToMet}";
+                                }
+                        }
+                }
+		// end depth from - depth to
+
+		// zoo prep details 
+		$preparation = new Field;
+		$preparation->ColName = 'ZooPreparation_tab';
+
+		$preparationLocation = new Field;
+		$preparationLocation->ColName = 'ZooPrepLocationRef_tab->elocations->SummaryData';
+
+		$preparationCount = new Field;
+		$preparationCount->ColName = 'ZooPreparationCount_tab';
+
+		$zooPrepDetails = new Table;
+		$zooPrepDetails->Name = 'Zoology Prep Details';
+		$zooPrepDetails->Headings = array('Preparation', 'Location', 'Count');
+		$zooPrepDetails->Columns = array($preparation, $preparationLocation, $preparationCount);
+		// end zoo prep details
+
+		// Measurement
+		$measurementType = new Field;
+		$measurementType->ColName = 'MeaType_tab';
+
+		$measurementValue = new Field;
+		$measurementValue->ColName = 'MeaVerbatimValue_tab';
+
+		$measurementUnit = new Field;
+		$measurementUnit->ColName = 'MeaVerbatimUnit_tab';
+
+		$measurements = new Table;
+		$measurements->Name = 'Measurements';
+		$measurements->Headings = array('Values', 'Units', 'Type');
+		$measurements->Columns = array($measurementType, $measurementValue);
+		// end Measurement
+
+		$this->Fields = array
+		(
+			'IdeFiledAsQualifiedName',
+			$catNumber,
+			'CatCollectionName_tab',
+			'CatSpecimenCount',
+			'IdeFiledAsOrder', 	
+			'IdeFiledAsFamily', 
+			'IdeFiledAsSubfamily', 
+			$identification,
+			'IdeFiledAsRef->etaxonomy->CitCitedInRef_tab->ebibliography->SummaryData', 
+			$dateCollected,
+			'BioEventSiteRef->ecollectionevents->LocOcean',
+                        'BioEventSiteRef->ecollectionevents->LocSeaGulf',
+                        'BioEventSiteRef->ecollectionevents->LocArchipelago',
+                        'BioEventSiteRef->ecollectionevents->LocIslandGrouping',
+                        'BioEventSiteRef->ecollectionevents->LocIslandName',
+			'BioEventSiteRef->ecollectionevents->LocContinent',
+			'BioEventSiteRef->ecollectionevents->LocCountry',
+                        'BioEventSiteRef->ecollectionevents->LocProvinceStateTerritory',
+                        'BioEventSiteRef->ecollectionevents->LocDistrictCountyShire',
+			'BioEventSiteRef->ecollectionevents->LocPreciseLocation',
+			'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLatitude',
+                        'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLongitude',
+			'BioEventSiteRef->ecollectionevents->ColParticipantString',
+			'BioEventSiteRef->ecollectionevents->ColSiteVisitNumbers_tab',
+			'BioEventSiteRef->ecollectionevents->AquVesselName',
+			'BioEventSiteRef->ecollectionevents->AquCruiseNumber',
+			'BioEventSiteRef->ecollectionevents->LocSiteStationNumber',
+			'BioEventSiteRef->ecollectionevents->ExpExpeditionName',
+			'BioEventSiteRef->ecollectionevents->ColCollectionMethod',
+			$aquDepth,
+			'BioEventSiteRef->ecollectionevents->DepSourceOfSample',
+			$zooPrepDetails,
+			$measurements,
+			'NotNmnhText0',
+			'AccAccessionLotRef_tab->eaccessionlots->LotLotNumber',
+		);
+
+		$this->HeaderField = 'IdeFiledAsQualifiedName';
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+	}
+
+	function
+	Show()
+	{
+		/*
+		**  The Show() method is resposible for sourcing the Language strings
+		**  ($this->_STRINGS) and performing the query before calling display().
+		*/
+		$this->sourceStrings();
+		$this->setupSchema();
+
+		if (!isset($this->IRN))
+		{
+			WebDie('Invalid IRN', 'BaseDisplayObject');
+		}
+
+		// we don't grab the Multimedia ref if we are already in Multimedia
+		if ($this->Database == "emultimedia")
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData'));
+		}
+		else
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData', 'MulMultiMediaRef_tab', 'AdmPublishWebNoPasswordLocal_tab'));
+		}
+		$this->_buildSelectArray($this->Fields);
+		$this->_buildSelectArray($this->AdditionalFields);
+
+		if (count($this->AdditionalFields) > 0)
+		{
+			$this->Fields = array_merge($this->Fields, $this->AdditionalFields);
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $this->selectArray;
+			
+
+		$qry->From = $this->Database;
+		$qry->Where = 'irn=' . $this->IRN;
+		$result = $qry->Fetch();
+
+		if (!isset($result[0]->irn_1) || $result[0]->irn_1 == '')
+		{
+			print "<center>";
+			print "<h2>";
+			PPrint($this->_STRINGS['NO RESULTS'], $this->FontFace, '', $this->BodyTextColor);
+			print"</h2>\n";
+			print "<h3>";
+			PPrint($this->_STRINGS['GO BACK'], $this->FontFace, '', $this->BodyTextColor);
+			print "</h3>\n";
+			print '<br /></center>';
+			return;
+		}
+
+		$this->record = $result[0];
+
+		// Now we call the display function
+		$this->display();
+	}
+
+	function
+	display()
+	{
+
+		$widthAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		$bodyColorAttrib = '';
+		if ($this->BodyColor != '')
+			$bodyColorAttrib	= 'bgcolor=' . $this->BodyColor;
+		$bodyTextColorAttrib = '';
+		if ($this->BodyTextColor != '')
+			$bodyTextColorAttrib	= 'color=' . $this->BodyTextColor;
+		$highlightColorAttrib = '';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor=' . $this->HighlightColor ;
+		$headerTextColorAttrib = '';
+		if ($this->HeaderTextColor != '')
+			$headerTextColorAttrib= 'color=' . $this->HeaderTextColor;
+		$borderColorAttrib = '';
+		$headerColorAttrib = '';
+		if ($this->BorderColor != '')
+		{
+			$borderColorAttrib= 'bordercolor=' . $this->BorderColor;
+			$headerColorAttrib= 'bgcolor=' . $this->BorderColor;
+		}
+		$fontFaceAttrib = '';
+		if ($this->FontFace != '')
+			$fontFaceAttrib= 'face="' . $this->FontFace . '"';
+		$fontSizeAttrib = '';
+		if ($this->FontSize != '')
+			$fontSizeAttrib= 'size="' . $this->FontSize . '"';
+		if ($this->HeaderFontSize == '')
+		{
+			if ($this->FontSize != '')
+				$this->HeaderFontSize = $this->FontSize + 1;
+			else
+				$this->HeaderFontSize = '+1';
+		}
+
+		print "<table $widthAttrib cellpadding=\"2\" cellspacing=\"0\" border=\"0\">\n";
+		print "<tr><td align=\"left\">\n";
+		$link = $this->QueryPage;
+
+		if ($this->DisplayNewSearchLink)
+		{
+			print "&nbsp;<a href=\"$link\">";
+			PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+		foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+		{
+			$link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+			PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "<a href=\"$link\">";
+			PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+
+		print "</td>\n";
+		print "</tr><tr><td colspan=\"2\">\n";
+		$decorator = new HtmlBoxAndTitle;
+		$decorator->BorderColor = $this->BorderColor;
+		$decorator->BodyColor = $this->BodyColor;
+		$decorator->TitleTextColor = $this->HeaderTextColor;
+		$decorator->FontFace = $this->FontFace;
+		$decorator->Width = "100%";
+		$decorator->Title = $this->record->{$this->HeaderField};
+		$decorator->Open();
+
+		if ($this->DisplayImage)
+			$this->DisplayMedia();
+
+		print "       <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\">\n";
+		print "<!-- Start Field Content -->\n";
+
+		// Foreach loop on each item in the $this->Fields var
+		$i = $fieldNum = 0;
+		foreach ($this->Fields as $item)
+		{
+			$fieldNum++;
+			if (is_string($item))
+			{
+				if (isset($this->_STRINGS[$item]))
+					$item = new Field($item, $this->_STRINGS[$item]);
+				else
+					$item = new Field($item, $item);
+			}
+
+			// Don't display if fields security doesn't allow
+			if (isset($item->ValidUsers) 
+				&& strtolower($item->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($item->ValidUsers))
+					continue;
+			}
+
+			// If it's a backreference item, then load data
+			$this->_loadBackReferenceField($item);
+
+			if (! $this->SuppressEmptyFields || $this->_hasData($item))
+			{
+				$i++;
+				if ($fieldNum == 1)
+					continue; // ignore first field as it's used in heading
+				if ($i % 2 == 0)
+					print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+				else
+					print "	<tr align=\"left\" valign=\"top\">\n";
+					
+				// Print field name
+				if ($item->Label != '')
+					$label = $item->Label;
+				elseif ($item->Name != '')
+				{
+					if (isset($this->_STRINGS[$item->Name]))
+						$label = $this->_STRINGS[$item->Name];
+					else
+						$label = $item->Name;
+				}
+				else
+				{
+					if (isset($this->_STRINGS[$item->ColName]))
+						$label = $this->_STRINGS[$item->ColName];
+					else
+						$label = $this->ColName;
+				}
+
+				if ($this->DisplayLabels)
+				{
+					print "	  <td width=\"160\"><b>";
+					print "<font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>";
+					print $label;
+					print "</font></b></td>\n"; 
+				}
+				else
+				{
+					print "	  <td>&nbsp;</td>\n";
+				}
+
+
+				print "	  <td>\n";
+				$this->adjustOutput($item);
+				print "</td>\n";
+				print "	</tr>\n";
+			}
+		}
+
+		
+		// Print the extra multimedia
+		$firstImage = ($this->DisplayImage) ? 2 : 1;
+			
+		$hasMedia = isset($this->record->{"MulMultiMediaRef:$firstImage"});
+		if ($this->DisplayAllMedia && $hasMedia)
+		{
+			if ($i % 2 == 0)
+				print "	<tr align=\"left\" valign=\"top\">\n";
+			else
+				print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+
+			// Print field name (This will normally be multimedia)
+			if ($this->DisplayLabels)
+			{
+				print "	  <td width=\"160\"><b><font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>".
+						$this->_STRINGS['MEDIA'] . "</font></b></td>\n"; 
+			}
+
+			// Display Images
+			print "	  <td>\n";
+			print "<!-- Start a table of thumbnails -->\n";
+			print "<table border=\"0\" cellpadding=\"3\"><tr>\n";
+			$i = $firstImage;
+			$imgcount = 0;
+			$mmField = "MulMultiMediaRef:$i"; 
+			$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+			$imgirn = $this->record->$mmField;
+			$publish = $this->record->$publishField;
+			
+			while ($imgirn != '')
+			{
+				if (strtolower($publish) == "yes")
+				{
+					if ($this->ImagesPerRow > 0 && ($imgcount % $this->ImagesPerRow == 0))
+						print "</tr><tr>";
+
+					print "<td align=\"center\">";
+					$image = new MediaImage;
+					$image->Intranet = $this->Intranet;
+					$image->IRN = $imgirn;
+					$image->BorderColor = $this->BorderColor;
+					if ($this->SuppressImageBorders)
+						$image->ShowBorder = 0;
+					$image->HighLightColor = $this->BorderColor;
+					$image->RefIRN = $this->IRN;
+					$image->RefTable = $this->Database;
+					$image->UseAbsoluteLinks = $this->UseAbsoluteLinks;
+					$image->KeepAspectRatio = $this->KeepAssociatedImagesAspectRatio;
+					$image->Width = 60;
+					$image->Height = 60;
+					if ($this->ImageDisplayPage != "")
+					{
+						$image->ImageDisplayPage = $this->ImageDisplayPage;
+					}
+					elseif($this->Intranet)
+					{
+						$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}	
+					else
+					{
+						$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}
+					$image->Show();
+					$imgcount++;
+					print "</td>";
+				}
+
+				$i++;
+				$mmField = "MulMultiMediaRef:$i"; 
+				$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+				$imgirn = $this->record->$mmField;
+				$publish = $this->record->$publishField;
+			}
+
+			print "</tr></table>";
+			print "</td></tr>\n";
+		}
+		print "       </table>\n";
+		print "<!-- End Field Content -->\n";
+
+		$decorator->Close();
+
+		print "<tr><td align=\"left\">\n";
+                $link = $this->QueryPage;
+
+                if ($this->DisplayNewSearchLink)
+                {
+                        print "&nbsp;<a href=\"$link\">";
+                        PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+                foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+                {
+                        $link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+                        PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "<a href=\"$link\">";
+                        PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+
+                print "</td></tr>\n";
+
+		print "</td></tr>";
+		print "</table>\n";
+
+	}
+}
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+class
+NmnhVzHerpsDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+        var $KeepAssociatedImagesAspectRatio = 1;
+
+	// Set default in the constructor
+	function
+	NmnhVzHerpsDisplay()
+	{
+		$this->BaseStandardDisplay();
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+		$this->DisplayImage = 0;
+		$this->HeaderField = 'IdeFiledAsQualifiedNameWeb';
+
+		// Values used below - we only want to get them once
+                $recEx = new RecordExtractor();
+                $recEx->ExtractFields
+                (
+                        array
+                        (
+                                'NotNmnhText0',
+                                'NotNmnhType_tab',
+                        )
+                );
+
+                $ceref = get('BioEventSiteRef', 'ecatalogue', $this->IRN);
+
+		// cat number 
+		$catNumber = new FormatField;
+		$catNumber->Format = "{CatPrefix} {CatNumber} {CatSuffix}";
+		$catNumber->Name = "CatNumber";
+		// end cat number 
+
+		// Citations
+		$citTaxon = new Field;
+		$citTaxon->ColName = 'CitTaxonRef_tab->etaxonomy->ClaScientificName';
+
+		$citTypeStatus = new Field;
+		$citTypeStatus->ColName = 'CitTypeStatus_tab';
+
+		$citPrimaryCitedIn = new Field;
+                $citPrimaryCitedIn->ColName = 'CitTaxonRef_tab->etaxonomy->PriCitedInRef->ebibliography->SummaryData';
+
+		$typeCitations = new Table;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitations->Columns = array($citTaxon, $citTypeStatus, $citPrimaryCitedIn);
+		// end Citations
+		
+		// START Notes
+		$notesText = $recEx->MultivalueFieldAsArray("NotNmnhText0");
+		$notesType = $recEx->MultivalueFieldAsArray("NotNmnhType_tab");
+
+                $taxonomicNotesDisplay = "";
+                $statusNotesDisplay = "";
+
+                for ($i = 0;$i < count($notesText); $i++)
+                {
+                        if (strtolower($notesType[$i]) == "taxonomic remarks")
+                        {
+                                $taxonomicNotesDisplay .= $notesText[$i] . "\n";
+                        }
+                        elseif (strtolower($notesType[$i]) == "status remarks" || strtolower($notesType[$i]) == "exchange remarks")
+                        {
+                                $statusNotesDisplay .= $notesText[$i] . "\n";
+                        }
+                }
+
+                $taxonomicNotes = new FormatField;
+                $taxonomicNotes->Name = 'TaxononomyNotes';
+                $taxonomicNotes->Format = $taxonomyNotesDisplay;
+
+                $statusNotes = new FormatField;
+                $statusNotes->Name = 'StatusNotes';
+                $statusNotes->Format = $statusNotesDisplay;
+		// END Notes
+
+                // START elevation from & elevation to formatting
+                $elevation = new FormatField;
+                $elevation->Name = "Elevation";
+
+                $elevFromFlag = "";
+                $elevToFlag = "";
+                if (filled('TerElevationFromOrig', 'ecollectionevents', $ceref))
+                        $elevFromFlag = get('TerElevationFromOrig', 'ecollectionevents', $ceref);
+                if (filled('TerElevationToOrig', 'ecollectionevents', $ceref))
+                        $elevToFlag = get('TerElevationToOrig', 'ecollectionevents', $ceref);
+
+                if ($elevFromFlag != "" || $elevToFlag != "")
+                {
+                        $elevFrom = "";
+                        $elevTo = "";
+                        $elevFromMod = "";
+                        $elevToMod = "";
+                        $elevUnit = "m";
+
+                        if (filled('TerElevationFromModifier', 'ecollectionevents', $ceref))
+                        {
+                                $elevFromMod = get('TerElevationFromModifier', 'ecollectionevents', $ceref);
+                        }
+                        if (filled('TerElevationToModifier', 'ecollectionevents', $ceref))
+                        {
+                                $elevToMod = get('TerElevationToModifier', 'ecollectionevents', $ceref);
+                        }
+
+                        // get elevations
+                        if ($elevFromFlag != "")
+                        {
+                                $elevFrom = get('TerElevationFromMet','ecollectionevents', $ceref);
+
+                                if ($elevFromMod != "")
+                                {
+                                        $elevFrom = "$elevFromMod $elevFrom";
+                                }
+                        }
+                        if ($elevToFlag != "")
+                        {
+                                $elevTo = get('TerElevationToMet','ecollectionevents', $ceref);
+                                
+                                if ($elevToMod != "")
+                                {
+                                        $elevTo = "$elevToMod $elevTo";
+                                }
+                        }
+                        if ($elevFrom == $elevTo)
+                        {
+                                $elevTo = "";
+                        }
+
+                        if ($elevFrom != "" && $elevTo != "")
+                        {
+                                $elevation->Format = $elevFrom;
+                                $elevation->Format .= " - ";
+                                $elevation->Format .= $elevTo;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                        elseif ($elevFrom != "" && $elevTo == "")
+                        {
+                                $elevation->Format = $elevFrom;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                        elseif ($elevFrom == "" && $elevTo != "")
+                        {
+                                $elevation->Format = $elevTo;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                }
+		// END elevation from & elevation to formatting
+
+		// START zoo prep details 
+		$zooPrep = new Field;
+		$zooPrep->ColName = 'ZooPreparation_tab';
+
+		$zooPrepRem = new Field;
+		$zooPrepRem->ColName = 'ZooPreparationRemarks_tab';
+
+		$zooPrepDetails = new Table;
+		$zooPrepDetails->Name = 'ZooPrepDetails';
+		$zooPrepDetails->Headings = array('Preparation', 'Remarks');
+		$zooPrepDetails->Columns = array($zooPrep, $zooPrepRem);
+		// END zoo prep details
+
+
+		$this->Fields = array
+		(
+			'IdeFiledAsQualifiedNameWeb',
+			$catNumber,
+<<<<<<< DisplayObjects.php
+			'IdeFiledAsClass', 		
+			'IdeFiledAsOrder', 	
+			'IdeFiledAsFamily', 
+			'IdeFiledAsQualifiedName',
+			'IdeOtherQualifiedName_tab',
+=======
+			'IdeFiledAsRef->etaxonomy->ClaClass', 		
+			'IdeFiledAsRef->etaxonomy->ClaOrder', 	
+			'IdeFiledAsRef->etaxonomy->ClaFamily', 
+			'IdeFiledAsQualifiedNameWeb',
+			'IdeOtherQualifiedNameWeb_tab',
+>>>>>>> 1.22
+			$typeCitations,
+			$taxonomicNotes,
+			'BioEventSiteRef->ecollectionevents->LocCountry',
+                        'BioEventSiteRef->ecollectionevents->LocProvinceStateTerritory',
+                        'BioEventSiteRef->ecollectionevents->LocDistrictCountyShire',
+			'BioEventSiteRef->ecollectionevents->LocPreciseLocation',
+			'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLatitude',
+                        'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLongitude',
+			$elevation,
+			'BioEventSiteRef->ecollectionevents->ExpExpeditionName',
+			'BioEventSiteRef->ecollectionevents->ColVerbatimDate',
+			$zooPrepDetails,
+			'StaInventoryStatus_tab',
+			$statusNotes,
+		);
+	}
+
+	function
+	Show()
+	{
+		/*
+		**  The Show() method is resposible for sourcing the Language strings
+		**  ($this->_STRINGS) and performing the query before calling display().
+		*/
+		$this->sourceStrings();
+		$this->setupSchema();
+
+		if (!isset($this->IRN))
+		{
+			WebDie('Invalid IRN', 'BaseDisplayObject');
+		}
+
+		// we don't grab the Multimedia ref if we are already in Multimedia
+		if ($this->Database == "emultimedia")
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData'));
+		}
+		else
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData', 'MulMultiMediaRef_tab', 'AdmPublishWebNoPasswordLocal_tab'));
+		}
+		$this->_buildSelectArray($this->Fields);
+		$this->_buildSelectArray($this->AdditionalFields);
+
+		if (count($this->AdditionalFields) > 0)
+		{
+			$this->Fields = array_merge($this->Fields, $this->AdditionalFields);
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $this->selectArray;
+			
+
+		$qry->From = $this->Database;
+		$qry->Where = 'irn=' . $this->IRN;
+		$result = $qry->Fetch();
+
+		if (!isset($result[0]->irn_1) || $result[0]->irn_1 == '')
+		{
+			print "<center>";
+			print "<h2>";
+			PPrint($this->_STRINGS['NO RESULTS'], $this->FontFace, '', $this->BodyTextColor);
+			print"</h2>\n";
+			print "<h3>";
+			PPrint($this->_STRINGS['GO BACK'], $this->FontFace, '', $this->BodyTextColor);
+			print "</h3>\n";
+			print '<br /></center>';
+			return;
+		}
+
+		$this->record = $result[0];
+
+		// Now we call the display function
+		$this->display();
+	}
+
+	function
+	display()
+	{
+
+		$widthAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		$bodyColorAttrib = '';
+		if ($this->BodyColor != '')
+			$bodyColorAttrib	= 'bgcolor=' . $this->BodyColor;
+		$bodyTextColorAttrib = '';
+		if ($this->BodyTextColor != '')
+			$bodyTextColorAttrib	= 'color=' . $this->BodyTextColor;
+		$highlightColorAttrib = '';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor=' . $this->HighlightColor ;
+		$headerTextColorAttrib = '';
+		if ($this->HeaderTextColor != '')
+			$headerTextColorAttrib= 'color=' . $this->HeaderTextColor;
+		$borderColorAttrib = '';
+		$headerColorAttrib = '';
+		if ($this->BorderColor != '')
+		{
+			$borderColorAttrib= 'bordercolor=' . $this->BorderColor;
+			$headerColorAttrib= 'bgcolor=' . $this->BorderColor;
+		}
+		$fontFaceAttrib = '';
+		if ($this->FontFace != '')
+			$fontFaceAttrib= 'face="' . $this->FontFace . '"';
+		$fontSizeAttrib = '';
+		if ($this->FontSize != '')
+			$fontSizeAttrib= 'size="' . $this->FontSize . '"';
+		if ($this->HeaderFontSize == '')
+		{
+			if ($this->FontSize != '')
+				$this->HeaderFontSize = $this->FontSize + 1;
+			else
+				$this->HeaderFontSize = '+1';
+		}
+
+		print "<table $widthAttrib cellpadding=\"2\" cellspacing=\"0\" border=\"0\">\n";
+		print "<tr><td align=\"left\">\n";
+		$link = $this->QueryPage;
+
+		if ($this->DisplayNewSearchLink)
+		{
+			print "&nbsp;<a href=\"$link\">";
+			PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+		foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+		{
+			$link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+			PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "<a href=\"$link\">";
+			PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+
+		print "</td>\n";
+		print "</tr><tr><td colspan=\"2\">\n";
+		$decorator = new HtmlBoxAndTitle;
+		$decorator->BorderColor = $this->BorderColor;
+		$decorator->BodyColor = $this->BodyColor;
+		$decorator->TitleTextColor = $this->HeaderTextColor;
+		$decorator->FontFace = $this->FontFace;
+		$decorator->Width = "100%";
+		$decorator->Title = $this->record->{$this->HeaderField};
+		$decorator->Open();
+
+		if ($this->DisplayImage)
+			$this->DisplayMedia();
+
+		print "       <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\">\n";
+		print "<!-- Start Field Content -->\n";
+
+		// Foreach loop on each item in the $this->Fields var
+		$i = $fieldNum = 0;
+		foreach ($this->Fields as $item)
+		{
+			$fieldNum++;
+			if (is_string($item))
+			{
+				if (isset($this->_STRINGS[$item]))
+					$item = new Field($item, $this->_STRINGS[$item]);
+				else
+					$item = new Field($item, $item);
+			}
+
+			// Don't display if fields security doesn't allow
+			if (isset($item->ValidUsers) 
+				&& strtolower($item->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($item->ValidUsers))
+					continue;
+			}
+
+			// If it's a backreference item, then load data
+			$this->_loadBackReferenceField($item);
+
+			if (! $this->SuppressEmptyFields || $this->_hasData($item))
+			{
+				$i++;
+				if ($fieldNum == 1)
+					continue; // ignore first field as it's used in heading
+				if ($i % 2 == 0)
+					print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+				else
+					print "	<tr align=\"left\" valign=\"top\">\n";
+					
+				// Print field name
+				if ($item->Label != '')
+					$label = $item->Label;
+				elseif ($item->Name != '')
+				{
+					if (isset($this->_STRINGS[$item->Name]))
+						$label = $this->_STRINGS[$item->Name];
+					else
+						$label = $item->Name;
+				}
+				else
+				{
+					if (isset($this->_STRINGS[$item->ColName]))
+						$label = $this->_STRINGS[$item->ColName];
+					else
+						$label = $this->ColName;
+				}
+
+				if ($this->DisplayLabels)
+				{
+					print "	  <td width=\"160\"><b>";
+					print "<font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>";
+					print $label;
+					print "</font></b></td>\n"; 
+				}
+				else
+				{
+					print "	  <td>&nbsp;</td>\n";
+				}
+
+
+				print "	  <td>\n";
+				$this->adjustOutput($item);
+				print "</td>\n";
+				print "	</tr>\n";
+			}
+		}
+
+		
+		// Print the extra multimedia
+		$firstImage = ($this->DisplayImage) ? 2 : 1;
+			
+		$hasMedia = isset($this->record->{"MulMultiMediaRef:$firstImage"});
+		if ($this->DisplayAllMedia && $hasMedia)
+		{
+			if ($i % 2 == 0)
+				print "	<tr align=\"left\" valign=\"top\">\n";
+			else
+				print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+
+			// Print field name (This will normally be multimedia)
+			if ($this->DisplayLabels)
+			{
+				print "	  <td width=\"160\"><b><font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>".
+						$this->_STRINGS['MEDIA'] . "</font></b></td>\n"; 
+			}
+
+			// Display Images
+			print "	  <td>\n";
+			print "<!-- Start a table of thumbnails -->\n";
+			print "<table border=\"0\" cellpadding=\"3\"><tr>\n";
+			$i = $firstImage;
+			$imgcount = 0;
+			$mmField = "MulMultiMediaRef:$i"; 
+			$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+			$imgirn = $this->record->$mmField;
+			$publish = $this->record->$publishField;
+			
+			while ($imgirn != '')
+			{
+				if (strtolower($publish) == "yes")
+				{
+					if ($this->ImagesPerRow > 0 && ($imgcount % $this->ImagesPerRow == 0))
+						print "</tr><tr>";
+
+					print "<td align=\"center\">";
+					$image = new MediaImage;
+					$image->Intranet = $this->Intranet;
+					$image->IRN = $imgirn;
+					$image->BorderColor = $this->BorderColor;
+					if ($this->SuppressImageBorders)
+						$image->ShowBorder = 0;
+					$image->HighLightColor = $this->BorderColor;
+					$image->RefIRN = $this->IRN;
+					$image->RefTable = $this->Database;
+					$image->UseAbsoluteLinks = $this->UseAbsoluteLinks;
+					$image->KeepAspectRatio = $this->KeepAssociatedImagesAspectRatio;
+					$image->Width = 60;
+					$image->Height = 60;
+					if ($this->ImageDisplayPage != "")
+					{
+						$image->ImageDisplayPage = $this->ImageDisplayPage;
+					}
+					elseif($this->Intranet)
+					{
+						$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}	
+					else
+					{
+						$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}
+					$image->Show();
+					$imgcount++;
+					print "</td>";
+				}
+
+				$i++;
+				$mmField = "MulMultiMediaRef:$i"; 
+				$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+				$imgirn = $this->record->$mmField;
+				$publish = $this->record->$publishField;
+			}
+
+			print "</tr></table>";
+			print "</td></tr>\n";
+		}
+		print "       </table>\n";
+		print "<!-- End Field Content -->\n";
+
+		$decorator->Close();
+
+		print "<tr><td align=\"left\">\n";
+                $link = $this->QueryPage;
+
+                if ($this->DisplayNewSearchLink)
+                {
+                        print "&nbsp;<a href=\"$link\">";
+                        PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+                foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+                {
+                        $link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+                        PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "<a href=\"$link\">";
+                        PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+
+                print "</td></tr>\n";
+
+		print "</td></tr>";
+		print "</table>\n";
+
+	}
+}
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+class
+NmnhVzBirdsDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+        var $KeepAssociatedImagesAspectRatio = 1;
+
+	// Set default in the constructor
+	function
+	NmnhVzBirdsDisplay()
+	{
+		$this->BaseStandardDisplay();
+
+		$recEx = new RecordExtractor();
+                $recEx->ExtractFields
+		(
+			array
+			(
+				'IdeCommonNameLocal_tab',
+				'CatOtherNumbersType_tab',
+				'CatOtherNumbersValue_tab',
+				'MeaType_tab',
+				'MeaVerbatimValue_tab',
+				'MeaVerbatimUnit_tab'
+			)
+		);
+
+		// Don't display images by default
+		$this->DisplayImage = 0;
+
+		// cat number 
+		// catalogue number, suffix & prefix formatting
+                $catNumber = new FormatField;
+                $catNumber->Name = "CatNumber";
+                if (filled('CatSuffix', 'ecatalogue', $this->IRN))
+                        $catNumber->Format = "{CatPrefix}{CatNumber}-{CatSuffix}";
+                else
+                        $catNumber->Format = "{CatPrefix}{CatNumber}";
+		// end cat number 
+
+		// Citations
+		$citTaxonLocal = new Field;
+		$citTaxonLocal->ColName = 'CitTaxonRef_tab->etaxonomy->ClaScientificName';
+
+		$citTypeStatus = new Field;
+		$citTypeStatus->ColName = 'CitTypeStatus_tab';
+
+		$citPrimaryCitedIn = new Field;
+                $citPrimaryCitedIn->ColName = 'CitTaxonRef_tab->etaxonomy->PriCitedInRef->ebibliography->SummaryData';
+
+		$typeCitations = new Table;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitations->Columns = array($citTaxonLocal, $citTypeStatus, $citPrimaryCitedIn);
+		// end Citations
+		
+		// Common Name
+                $commonNameArray = $recEx->MultivalueFieldAsArray("IdeCommonNameLocal_tab");
+                $commonNameDisplayArray = array();
+                $commonNameDisplay = "";
+
+                for ($i = 0;$i < count($commonNameArray); $i++)
+                {
+                        if (! empty($commonNameArray[$i]) && ! in_array($commonNameArray[$i], $commonNameDisplayArray))
+                        {
+                                array_push($commonNameDisplayArray, $commonNameArray[$i]);
+                        }
+                }
+                foreach ($commonNameDisplayArray as $comName)
+                {
+                        $commonNameDisplay .= $comName . "\n";
+                }
+
+                $commonName = new FormatField;
+                $commonName->Format = $commonNameDisplay;
+                $commonName->Name = "IdeCommonNameLocal_tab";
+		// end Common Name
+
+		// date visited from and date visited to formatting
+                $dateCollected = new FormatField;
+                $dateCollected->Name = "Date Collected (dd/mm/yyyy)";
+                $ceref = get('BioEventSiteRef', 'ecatalogue', $this->IRN);
+                if (filled('ColDateVisitedFrom', 'ecollectionevents', $ceref) &&
+                    filled('ColDateVisitedTo', 'ecollectionevents', $ceref) &&
+                    filled('ColDateVisitedConjunction', 'ecollectionevents', $ceref))
+                        {
+                                if (get('ColDateVisitedFrom', 'ecollectionevents', $ceref) != get('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                                {
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                                        $dateCollected->Format .= " {BioEventSiteRef->ecollectionevents->ColDateVisitedConjunction} ";
+                                        $dateCollected->Format .= "{BioEventSiteRef->ecollectionevents->ColDateVisitedTo}";
+                                }
+                                else
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                        }
+                elseif (filled('ColDateVisitedFrom', 'ecollectionevents', $ceref) && filled('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                        {
+                                if (get('ColDateVisitedFrom', 'ecollectionevents', $ceref) != get('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                                {
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                                        $dateCollected->Format .= " - ";
+                                        $dateCollected->Format .= "{BioEventSiteRef->ecollectionevents->ColDateVisitedTo}";
+                                }
+                                else
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                        }
+                else
+                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+
+                // elevation from & elevation to formatting
+                $elevation = new FormatField;
+                $elevation->Name = "Elevation";
+
+                $elevFromFlag = "";
+                $elevToFlag = "";
+                if (filled('TerElevationFromOrig', 'ecollectionevents', $ceref))
+                        $elevFromFlag = get('TerElevationFromOrig', 'ecollectionevents', $ceref);
+                if (filled('TerElevationToOrig', 'ecollectionevents', $ceref))
+                        $elevToFlag = get('TerElevationToOrig', 'ecollectionevents', $ceref);
+
+                if ($elevFromFlag != "" || $elevToFlag != "")
+                {
+                        $elevFrom = "";
+                        $elevTo = "";
+                        $elevUnit = "";
+                        $elevFromMod = "";
+                        $elevToMod = "";
+
+                        if (filled('TerElevationFromModifier', 'ecollectionevents', $ceref))
+                        {
+                                $elevFromMod = get('TerElevationFromModifier', 'ecollectionevents', $ceref);
+                        }
+                        if (filled('TerElevationToModifier', 'ecollectionevents', $ceref))
+                        {
+                                $elevToMod = get('TerElevationToModifier', 'ecollectionevents', $ceref);
+                        }
+
+                        // get elevations
+                        if ($elevFromFlag != "")
+                        {
+                                if (! $elevFromFlag)
+                                {
+                                        $elevFrom = get('TerElevationFromMet','ecollectionevents', $ceref);
+                                        $elevUnit = "m";
+                                }
+                                else
+                                {
+                                        $elevFrom = get('TerElevationFromFt','ecollectionevents', $ceref);
+                                        $elevUnit = "ft";
+                                }
+                                if ($elevFromMod != "")
+                                {
+                                        $elevFrom = "$elevFromMod $elevFrom";
+                                }
+                        }
+                        if ($elevToFlag != "")
+                        {
+                                if (! $elevToFlag)
+                                {
+                                        $elevTo = get('TerElevationToMet','ecollectionevents', $ceref);
+                                        if ($elevUnit == "")
+                                        {
+                                                $elevUnit = "m";
+                                        }
+                                }
+                                else
+                                {
+                                        $elevTo = get('TerElevationToFt','ecollectionevents', $ceref);
+                                        if ($elevUnit == "")
+                                        {
+                                                $elevUnit = "ft";
+                                        }
+                                }
+                                if ($elevToMod != "")
+                                {
+                                        $elevTo = "$elevToMod $elevTo";
+                                }
+                        }
+                        if ($elevFrom == $elevTo)
+                        {
+                                $elevTo = "";
+                        }
+
+                        if ($elevFrom != "" && $elevTo != "")
+                        {
+                                $elevation->Format = $elevFrom;
+                                $elevation->Format .= " - ";
+                                $elevation->Format .= $elevTo;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                        elseif ($elevFrom != "" && $elevTo == "")
+                        {
+                                $elevation->Format = $elevFrom;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                        elseif ($elevFrom == "" && $elevTo != "")
+                        {
+                                $elevation->Format = $elevTo;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                }
+
+		// Field Number
+                $otherNumbersType = $recEx->MultivalueFieldAsArray("CatOtherNumbersType_tab");
+                $otherNumbersValue = $recEx->MultivalueFieldAsArray("CatOtherNumbersValue_tab");
+                $fieldNumber = new FormatField;
+                $fieldNumber->Name = "Field Number(s)";
+               	$fieldNumber->Format = "";
+
+                for ($i = 0;$i < count($otherNumbersType); $i++)
+                {
+                        if (strtolower($otherNumbersType[$i]) == "field number") 
+                        {
+				if (empty($fieldNumber->Format))
+				{
+                			$fieldNumber->Format = $otherNumbersValue[$i];
+				}
+				else
+				{
+                			$fieldNumber->Format .= ", " . $otherNumbersValue[$i];
+				}
+                        }
+                }
+		// end Field Number
+
+		// Zoo Sex Table 
+		$zooSex = new Field;
+		$zooSex->ColName = 'ZooSex_tab';
+
+		$zooStage = new Field;
+		$zooStage->ColName = 'ZooStage_tab';
+
+		$zooRemarks = new Field;
+		$zooRemarks->ColName = 'ZooSexStageRemarks_tab';
+
+		$zooSexStageTable = new Table;
+		$zooSexStageTable->Name = 'SexAndStage';
+		$zooSexStageTable->Headings = array('Sex', 'Stage', 'Remarks');
+		$zooSexStageTable->Columns = array($zooSex, $zooStage, $zooRemarks);
+		// end Zoo Sex Table
+
+		// zoo prep details 
+		$zooPrep = new Field;
+		$zooPrep->ColName = 'ZooPreparation_tab';
+
+		$zooPrepRem = new Field;
+		$zooPrepRem->ColName = 'ZooPreparationRemarks_tab';
+
+		$zooPrepDetails = new Table;
+		$zooPrepDetails->Name = 'ZooPrepDetails';
+		$zooPrepDetails->Headings = array('Preparation', 'Remarks');
+		$zooPrepDetails->Columns = array($zooPrep, $zooPrepRem);
+		// end zoo prep details
+
+		// Measurement - Weight
+                $measurementKind = $recEx->MultivalueFieldAsArray("MeaType_tab");
+                $verbatimValue = $recEx->MultivalueFieldAsArray("MeaVerbatimValue_tab");
+                $verbatimUnit = $recEx->MultivalueFieldAsArray("MeaVerbatimUnit_tab");
+                $measurements = new FormatField;
+                $measurements->Name = "Measurements";
+               	$measurements->Format = "";
+
+                for ($i = 0;$i < count($measurementKind); $i++)
+                {
+                        if (strtolower($measurementKind[$i]) == "weight") 
+                        {
+                		$measurements->Format = $measurementKind[$i] . ": " . $verbatimValue[$i] . " " . $verbatimUnit[$i];
+				break;
+                        }
+                }
+		// end Measurement - Weight
+
+		$this->Fields = array
+		(
+			'IdeFiledAsName',
+			$catNumber,
+			'CatCollectionName_tab',
+			'CatSpecimenCount',
+			'IdeFiledAsQualifiedNameWeb',
+			'IdeOtherQualifiedNameWeb_tab',
+			$typeCitations,
+			$commonName,
+			$dateCollected,
+			'BioEventSiteRef->ecollectionevents->LocOcean',
+                        'BioEventSiteRef->ecollectionevents->LocSeaGulf',
+			'BioEventSiteRef->ecollectionevents->LocCountry',
+                        'BioEventSiteRef->ecollectionevents->LocProvinceStateTerritory',
+                        'BioEventSiteRef->ecollectionevents->LocDistrictCountyShire',
+			'BioEventSiteRef->ecollectionevents->LocPreciseLocation',
+			'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLatitude',
+                        'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLongitude',
+			$elevation,
+			'BioEventSiteRef->ecollectionevents->ExpExpeditionName',
+			'BioEventSiteRef->ecollectionevents->ColParticipantLocal_tab',
+			$fieldNumber,
+			$zooSexStageTable,
+			$zooPrepDetails,
+			$measurements,
+			'NotNmnhText0',
+		);
+
+		$this->HeaderField = 'IdeFiledAsName';
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+	}
+
+	function
+	Show()
+	{
+		/*
+		**  The Show() method is resposible for sourcing the Language strings
+		**  ($this->_STRINGS) and performing the query before calling display().
+		*/
+		$this->sourceStrings();
+		$this->setupSchema();
+
+		if (!isset($this->IRN))
+		{
+			WebDie('Invalid IRN', 'BaseDisplayObject');
+		}
+
+		// we don't grab the Multimedia ref if we are already in Multimedia
+		if ($this->Database == "emultimedia")
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData'));
+		}
+		else
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData', 'MulMultiMediaRef_tab', 'AdmPublishWebNoPasswordLocal_tab'));
+		}
+		$this->_buildSelectArray($this->Fields);
+		$this->_buildSelectArray($this->AdditionalFields);
+
+		if (count($this->AdditionalFields) > 0)
+		{
+			$this->Fields = array_merge($this->Fields, $this->AdditionalFields);
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $this->selectArray;
+			
+
+		$qry->From = $this->Database;
+		$qry->Where = 'irn=' . $this->IRN;
+		$result = $qry->Fetch();
+
+		if (!isset($result[0]->irn_1) || $result[0]->irn_1 == '')
+		{
+			print "<center>";
+			print "<h2>";
+			PPrint($this->_STRINGS['NO RESULTS'], $this->FontFace, '', $this->BodyTextColor);
+			print"</h2>\n";
+			print "<h3>";
+			PPrint($this->_STRINGS['GO BACK'], $this->FontFace, '', $this->BodyTextColor);
+			print "</h3>\n";
+			print '<br /></center>';
+			return;
+		}
+
+		$this->record = $result[0];
+
+		// Now we call the display function
+		$this->display();
+	}
+
+	function
+	display()
+	{
+
+		$widthAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		$bodyColorAttrib = '';
+		if ($this->BodyColor != '')
+			$bodyColorAttrib	= 'bgcolor=' . $this->BodyColor;
+		$bodyTextColorAttrib = '';
+		if ($this->BodyTextColor != '')
+			$bodyTextColorAttrib	= 'color=' . $this->BodyTextColor;
+		$highlightColorAttrib = '';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor=' . $this->HighlightColor ;
+		$headerTextColorAttrib = '';
+		if ($this->HeaderTextColor != '')
+			$headerTextColorAttrib= 'color=' . $this->HeaderTextColor;
+		$borderColorAttrib = '';
+		$headerColorAttrib = '';
+		if ($this->BorderColor != '')
+		{
+			$borderColorAttrib= 'bordercolor=' . $this->BorderColor;
+			$headerColorAttrib= 'bgcolor=' . $this->BorderColor;
+		}
+		$fontFaceAttrib = '';
+		if ($this->FontFace != '')
+			$fontFaceAttrib= 'face="' . $this->FontFace . '"';
+		$fontSizeAttrib = '';
+		if ($this->FontSize != '')
+			$fontSizeAttrib= 'size="' . $this->FontSize . '"';
+		if ($this->HeaderFontSize == '')
+		{
+			if ($this->FontSize != '')
+				$this->HeaderFontSize = $this->FontSize + 1;
+			else
+				$this->HeaderFontSize = '+1';
+		}
+
+		print "<table $widthAttrib cellpadding=\"2\" cellspacing=\"0\" border=\"0\">\n";
+		print "<tr><td align=\"left\">\n";
+		$link = $this->QueryPage;
+
+		if ($this->DisplayNewSearchLink)
+		{
+			print "&nbsp;<a href=\"$link\">";
+			PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+		foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+		{
+			$link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+			PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "<a href=\"$link\">";
+			PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+
+		print "</td>\n";
+		print "</tr><tr><td colspan=\"2\">\n";
+		$decorator = new HtmlBoxAndTitle;
+		$decorator->BorderColor = $this->BorderColor;
+		$decorator->BodyColor = $this->BodyColor;
+		$decorator->TitleTextColor = $this->HeaderTextColor;
+		$decorator->FontFace = $this->FontFace;
+		$decorator->Width = "100%";
+		$decorator->Title = $this->record->{$this->HeaderField};
+		$decorator->Open();
+
+		if ($this->DisplayImage)
+			$this->DisplayMedia();
+
+		print "       <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\">\n";
+		print "<!-- Start Field Content -->\n";
+
+		// Foreach loop on each item in the $this->Fields var
+		$i = $fieldNum = 0;
+		foreach ($this->Fields as $item)
+		{
+			$fieldNum++;
+			if (is_string($item))
+			{
+				if (isset($this->_STRINGS[$item]))
+					$item = new Field($item, $this->_STRINGS[$item]);
+				else
+					$item = new Field($item, $item);
+			}
+
+			// Don't display if fields security doesn't allow
+			if (isset($item->ValidUsers) 
+				&& strtolower($item->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($item->ValidUsers))
+					continue;
+			}
+
+			// If it's a backreference item, then load data
+			$this->_loadBackReferenceField($item);
+
+			if (! $this->SuppressEmptyFields || $this->_hasData($item))
+			{
+				$i++;
+				if ($fieldNum == 1)
+					continue; // ignore first field as it's used in heading
+				if ($i % 2 == 0)
+					print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+				else
+					print "	<tr align=\"left\" valign=\"top\">\n";
+					
+				// Print field name
+				if ($item->Label != '')
+					$label = $item->Label;
+				elseif ($item->Name != '')
+				{
+					if (isset($this->_STRINGS[$item->Name]))
+						$label = $this->_STRINGS[$item->Name];
+					else
+						$label = $item->Name;
+				}
+				else
+				{
+					if (isset($this->_STRINGS[$item->ColName]))
+						$label = $this->_STRINGS[$item->ColName];
+					else
+						$label = $this->ColName;
+				}
+
+				if ($this->DisplayLabels)
+				{
+					print "	  <td width=\"160\"><b>";
+					print "<font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>";
+					print $label;
+					print "</font></b></td>\n"; 
+				}
+				else
+				{
+					print "	  <td>&nbsp;</td>\n";
+				}
+
+
+				print "	  <td>\n";
+				$this->adjustOutput($item);
+				print "</td>\n";
+				print "	</tr>\n";
+			}
+		}
+
+		
+		// Print the extra multimedia
+		$firstImage = ($this->DisplayImage) ? 2 : 1;
+			
+		$hasMedia = isset($this->record->{"MulMultiMediaRef:$firstImage"});
+		if ($this->DisplayAllMedia && $hasMedia)
+		{
+			if ($i % 2 == 0)
+				print "	<tr align=\"left\" valign=\"top\">\n";
+			else
+				print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+
+			// Print field name (This will normally be multimedia)
+			if ($this->DisplayLabels)
+			{
+				print "	  <td width=\"160\"><b><font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>".
+						$this->_STRINGS['MEDIA'] . "</font></b></td>\n"; 
+			}
+
+			// Display Images
+			print "	  <td>\n";
+			print "<!-- Start a table of thumbnails -->\n";
+			print "<table border=\"0\" cellpadding=\"3\"><tr>\n";
+			$i = $firstImage;
+			$imgcount = 0;
+			$mmField = "MulMultiMediaRef:$i"; 
+			$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+			$imgirn = $this->record->$mmField;
+			$publish = $this->record->$publishField;
+			
+			while ($imgirn != '')
+			{
+				if (strtolower($publish) == "yes")
+				{
+					if ($this->ImagesPerRow > 0 && ($imgcount % $this->ImagesPerRow == 0))
+						print "</tr><tr>";
+
+					print "<td align=\"center\">";
+					$image = new MediaImage;
+					$image->Intranet = $this->Intranet;
+					$image->IRN = $imgirn;
+					$image->BorderColor = $this->BorderColor;
+					if ($this->SuppressImageBorders)
+						$image->ShowBorder = 0;
+					$image->HighLightColor = $this->BorderColor;
+					$image->RefIRN = $this->IRN;
+					$image->RefTable = $this->Database;
+					$image->UseAbsoluteLinks = $this->UseAbsoluteLinks;
+					$image->KeepAspectRatio = $this->KeepAssociatedImagesAspectRatio;
+					$image->Width = 60;
+					$image->Height = 60;
+					if ($this->ImageDisplayPage != "")
+					{
+						$image->ImageDisplayPage = $this->ImageDisplayPage;
+					}
+					elseif($this->Intranet)
+					{
+						$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}	
+					else
+					{
+						$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}
+					$image->Show();
+					$imgcount++;
+					print "</td>";
+				}
+
+				$i++;
+				$mmField = "MulMultiMediaRef:$i"; 
+				$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+				$imgirn = $this->record->$mmField;
+				$publish = $this->record->$publishField;
+			}
+
+			print "</tr></table>";
+			print "</td></tr>\n";
+		}
+		print "       </table>\n";
+		print "<!-- End Field Content -->\n";
+
+		$decorator->Close();
+
+		print "<tr><td align=\"left\">\n";
+                $link = $this->QueryPage;
+
+                if ($this->DisplayNewSearchLink)
+                {
+                        print "&nbsp;<a href=\"$link\">";
+                        PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+                foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+                {
+                        $link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+                        PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "<a href=\"$link\">";
+                        PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+
+                print "</td></tr>\n";
+
+		print "</td></tr>";
+		print "</table>\n";
+
+	}
+}
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+class
+NmnhVzMammalsDisplay extends BaseStandardDisplay
+{
+	// Keep Aspect Ratio for image on display page
+        var $KeepAssociatedImagesAspectRatio = 1;
+
+	// Set default in the constructor
+	function
+	NmnhVzMammalsDisplay()
+	{
+		$this->BaseStandardDisplay();
+
+		// Don't display images by default
+		$this->DisplayImage = 0;
+
+		// cat number 
+		// catalogue number, suffix & prefix formatting
+                $catNumber = new FormatField;
+                $catNumber->Name = "CatNumber";
+                if (filled('CatSuffix', 'ecatalogue', $this->IRN))
+                        $catNumber->Format = "{CatPrefix}{CatNumber}-{CatSuffix}";
+                else
+                        $catNumber->Format = "{CatPrefix}{CatNumber}";
+		// end cat number 
+
+                $specimenCount = new FormatField;
+                $specimenCount->Name = "CatSpecimenCount";
+                $specimenCount->Format = "{CatSpecimenCount} {CatSpecimenCountModifier}";
+
+		// Citations
+		$citTaxonLocal = new Field;
+		$citTaxonLocal->ColName = 'CitTaxonRef_tab->etaxonomy->ClaScientificName';
+
+		$citTypeStatus = new Field;
+		$citTypeStatus->ColName = 'CitTypeStatus_tab';
+
+		$citPrimaryCitedIn = new Field;
+                $citPrimaryCitedIn->ColName = 'CitTaxonRef_tab->etaxonomy->PriCitedInRef->ebibliography->SummaryData';
+
+		$typeCitations = new Table;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitations->Columns = array($citTaxonLocal, $citTypeStatus, $citPrimaryCitedIn);
+		// end Citations
+		
+		/*
+		// Common Name
+		$recEx = new RecordExtractor();
+                $recEx->ExtractFields(array('IdeCommonNameLocal_tab'));
+                $commonNameArray = $recEx->MultivalueFieldAsArray("IdeCommonNameLocal_tab");
+                $commonNameDisplayArray = array();
+                $commonNameDisplay = "";
+
+                for ($i = 0;$i < count($commonNameArray); $i++)
+                {
+                        if (! empty($commonNameArray[$i]) && ! in_array($commonNameArray[$i], $commonNameDisplayArray))
+                        {
+                                array_push($commonNameDisplayArray, $commonNameArray[$i]);
+                        }
+                }
+                foreach ($commonNameDisplayArray as $comName)
+                {
+                        $commonNameDisplay .= $comName . "\n";
+                }
+
+                $commonName = new FormatField;
+                $commonName->Format = $commonNameDisplay;
+                $commonName->Name = "IdeCommonNameLocal_tab";
+		// end Common Name
+		*/
+
+		// date visited from and date visited to formatting
+                $dateCollected = new FormatField;
+                $dateCollected->Name = "Date Collected (dd/mm/yyyy)";
+                $ceref = get('BioEventSiteRef', 'ecatalogue', $this->IRN);
+                if (filled('ColDateVisitedFrom', 'ecollectionevents', $ceref) &&
+                    filled('ColDateVisitedTo', 'ecollectionevents', $ceref) &&
+                    filled('ColDateVisitedConjunction', 'ecollectionevents', $ceref))
+                        {
+                                if (get('ColDateVisitedFrom', 'ecollectionevents', $ceref) != get('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                                {
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                                        $dateCollected->Format .= " {BioEventSiteRef->ecollectionevents->ColDateVisitedConjunction} ";
+                                        $dateCollected->Format .= "{BioEventSiteRef->ecollectionevents->ColDateVisitedTo}";
+                                }
+                                else
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                        }
+                elseif (filled('ColDateVisitedFrom', 'ecollectionevents', $ceref) && filled('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                        {
+                                if (get('ColDateVisitedFrom', 'ecollectionevents', $ceref) != get('ColDateVisitedTo', 'ecollectionevents', $ceref))
+                                {
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                                        $dateCollected->Format .= " - ";
+                                        $dateCollected->Format .= "{BioEventSiteRef->ecollectionevents->ColDateVisitedTo}";
+                                }
+                                else
+                                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+                        }
+                else
+                        $dateCollected->Format = "{BioEventSiteRef->ecollectionevents->ColDateVisitedFrom}";
+
+                // elevation from & elevation to formatting
+                $elevation = new FormatField;
+                $elevation->Name = "Elevation";
+
+                $elevFromFlag = "";
+                $elevToFlag = "";
+                if (filled('TerElevationFromOrig', 'ecollectionevents', $ceref))
+                        $elevFromFlag = get('TerElevationFromOrig', 'ecollectionevents', $ceref);
+                if (filled('TerElevationToOrig', 'ecollectionevents', $ceref))
+                        $elevToFlag = get('TerElevationToOrig', 'ecollectionevents', $ceref);
+
+                if ($elevFromFlag != "" || $elevToFlag != "")
+                {
+                        $elevFrom = "";
+                        $elevTo = "";
+                        $elevUnit = "";
+                        $elevFromMod = "";
+                        $elevToMod = "";
+
+                        if (filled('TerElevationFromModifier', 'ecollectionevents', $ceref))
+                        {
+                                $elevFromMod = get('TerElevationFromModifier', 'ecollectionevents', $ceref);
+                        }
+                        if (filled('TerElevationToModifier', 'ecollectionevents', $ceref))
+                        {
+                                $elevToMod = get('TerElevationToModifier', 'ecollectionevents', $ceref);
+                        }
+
+                        // get elevations
+                        if ($elevFromFlag != "")
+                        {
+                                if (! $elevFromFlag)
+                                {
+                                        $elevFrom = get('TerElevationFromMet','ecollectionevents', $ceref);
+                                        $elevUnit = "m";
+                                }
+                                else
+                                {
+                                        $elevFrom = get('TerElevationFromFt','ecollectionevents', $ceref);
+                                        $elevUnit = "ft";
+                                }
+                                if ($elevFromMod != "")
+                                {
+                                        $elevFrom = "$elevFromMod $elevFrom";
+                                }
+                        }
+                        if ($elevToFlag != "")
+                        {
+                                if (! $elevToFlag)
+                                {
+                                        $elevTo = get('TerElevationToMet','ecollectionevents', $ceref);
+                                        if ($elevUnit == "")
+                                        {
+                                                $elevUnit = "m";
+                                        }
+                                }
+                                else
+                                {
+                                        $elevTo = get('TerElevationToFt','ecollectionevents', $ceref);
+                                        if ($elevUnit == "")
+                                        {
+                                                $elevUnit = "ft";
+                                        }
+                                }
+                                if ($elevToMod != "")
+                                {
+                                        $elevTo = "$elevToMod $elevTo";
+                                }
+                        }
+                        if ($elevFrom == $elevTo)
+                        {
+                                $elevTo = "";
+                        }
+
+                        if ($elevFrom != "" && $elevTo != "")
+                        {
+                                $elevation->Format = $elevFrom;
+                                $elevation->Format .= " - ";
+                                $elevation->Format .= $elevTo;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                        elseif ($elevFrom != "" && $elevTo == "")
+                        {
+                                $elevation->Format = $elevFrom;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                        elseif ($elevFrom == "" && $elevTo != "")
+                        {
+                                $elevation->Format = $elevTo;
+                                $elevation->Format .= " " . $elevUnit;
+                        }
+                }
+
+		// Other Numbers
+		$otherNumbersType = new Field;
+		$otherNumbersType->ColName = 'CatOtherNumbersType_tab';
+
+		$otherNumbersValue = new Field;
+		$otherNumbersValue->ColName = 'CatOtherNumbersValue_tab';
+
+		$otherNumbers = new Table;
+		$otherNumbers->Name = 'OtherNumbers';
+		$otherNumbers->Headings = array('Type', 'Value');
+		$otherNumbers->Columns = array($otherNumbersType, $otherNumbersValue);
+		// end Other Numbers
+
+		// Zoo Sex Table 
+		$zooSex = new Field;
+		$zooSex->ColName = 'ZooSex_tab';
+
+		$zooStage = new Field;
+		$zooStage->ColName = 'ZooStage_tab';
+
+		$zooRemarks = new Field;
+		$zooRemarks->ColName = 'ZooSexStageRemarks_tab';
+
+		$zooSexStageTable = new Table;
+		$zooSexStageTable->Name = 'SexAndStage';
+		$zooSexStageTable->Headings = array('Sex', 'Stage', 'Remarks');
+		$zooSexStageTable->Columns = array($zooSex, $zooStage, $zooRemarks);
+		// end Zoo Sex Table
+
+		// zoo prep details 
+		$zooPrep = new Field;
+		$zooPrep->ColName = 'ZooPreparation_tab';
+
+		$zooPrepRem = new Field;
+		$zooPrepRem->ColName = 'ZooPreparationRemarks_tab';
+
+		$zooPrepDetails = new Table;
+		$zooPrepDetails->Name = 'ZooPrepDetails';
+		$zooPrepDetails->Headings = array('Preparation', 'Remarks');
+		$zooPrepDetails->Columns = array($zooPrep, $zooPrepRem);
+		// end zoo prep details
+
+		// Reproductive Condition Table 
+		$ReproductiveCondPart = new Field;
+		$ReproductiveCondPart->ColName = 'VerReprodCondPart_tab';
+
+		$ReproductiveCondLength = new Field;
+		$ReproductiveCondLength->ColName = 'VerReprodCondLength_tab';
+
+		$ReproductiveCondWidth = new Field;
+		$ReproductiveCondWidth->ColName = 'VerReprodCondWidth_tab';
+
+		$ReproductiveCondUnit = new Field;
+		$ReproductiveCondUnit->ColName = 'VerReprodCondUnit_tab';
+
+		$ReproductiveCondRemarks = new Field;
+		$ReproductiveCondRemarks->ColName = 'VerReprodCondRemarks_tab';
+
+		$ReproductiveCondition = new Table;
+		$ReproductiveCondition->Name = 'ReproductiveCondition';
+		$ReproductiveCondition->Headings = array('Part', 'Length', 'Width', 'Unit', 'Remarks');
+		$ReproductiveCondition->Columns = array
+		(
+			$ReproductiveCondPart, 
+			$ReproductiveCondLength, 
+			$ReproductiveCondWidth, 
+			$ReproductiveCondUnit, 
+			$ReproductiveCondRemarks
+		);
+		// end Reproductive Condition Table 
+
+		// Progeny Details table
+		$ProgenyDetailsCount = new Field;
+		$ProgenyDetailsCount->ColName = 'MamProgenyCount_tab';
+
+		$ProgenyDetailsPart = new Field;
+		$ProgenyDetailsPart->ColName = 'MamProgenyPart_tab';
+
+		$ProgenyDetailsCrownRump = new Field;
+		$ProgenyDetailsCrownRump->ColName = 'MamProgenyCrownRump_tab';
+
+		$ProgenyDetailsUnit = new Field;
+		$ProgenyDetailsUnit->ColName = 'MamProgenyUnit_tab';
+
+		$ProgenyDetailsRemarks = new Field;
+		$ProgenyDetailsRemarks->ColName = 'MamProgenyRemarks_tab';
+
+		$ProgenyDetails = new Table;
+		$ProgenyDetails->Name = 'ProgenyDetails';
+		$ProgenyDetails->Headings = array('Count', 'Part', 'Crown Rump', 'Unit', 'Remarks');
+		$ProgenyDetails->Columns = array
+		(
+			$ProgenyDetailsCount, 
+			$ProgenyDetailsPart, 
+			$ProgenyDetailsCrownRump, 
+			$ProgenyDetailsUnit, 
+			$ProgenyDetailsRemarks
+		);
+		// end Progeny Details table
+
+		// Measurement 
+		$measurementOf = new Field;
+		$measurementOf->ColName = 'MeaOf_tab';
+
+		$measurementType = new Field;
+		$measurementType->ColName = 'MeaType_tab';
+
+		$measurementValue = new Field;
+		$measurementValue->ColName = 'MeaVerbatimValue_tab';
+
+		$measurementUnit = new Field;
+		$measurementUnit->ColName = 'MeaVerbatimUnit_tab';
+
+		$measurementRemarks = new Field;
+		$measurementRemarks->ColName = 'MeaRemarks_tab';
+
+		$measurements = new Table;
+		$measurements->Name = 'Measurements';
+		$measurements->Headings = array('Measurement of', 'Kind', 'Verbatim Measurement Value', 'Unit', 'Remarks');
+		$measurements->Columns = array
+		(
+			$measurementOf, 
+			$measurementType, 
+			$measurementValue, 
+			$measurementUnit, 
+			$measurementRemarks
+		);
+		// end Measurement
+
+		$this->Fields = array
+		(
+			'IdeFiledAsName',
+			'CatMuseum',
+			'CatPrefix',
+			$catNumber,
+			'CatCollectionName_tab',
+			'CatObjectType',
+			$specimenCount,
+			'IdeFiledAsQualifiedNameWeb',
+			'IdeOtherQualifiedNameWeb_tab',
+			$typeCitations,
+			//$commonName,
+			$dateCollected,
+			'BioEventSiteRef->ecollectionevents->LocOcean',
+                        'BioEventSiteRef->ecollectionevents->LocSeaGulf',
+                        'BioEventSiteRef->ecollectionevents->LocBaySound',
+			'BioEventSiteRef->ecollectionevents->LocCountry',
+                        'BioEventSiteRef->ecollectionevents->LocIslandName',
+                        'BioEventSiteRef->ecollectionevents->LocProvinceStateTerritory',
+                        'BioEventSiteRef->ecollectionevents->LocDistrictCountyShire',
+			'BioEventSiteRef->ecollectionevents->LocPreciseLocation',
+			'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLatitude',
+                        'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLongitude',
+			$elevation,
+			'BioEventSiteRef->ecollectionevents->ColParticipantLocal_tab',
+			$otherNumbers,
+			$zooSexStageTable,
+			$zooPrepDetails,
+			'BioMicrohabitatDescription',
+			$ReproductiveCondition,
+			$ProgenyDetails,
+			$measurements,
+			'VerStomachContents',
+			'BioEventSiteRef->ecollectionevents->ColCollectionMethod',
+			'MamSexualMaturity',
+			'MamPhysicalMaturity',
+			'MamSpecimenCondition',
+			'MamInjury',
+			'MamParasite',
+			'BibBibliographyRef_tab->ebibliography->SummaryData',
+			'NotNmnhText0',
+		);
+
+		$this->HeaderField = 'IdeFiledAsName';
+		$this->Database = 'enmnh';
+		$this->SuppressEmptyFields = 0;
+	}
+
+	function
+	Show()
+	{
+		/*
+		**  The Show() method is resposible for sourcing the Language strings
+		**  ($this->_STRINGS) and performing the query before calling display().
+		*/
+		$this->sourceStrings();
+		$this->setupSchema();
+
+		if (!isset($this->IRN))
+		{
+			WebDie('Invalid IRN', 'BaseDisplayObject');
+		}
+
+		// we don't grab the Multimedia ref if we are already in Multimedia
+		if ($this->Database == "emultimedia")
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData'));
+		}
+		else
+		{
+			$this->_buildSelectArray(array('irn', 'SummaryData', 'MulMultiMediaRef_tab', 'AdmPublishWebNoPasswordLocal_tab'));
+		}
+		$this->_buildSelectArray($this->Fields);
+		$this->_buildSelectArray($this->AdditionalFields);
+
+		if (count($this->AdditionalFields) > 0)
+		{
+			$this->Fields = array_merge($this->Fields, $this->AdditionalFields);
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $this->selectArray;
+			
+
+		$qry->From = $this->Database;
+		$qry->Where = 'irn=' . $this->IRN;
+		$result = $qry->Fetch();
+
+		if (!isset($result[0]->irn_1) || $result[0]->irn_1 == '')
+		{
+			print "<center>";
+			print "<h2>";
+			PPrint($this->_STRINGS['NO RESULTS'], $this->FontFace, '', $this->BodyTextColor);
+			print"</h2>\n";
+			print "<h3>";
+			PPrint($this->_STRINGS['GO BACK'], $this->FontFace, '', $this->BodyTextColor);
+			print "</h3>\n";
+			print '<br /></center>';
+			return;
+		}
+
+		$this->record = $result[0];
+
+		// Now we call the display function
+		$this->display();
+	}
+
+	function
+	display()
+	{
+
+		$widthAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		$bodyColorAttrib = '';
+		if ($this->BodyColor != '')
+			$bodyColorAttrib	= 'bgcolor=' . $this->BodyColor;
+		$bodyTextColorAttrib = '';
+		if ($this->BodyTextColor != '')
+			$bodyTextColorAttrib	= 'color=' . $this->BodyTextColor;
+		$highlightColorAttrib = '';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor=' . $this->HighlightColor ;
+		$headerTextColorAttrib = '';
+		if ($this->HeaderTextColor != '')
+			$headerTextColorAttrib= 'color=' . $this->HeaderTextColor;
+		$borderColorAttrib = '';
+		$headerColorAttrib = '';
+		if ($this->BorderColor != '')
+		{
+			$borderColorAttrib= 'bordercolor=' . $this->BorderColor;
+			$headerColorAttrib= 'bgcolor=' . $this->BorderColor;
+		}
+		$fontFaceAttrib = '';
+		if ($this->FontFace != '')
+			$fontFaceAttrib= 'face="' . $this->FontFace . '"';
+		$fontSizeAttrib = '';
+		if ($this->FontSize != '')
+			$fontSizeAttrib= 'size="' . $this->FontSize . '"';
+		if ($this->HeaderFontSize == '')
+		{
+			if ($this->FontSize != '')
+				$this->HeaderFontSize = $this->FontSize + 1;
+			else
+				$this->HeaderFontSize = '+1';
+		}
+
+		print "<table $widthAttrib cellpadding=\"2\" cellspacing=\"0\" border=\"0\">\n";
+		print "<tr><td align=\"left\">\n";
+		$link = $this->QueryPage;
+
+		if ($this->DisplayNewSearchLink)
+		{
+			print "&nbsp;<a href=\"$link\">";
+			PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+		foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+		{
+			$link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+			PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "<a href=\"$link\">";
+			PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+			print "</a>";
+		}
+
+		print "</td>\n";
+		print "</tr><tr><td colspan=\"2\">\n";
+		$decorator = new HtmlBoxAndTitle;
+		$decorator->BorderColor = $this->BorderColor;
+		$decorator->BodyColor = $this->BodyColor;
+		$decorator->TitleTextColor = $this->HeaderTextColor;
+		$decorator->FontFace = $this->FontFace;
+		$decorator->Width = "100%";
+		$decorator->Title = $this->record->{$this->HeaderField};
+		$decorator->Open();
+
+		if ($this->DisplayImage)
+			$this->DisplayMedia();
+
+		print "       <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\">\n";
+		print "<!-- Start Field Content -->\n";
+
+		// Foreach loop on each item in the $this->Fields var
+		$i = $fieldNum = 0;
+		foreach ($this->Fields as $item)
+		{
+			$fieldNum++;
+			if (is_string($item))
+			{
+				if (isset($this->_STRINGS[$item]))
+					$item = new Field($item, $this->_STRINGS[$item]);
+				else
+					$item = new Field($item, $item);
+			}
+
+			// Don't display if fields security doesn't allow
+			if (isset($item->ValidUsers) 
+				&& strtolower($item->ValidUsers) != 'all')
+			{
+				if (! $this->SecurityTester->UserIsValid($item->ValidUsers))
+					continue;
+			}
+
+			// If it's a backreference item, then load data
+			$this->_loadBackReferenceField($item);
+
+			if (! $this->SuppressEmptyFields || $this->_hasData($item))
+			{
+				$i++;
+				if ($fieldNum == 1)
+					continue; // ignore first field as it's used in heading
+				if ($i % 2 == 0)
+					print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+				else
+					print "	<tr align=\"left\" valign=\"top\">\n";
+					
+				// Print field name
+				if ($item->Label != '')
+					$label = $item->Label;
+				elseif ($item->Name != '')
+				{
+					if (isset($this->_STRINGS[$item->Name]))
+						$label = $this->_STRINGS[$item->Name];
+					else
+						$label = $item->Name;
+				}
+				else
+				{
+					if (isset($this->_STRINGS[$item->ColName]))
+						$label = $this->_STRINGS[$item->ColName];
+					else
+						$label = $this->ColName;
+				}
+
+				if ($this->DisplayLabels)
+				{
+					print "	  <td width=\"160\"><b>";
+					print "<font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>";
+					print $label;
+					print "</font></b></td>\n"; 
+				}
+				else
+				{
+					print "	  <td>&nbsp;</td>\n";
+				}
+
+
+				print "	  <td>\n";
+				$this->adjustOutput($item);
+				print "</td>\n";
+				print "	</tr>\n";
+			}
+		}
+
+		
+		// Print the extra multimedia
+		$firstImage = ($this->DisplayImage) ? 2 : 1;
+			
+		$hasMedia = isset($this->record->{"MulMultiMediaRef:$firstImage"});
+		if ($this->DisplayAllMedia && $hasMedia)
+		{
+			if ($i % 2 == 0)
+				print "	<tr align=\"left\" valign=\"top\">\n";
+			else
+				print "	<tr $highlightColorAttrib align=\"left\" valign=\"top\">\n";
+
+			// Print field name (This will normally be multimedia)
+			if ($this->DisplayLabels)
+			{
+				print "	  <td width=\"160\"><b><font $bodyTextColorAttrib $fontFaceAttrib $fontSizeAttrib>".
+						$this->_STRINGS['MEDIA'] . "</font></b></td>\n"; 
+			}
+
+			// Display Images
+			print "	  <td>\n";
+			print "<!-- Start a table of thumbnails -->\n";
+			print "<table border=\"0\" cellpadding=\"3\"><tr>\n";
+			$i = $firstImage;
+			$imgcount = 0;
+			$mmField = "MulMultiMediaRef:$i"; 
+			$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+			$imgirn = $this->record->$mmField;
+			$publish = $this->record->$publishField;
+			
+			while ($imgirn != '')
+			{
+				if (strtolower($publish) == "yes")
+				{
+					if ($this->ImagesPerRow > 0 && ($imgcount % $this->ImagesPerRow == 0))
+						print "</tr><tr>";
+
+					print "<td align=\"center\">";
+					$image = new MediaImage;
+					$image->Intranet = $this->Intranet;
+					$image->IRN = $imgirn;
+					$image->BorderColor = $this->BorderColor;
+					if ($this->SuppressImageBorders)
+						$image->ShowBorder = 0;
+					$image->HighLightColor = $this->BorderColor;
+					$image->RefIRN = $this->IRN;
+					$image->RefTable = $this->Database;
+					$image->UseAbsoluteLinks = $this->UseAbsoluteLinks;
+					$image->KeepAspectRatio = $this->KeepAssociatedImagesAspectRatio;
+					$image->Width = 60;
+					$image->Height = 60;
+					if ($this->ImageDisplayPage != "")
+					{
+						$image->ImageDisplayPage = $this->ImageDisplayPage;
+					}
+					elseif($this->Intranet)
+					{
+						$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}	
+					else
+					{
+						$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}
+					$image->Show();
+					$imgcount++;
+					print "</td>";
+				}
+
+				$i++;
+				$mmField = "MulMultiMediaRef:$i"; 
+				$publishField = "AdmPublishWebNoPasswordLocal:$i"; 
+				$imgirn = $this->record->$mmField;
+				$publish = $this->record->$publishField;
+			}
+
+			print "</tr></table>";
+			print "</td></tr>\n";
+		}
+		print "       </table>\n";
+		print "<!-- End Field Content -->\n";
+
+		$decorator->Close();
+
+		print "<tr><td align=\"left\">\n";
+                $link = $this->QueryPage;
+
+                if ($this->DisplayNewSearchLink)
+                {
+                        print "&nbsp;<a href=\"$link\">";
+                        PPrint($this->_STRINGS['NEW SEARCH'], $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+                foreach ($this->OtherDisplayPages as $pagename => $pagelink)
+                {
+                        $link = "$pagelink?irn=" . $this->IRN . "&amp;QueryPage=" . urlencode($this->QueryPage);
+                        PPrint(' | ', $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "<a href=\"$link\">";
+                        PPrint($pagename, $this->FontFace, $this->FontSize, $this->BodyTextColor);
+                        print "</a>";
+                }
+
+                print "</td></tr>\n";
+
+		print "</td></tr>";
+		print "</table>\n";
+
+	}
+}
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+class
+NmnhVzPartyDisplay extends BaseStandardDisplay
+{
+
+	// Set default field in the constructor
+	function
+	NmnhVzPartyDisplay()
+	{
+		$this->BaseStandardDisplay();
+		// Don't display images by default
+		$this->DisplayImage = 0;
+
+		$this->Fields = array
+		(
+			'SummaryData',
+			'NamTitle',
+			'NamFirst',
+			'NamMiddle',
+			'NamLast',
+			'BioBirthPlace',
+			'BioDeathPlace',
+			'BioEthnicity',
+			'NotNotes',
+		);
+		$this->Database = 'eparties';
+	}
+}
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+function
+filled($column, $db, $irn)
+{
+        $qry = new ConfiguredQuery();
+        $qry->Select = array($column);
+        $qry->From = "$db";
+        $qry->Where = "irn=" . $irn;
+        $records = $qry->Fetch();
+
+        $data = "";
+        $data = $records[0]->{"$column"};
+
+        if ($data != "")
+                return 1;
+        else
+                return 0;
+}
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+function
+get($column, $db, $irn)
+{
+        $qry = new ConfiguredQuery();
+        $qry->Select = array($column);
+        $qry->From = "$db";
+        $qry->Where = "irn=" . $irn;
+        $records = $qry->Fetch();
+
+        $data = $records[0]->{"$column"};
+        return $data;
+}
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+?>

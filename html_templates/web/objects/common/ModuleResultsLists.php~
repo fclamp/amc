@@ -1,0 +1,789 @@
+<?php
+/*****************************************************
+ *  Copyright (c) KE Software Pty Ltd - 2001-2007
+ *****************************************************/
+/*
+ $Source: /home/cvs/emu/emu/master/web/objects/common/ModuleResultsLists.php,v $
+ $Revision: 1.5 $
+ $Date: 2007/09/05 14:52:13 $
+ */
+
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($WEB_ROOT . '/objects/lib/BaseResultsLists.php');
+require_once ($WEB_ROOT . '/objects/lib/BaseQueryGenerator.php');
+
+
+class TaxonomyResultsListTitle
+{
+	var $info;
+	var $suffix;
+
+	function TaxonomyResultsListTitle($suffix)
+	{
+		global $ALL_REQUEST;
+
+		$this->suffix = $suffix;
+		$all = array_merge($ALL_REQUEST['HTTP_GET_VARS'],$ALL_REQUEST['HTTP_POST_VARS']);
+		$this->info = $all['QueryTerms'];
+		if (! $this->info)
+		{
+			$this->info = $all['QueryDescription'];
+		}
+
+	}
+
+	function Show()
+	{
+		print 'KE EMu item #'. $this->info . ' '. $this->suffix;
+	}
+}
+
+
+/**************************************************************
+ *
+ * ModuleStandardResultsList extends BaseStandardResultsList
+ *
+ * modifies methods:
+ *    	dislay (extensively changed)
+ *	show (to allow calling a 3rd party interface display)
+ * provides new method
+ *	CallExternal - a display page to call 3rd party interfaces
+ *
+ * User interface:
+ * ---------------
+ *
+ * Fields:
+ *	array of fields that can be displayed (if actually
+ *	displayed depends on passed showFields array)
+ * allowMapper (default = 0):
+ *	Allow 'further investigation features'
+ * mapperUrl : 
+ *	The url for the mapping system
+ * mapperDataSource : 
+ *	the name to use for the data source to query
+ *	when sending query to mapper (corresponds to mapper
+ *	XML_URL name in its config file)
+ *
+ **************************************************************/
+class
+ModuleBaseStandardResultsList extends BaseStandardResultsList
+{
+
+	# field(s) that link to record data
+	var $linkFields = array ();
+	
+	# any field(s) to be displayed as merged single field
+	var $mergedFields = array (); 
+	var $standAloneFields = array ();
+
+	var $allowMapper = 0;
+	var $mapperUrl = '';
+
+	// mapper2 args
+	var $mapperFetcher = 'DefaultTexxml';
+	var $mapDisplayMethod = 'SimpleTransformation';
+	var $mapDisplayStylesheet = 'mapper/style/mapdisplay.html';
+	var $mapDisplaySortBy = 'ScientificName';
+	// old mapper version argument
+	var $mapperDataSource = '';
+	var $DisplayThumbnails = 1;
+
+	//used internally
+	var $showFields = array ();
+	var $allowInvestigation = 0;
+	var $showAsInvestigation = 0;
+	var $queryTerms = '';
+	var $irns = array();
+
+	var $QueryGenerator 		= "BaseQueryGenerator";
+	var $Database 			= '';
+
+	// used to enhance navigation
+	var $currentUrl = '';
+	var $previousUrl = '';
+
+	var $mapperInstalled = '';
+	var $Fields = '';
+	var $searchColumn = '';
+	var $searchType = 'text';
+	var $searchEmpty = 0;
+
+	var $referer = '';
+	var $websection = '';
+
+	function ModuleBaseStandardResultsList()
+	{
+
+		global $ALL_REQUEST;
+		
+		// turn post and get parameters into one associative array
+		$all = array_merge($ALL_REQUEST['HTTP_GET_VARS'],$ALL_REQUEST['HTTP_POST_VARS']);
+	# fix properly - am confused ...
+	# this doesn't work on this client as on development... JK
+	# $all = $ALL_REQUEST;
+
+
+		if (isset($all['showSummary']))
+		{
+			$this->showSummary = $all['showSummary'];
+			if (! $this->showSummary)
+				$this->allowInvestigation++;
+				
+		}	
+
+		if (isset($all['allowMapper']))
+			$this->allowMapper = 1;
+
+		// Select Requested Display Fields From All Possible Fields
+		foreach ($this->Fields as $field)
+		{
+			if ($all[$field] == 'show')
+			{
+				$this->showFields[] = 1;
+				$args[] =  "$field=" . $all[$field];
+			}	
+			else	
+				$this->showFields[] = 0;
+		}
+		// irn is not visible
+		$this->showFields[0] = 0;
+
+
+		// extract any requested irns of records
+		foreach ($all as $var => $val)
+		{
+			if ( preg_match('/group[0-9]/i',$var) )
+			{
+				$this->irns = array_merge(
+					$this->irns,
+					explode (':',$all{$var}));
+					$this->allowInvestigation++;
+			}	
+
+		}
+
+		// allow passed parameters to be made into get as well as post
+		// parameters in case we use <a> navigation
+		if (isset($this->irns))
+			$args[] =  'group0=' . implode ($this->irns,':') ;
+		if (isset($all['QueryTerms']))
+			$args[] =  'QueryTerms=' . $all['QueryTerms'];
+		if (isset($all['QueryOption']))
+		{
+			$args[] =  'QueryOption=' . $all['QueryOption'];
+			$args[] = $all['QueryOption'] . '=' . $all[$all['QueryOption']];
+		}	
+		if (isset($all['QueryName']))
+			$args[] =  'QueryName='. $all['QueryName'];
+		if (isset($all['action']))
+			$args[] =  'action='. $all['action'];
+		if (isset($all['QueryPage']))
+			$args[] =  'QueryPage='. $all['QueryPage'];
+
+		$get =  implode($args,'&');
+
+		$me = $GLOBALS['PHP_SELF'];
+		$this->currentUrl = $me . '?' . $get;
+
+		if ( isset($all['previousUrl']))
+		{
+			$this->previousUrl = $all['previousUrl'];
+		}
+		else
+		{
+			$this->previousUrl = $this->QueryPage;;
+		}
+
+		// Call Parent Constructor
+		$this->BaseStandardResultsList();
+
+		switch ($all['action'] )
+		{
+			case 'Investigate Selected' :
+				$this->showAsInvestigation = 1;
+				$this->Where  = "false";
+				break;
+			case 'View Selected' :
+				$this->Where  = "irn = " . implode ($this->irns, ' or irn =');
+				break;
+			default:
+				break;
+		}
+
+		$this->queryTerms = $ALL_REQUEST['QueryTerms'];
+
+	}
+
+	function Show()
+	{
+		if ($this->showAsInvestigation)
+		{
+			print $this->CallExternal($this->irns,$this->queryTerms);
+		}
+		else
+			parent::Show();
+	}
+
+	function display()
+	{
+
+		$allIrns = array();
+		$allLinks = array();
+		$allStandAlone = array();
+		$allMerged = array();
+		$thumbNail = array();
+		$allSearchCriteria = array();
+		$displayLink = array();
+
+		// build the referer url
+		$referer = '/' . $GLOBALS['WEB_DIR_NAME'] . $this->referer;
+
+		# make column headings
+		$taxonHeadings = array();			
+		foreach ($this->linkFields as $field)
+		{
+			if ($this->_STRINGS[$field])
+				$taxonHeadings[] = $this->_STRINGS[$field];
+			else	
+				$taxonHeadings[] = $field;
+		}
+		foreach ($this->standAloneFields as $field)
+		{
+			if ($this->_STRINGS[$field])
+				$taxonHeadings[] = $this->_STRINGS[$field];
+			else	
+				$taxonHeadings[] = $field;
+		}
+		foreach ($this->mergedFields as $field)
+		{
+			if ($this->_STRINGS[$field])
+				$taxonHeadings[] = $this->_STRINGS[$field];
+			else	
+				$taxonHeadings[] = $field;
+		}
+	
+		if ($this->mapperInstalled == 1)
+		{
+			$taxonHeadings[] = $this->_STRINGS[SELECT_TO_MAP];
+		}
+
+		if (! $this->allowMapper)	
+			$this->allowInvestigation = 0;
+		else
+		{
+			if (! $this->allowInvestigation)
+				$this->allowInvestigation = 1;
+		}
+
+		$numcol = count($this->Fields) + 1;
+		
+		$records =& $this->records;
+		foreach ($records as $rec)
+		{
+			// build a list made up of
+			// only requested fields
+			$all = array ();
+			$fieldsWithData = 0;
+
+
+			# assemble link data field
+			$linkDataArray = array();
+			foreach ($this->linkFields as $field)
+			{
+				$linkDataArray[] = $rec->{$field};
+					
+			}
+
+			# assemble stand alone data fields (ie separate columns)
+			$standAloneDataArray = array();
+			foreach ($this->standAloneFields as $field)
+			{
+				$standAloneDataArray[] = $rec->{$field};
+			}
+
+			# assemble merged data fields that will appear in 1 column
+			$mergedDataArray = array();
+			foreach ($this->mergedFields as $field)
+			{
+				$mergedDataArray[] = $rec->{$field};
+			}
+
+			$linkData = implode ($linkDataArray,':');
+			if (! $linkData)
+			{
+				$rank = $rec->{'ClaRank'};
+				$linkData = "$rank = ".$rec->{"Cla".$rank};
+			}
+			$mergedData = implode ($mergedDataArray,':');
+			$all = array($linkData,$mergedData,$standAloneDataArray);
+
+			$searchCriteria = array();
+			foreach (array($linkDataArray,
+					$mergedDataArray,
+					$standAloneDataArray) as $field)
+			{
+					$searchCriteria[] = "<".$field.">".
+							$rec->{$field} .
+							"</".$field.">";
+			}				
+
+
+			# make (unique) name for this record (adds digits in
+			# case duplicates)
+			$i = 0;
+			$allAsString = implode($all,"|") . '|' . $i++;
+			while ( isset($allIrns[$allAsString]))
+			{
+				$allAsString = preg_replace('/\|[0-9]+$/','|'.$i++,$allAsString);
+			}
+
+			# save record data in easily played with bits...
+			$allIrns[$allAsString] = $rec->{'irn_1'};
+			$allLinks[$allAsString] = $linkData;
+			$allStandAlone[$allAsString] = $standAloneDataArray;
+			$allMerged[$allAsString] = $mergedData;
+
+			$allSearchCriteria[$allAsString] = 
+				"<name>" . implode($searchCriteria,'') . "</name>";
+
+
+			$displayLink[$allAsString] = $this->displayPageLink($rec) . 
+				"&amp;name=$linkData";
+
+			if ($this->DisplayThumbnails)
+			{
+				$image = new MediaImage();
+
+				$image->IRN = $rec->{'MulMultiMediaRef:1'};
+				$image->Link =  $this->displayPageLink($rec);
+				$image->Intranet = $this->Intranet;
+				$image->BorderColor = $this->HeaderColor;
+				$image->HighLightColor = $this->HeaderColor;
+				$image->Width = 60;
+				$image->Height = 60;
+				$image->KeepAspectRatio = $this->KeepImageAspectRatio;
+				$image->RefIRN = $rec->{'irn_1'};
+				$image->RefTable = $this->Database;
+
+				$thumbNail[$allAsString] = $image;
+			}
+
+		}
+
+		// Generate A Page
+		
+		$widthAttrib = '';
+		$backgroundColorAttrib = '';
+		$highlightColorAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		if ($this->BodyColor != '')
+			$backgroundColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor="' . $this->HighlightColor . '"';
+		else
+			$highlightColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->HeaderColor != '')
+			$headerColorAttrib= 'bgcolor="' . $this->HeaderColor . '"';
+		if ($this->BorderColor != '')
+			$borderColorAttrib= 'bgcolor="' . $this->BorderColor . '"';
+
+		if ($this->previousUrl && $this->previousUrl != $this->QueryPage)
+			$goback = "<a href='$this->previousUrl'>Previous Display</a>";
+		else
+			$goback = '';
+
+		$me = $GLOBALS['PHP_SELF'];
+
+		print <<< HTML
+			<!-- START OBJECT -->
+			<script language='javascript'>
+			
+				function AllowMap()
+				{
+					var mapText1 = document.getElementById('mapText1');
+					var mapText2 = document.getElementById('mapText2');
+
+					var i,someChecked;
+
+					someChecked = 0;
+
+					for(i=0; (input=document.getElementsByTagName("input")[i]);
+						i++)
+					{
+						if (input.type == 'checkbox' && input.checked)
+						{
+							mapText1.style.color='#336699';
+							mapText1.onclick = function(){makeMapUrl(this);};
+
+							mapText2.style.color='#336699';
+							mapText2.onclick = function(){makeMapUrl(this);};
+
+							// ie needs this netscape using changed style...
+							if (typeof(mapText1.style.cursor) != undefined)
+							{
+								someChecked++;
+								mapText1.style.cursor='hand';
+								mapText1.style.cursor='pointer';
+								mapText2.style.cursor='hand';
+								mapText2.style.cursor='pointer';
+							}
+						}	
+					}	
+					if (! someChecked)
+					{
+						mapText1.style.color='#7f6f6f';
+						mapText1.onclick = "";
+
+						mapText2.style.color='#7f6f6f';
+						mapText2.onclick = "";
+
+						// ie needs this netscape using changed style...
+						if (typeof(mapText1.style.cursor) != undefined)
+						{
+							mapText1.style.cursor='default';
+							mapText2.style.cursor='default';
+						}
+					}
+				}
+
+				function SetCheckBoxes(val)
+				{
+					allElements = document.listForm.elements;
+					var i;
+					for( i = 0 ; i < allElements.length; i++)
+					{
+						if (allElements[i].type == 'checkbox')
+							allElements[i].checked = val;
+					}	
+					AllowMap();
+				}
+
+				function makeMapUrl(button)
+				{
+					var search = Array();
+					var searchColumn =
+HTML;
+						print" '$this->searchColumn'";
+print <<< HTML
+;
+					var searchType =
+HTML;
+						print" '$this->searchType'";
+print <<< HTML
+;
+					var searchEmpty =
+HTML;
+						print" $this->searchEmpty";
+print <<< HTML
+;
+					for(i=0; (input=document.getElementsByTagName("input")[i]); i++)
+					{
+						if ((input.getAttribute('name') == "EmuOr") && input.checked)
+						{
+							var st;
+							
+							if (searchType == "text")
+								st = searchColumn + " CONTAINS '" + input.getAttribute("value") + "'";
+							else
+								st = searchColumn + " = " + input.getAttribute("value");
+							search.push(st);
+						}	
+					}	
+					var searchSt = search.join(" OR ");
+					if (searchEmpty == 0)
+						searchSt += " AND DarLatitude IS NOT NULL AND DarLongitude IS NOT NULL";
+					texql = "SELECT ALL FROM ecatalogue WHERE (" + searchSt + ")";
+
+					document.getElementsByName("texql")[0].setAttribute("value",texql);
+
+					if (! button.getAttribute('disabled'))
+						document.forms[1].submit();
+					else
+						alert("disabled");
+
+				}
+			</script>			
+
+
+			<form name='listForm' method="GET" action="$this->mapperUrl">
+
+			<table $widthAttrib border="0" cellspacing="0" cellpadding="2">
+			<tr>
+			  <td width="25%" align="left" nowrap="nowrap">
+			    <table width="100%">
+			      <tr>
+HTML;
+
+		$this->printControls(1);
+
+		print <<< HTML
+
+			      </tr>
+			    </table>
+			  </td>
+			  <td width="75%" align="right">
+HTML;
+		$this->printNavLinks();
+
+		print <<< HTML
+			  </td>
+			</tr>
+
+			<tr>
+			  <td colspan="2">
+			<table $borderColorAttrib width="100%" border="0" cellspacing="1" 
+				cellpadding="4">
+			<tr $headerColorAttrib>
+HTML;
+
+		if ($this->DisplayThumbnails)
+		{
+			print "    <td  width=\"72\" align=\"center\"><b>";
+			PPrint($this->_STRINGS['IMAGE'], 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->HeaderTextColor);
+			print "</b></td>\n";
+		}
+
+		foreach ($taxonHeadings as $heading)
+		{
+			print "    <td align='center'><b>";
+			PPrint(	$heading,
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->HeaderTextColor);
+			print "</b></td>\n";
+		}	
+
+
+
+		// Display The Found Records
+
+		$rownum = 1;
+		ksort ($allIrns);
+		foreach ($allIrns as $rec => $irn)
+		{
+			if ($rownum > $this->LimitPerPage)
+				break;
+
+			if ($rownum % 2 == 0 && $this->HighlightColor != '')
+				print "  <tr align='center' valign='middle' $highlightColorAttrib>\n";
+			else
+				print "  <tr align='center' valign='middle' $backgroundColorAttrib>\n";
+
+			if ($this->DisplayThumbnails)
+			{
+				print "<td width='1'>";
+				print $thumbNail[$rec]->Show();
+				print "</td>";
+			}
+
+			$recs = explode('|',$rec);
+			$duplicates = array_pop($recs);
+
+			print "<td align='left'><a href='$displayLink[$rec]'><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\"> $allLinks[$rec] </font><a> </td>";
+
+			foreach ($allStandAlone[$rec] as $data)
+			{
+				print "<td align='left'><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\"> $data </font></td>";
+			}
+
+			print "<td align='left'><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\"> $allMerged[$rec] </font></td>";
+
+			// make checkbox to allow inclusion in mapping
+			if ($duplicates > 0)
+				print "<td align='center'>Record is duplicate of above</td>";
+			else
+			{
+				if ($this->mapperInstalled == 1)
+				{
+					// Darwin Core Scientific Name does not have authorship
+					// so we need to drop authorship from name when searching
+					// for scientific name...
+				
+					$sciName = $recs[0];
+					$sciName = preg_replace("/\s*,\s+/",",",$sciName);
+					$nameBits = preg_split("/\s+/",$sciName);
+					if (count($nameBits) > 2)
+					{
+						$authorship = $nameBits[count($nameBits)-1];
+						if (preg_match("/^([A-Z]|\()/",$authorship))
+						{
+							// drop authorship
+							array_pop($nameBits);
+						}
+						$sciName = implode(" ",$nameBits);
+					}
+
+					print "<td align='center'>
+							<input type='checkbox' 
+								onClick='AllowMap();'
+								name='EmuOr'
+								value='$sciName' />
+						</td>";
+				}
+			}
+
+			$rownum++;
+		}
+
+
+		//End Table
+
+		$queryTerms = implode(array_values($allSearchCriteria),':');
+
+		print <<< HTML
+			</table>
+			</td>
+		</tr>
+		<tr>
+		  <td width="25%" align="left" nowrap="nowrap">
+		    <table width="100%">
+		      <tr>
+HTML;
+		$this->printControls(2);
+
+		print <<< HTML
+		      </tr>
+		    </table>
+		  </td>
+		  <td width="75%" align="right">
+HTML;
+
+		$this->printNavLinks();
+
+		print <<< HTML
+		  </td>
+		</tr>
+
+		</table>
+
+
+		<input type="hidden" name="action" value="query"/>
+		<input type="hidden" name="maxcache" value="on" />
+
+		<input type="hidden" name="URL"
+			value="<dataSource>$this->mapperDataSource</dataSource>"/>
+		<input type="hidden" name="showby" value="genus,species"/>
+
+		<input type='hidden' name='previousUrl' value="$this->QueryPage" />
+
+		
+		</form>
+		<form name='mapForm' method="GET" action="$this->mapperUrl">
+		<!-- start mapper2 args -->
+			<input type='hidden' name='stylesheet' value="$this->mapDisplayStylesheet" />
+			<input type='hidden' name='transform' value="$this->mapDisplayMethod" />
+			<input type='hidden' name='texql' value='' />
+			<input type='hidden' name='source[]' value="$this->mapperFetcher" />
+			<input type='hidden' name='sortby' value="$this->mapDisplaySortBy" />
+			<input type='hidden' name='referer' value="$referer" />
+			<input type='hidden' name='websection' value="$this->websection" />
+		<!-- end   mapper2 args -->
+		</form>
+
+		<script language='javascript'>
+			AllowMap();
+		</script>
+		<!--END OBJECT-->
+HTML;
+
+	}
+
+	function printControls($position)
+	{
+		if ($this->mapperInstalled == 1)
+		{	
+			//FIRST, PRINT THE LINK TO GO BACK TO A NEW SEARCH
+			print ("<td width=\"25%\" nowrap=\"nowrap\"><a href='".$this->QueryPage ."'><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\">". $this->_STRINGS['NEW SEARCH'] ."</font></a></td>");
+			print ("<td width=\"1%\" nowrap=\"nowrap\"><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\">&nbsp;|&nbsp;</font></td>\n");
+			//SECOND, PRINT THE LINK TO GO TO THE CONTACT SHEE VIEW
+			if ($this->ContactSheetPage != '')
+			{
+				print ("<td width=\"25%\" nowrap=\"nowrap\">");
+				$this->printRedisplay($this->ContactSheetPage, $this->_STRINGS["CONTACT_SHEET"]);
+				print ("</td>\n");
+				print ("<td width=\"1%\" nowrap=\"nowrap\"><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\">&nbsp;|&nbsp;</font></td>\n");
+			}
+			
+			if ($position == 1)
+			{
+				print ("<td width=\"25%\" nowrap=\"nowrap\"><div id=\"mapText1\"><font face=\"$this->FontFace\" size=\"$this->FontSize\"><u>Map Selected Records</u></font></div></td>");
+				print ("<td width=\"1%\" nowrap=\"nowrap\"><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\">&nbsp;|&nbsp;</font></td>\n");
+			}
+			else
+			{
+				print ("<td width=\"25%\" nowrap=\"nowrap\"><div id=\"mapText2\"><font face=\"$this->FontFace\" size=\"$this->FontSize\"><u>Map Selected Records</u></font></div></td>");
+				print ("<td width=\"1%\" nowrap=\"nowrap\"><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\">&nbsp;|&nbsp;</font></td>\n");
+			}
+
+			print ("<td width=\"25%\" nowrap=\"nowrap\"><a onClick=\"SetCheckBoxes('checked');\" style=\"cursor: pointer; cursor: hand;\"><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\"><u>Select All</u></font></a></td>");
+			print ("<td width=\"1%\" nowrap=\"nowrap\"><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\">&nbsp;|&nbsp;</font></td>\n");
+			print ("<td width=\"25%\" nowrap=\"nowrap\"><a onClick=\"SetCheckBoxes(0);\" style=\"cursor: pointer; cursor: hand;\"><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\"><u>Clear All Selection</u></font></a></td>");
+		}
+		else
+		{
+			print ("&nbsp;<a href='".$this->QueryPage ."'><font face=\"$this->FontFace\" size=\"$this->FontSize\" color=\"$this->TextColor\">". $this->_STRINGS['NEW SEARCH'] ."</font></a>");
+		}
+
+	}
+
+	function CallExternal($irns,$terms)
+	{
+		// this is dodgy...
+		$irnList = '';
+		foreach ($irns as $irn)
+		{
+			$irnList .= "&lt;irn&gt;$irn&lt;/irn&gt;";
+		}
+
+		$terms = preg_replace('/:([0-9]+)>/','_$1>',$terms);
+		$terms = preg_replace('/</','&lt;',$terms);
+		$terms = preg_replace('/>/','&gt;',$terms);
+		$terms = preg_replace('/ClaScientificName/','name',$terms);
+		$terms = preg_replace('/ClaPhylum/','phylum',$terms);
+		$terms = preg_replace('/ClaClass/','class',$terms);
+		$terms = preg_replace('/ClaOrder/','order',$terms);
+		$terms = preg_replace('/ClaFamily/','family',$terms);
+		$terms = preg_replace('/ClaGenus/','genus',$terms);
+		$terms = preg_replace('/ClaSpecies/','species',$terms);
+
+		print <<< HTML
+		<h1>EMu Web Investigation Interface</h1>
+			<a href='$this->previousUrl'>Previous Page</a>
+			<p> Idea is from here you can choose various 'plug in' tools eg
+			mapper, ferret, google, spatial analysis stuff etc
+			</p>
+			<p>
+			Currently just mapper option
+			</p>
+		<form method="GET" action="$this->mapperUrl">
+			<input type="hidden" name="action" value="query"/>
+			<input type="hidden" name="maxcache" value="on" />
+
+		<input type="hidden" name="URL" value="<dataSource>$this->mapperDataSource</dataSource>"/>
+		<input type="hidden" name="showby" value="genus,species"/>
+
+		<input type="hidden" name="query" value='$irnList' />
+		<input type='hidden' name='QueryName' value='BasicQuery' />
+
+		<table border='1'>
+			<td>Map</td><td><input type="submit" value="Map"/></td><tr />
+			<td>Ferret</td><td>&nbsp;</td><tr />
+			<td>Google</td><td>&nbsp;</td><tr />
+			<td>etc</td><td>&nbsp;</td><tr />
+		</table>
+
+		</form>
+HTML;
+
+	}
+
+}
+
+?>

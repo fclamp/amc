@@ -1,0 +1,473 @@
+#content-wide { width: 892px; }
+
+/* -----------------------------------------
+emu-bits
+----------------------------------------- */
+
+ul#emu-nav { margin: 0 0 1em; }
+
+ul#emu-nav li
+{
+	display: inline;
+	margin: 0 1.5em 0 0;
+	padding: 0;
+	list-style-type: none;
+	background: none;
+}
+
+#emu-title
+{
+	position: relative;
+	margin: -58px 0 20px;
+}
+
+p#emu-intro
+{
+	width: 650px;
+	font-size: 110%;
+}
+
+/* -----------------------------------------
+emu-search
+----------------------------------------- */
+
+#emu-search
+{
+	clear: left;
+	padding: 20px 0;
+	float: left;
+	width: 650px;
+	border-top: 1px solid #aaa;
+}
+
+#emu-search h3
+{
+	float: left;
+	width: 100px;
+}
+
+#emu-search .hidden
+{
+	position: absolute;
+	left: -500em;
+}
+
+#emu-search #QueryTerms
+{
+	float: left;
+	width: 218px;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+	border: 1px solid #aaa;
+}
+
+#emu-search-one
+{
+	float: left;
+	width: 230px;
+}
+
+#emu-search-one1
+{
+	float: left;
+	width: 230px;
+	margin: 0 0 5px;
+}
+
+#emu-search-one2
+{
+	float: left;
+	width: 230px;
+	margin: 0 0 5px;
+}
+
+#emu-search-one div { clear: left; }
+
+#emu-search-two
+{
+	float: left;
+	width: 140px;
+}
+
+/* -----------------------------------------
+emu-browse
+----------------------------------------- */
+
+#emu-browse
+{
+	clear: left;
+	padding: 20px 0;
+	float: left;
+	width: 650px;
+	border-top: 1px solid #aaa;
+}
+
+#emu-browse h3
+{
+}
+
+#emu-browse ul
+{
+}
+
+#emu-browse ul li
+{
+	margin: 0 1em 0 0;
+	padding: 0;
+	display: inline;
+	list-style-type: none;
+	background: none;
+}
+
+/* -----------------------------------------
+emu-advanced
+----------------------------------------- */
+
+#emu-advanced { }
+
+#emu-advanced div
+{
+	clear: left;
+	padding: 5px 0 0;
+}
+
+#emu-advanced1 label
+{
+	float: left;
+	width: 150px;
+	text-align: right;
+	margin: 0 10px 0 0;
+	padding: 5px 0 0;
+}
+
+#emu-advanced1 input
+{
+	float: left;
+	width: 200px;
+	border: 1px solid #aaa;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+}
+
+div#emu-advanced2
+{
+	clear: left;
+	margin: 0 0 0 157px;
+	width: 400px;
+}
+
+div#emu-advanced3
+{
+	clear: left;
+	margin: 0 0 0 160px;
+	padding: 15px 0 20px;
+	width: 200px;
+}
+
+#emu-advanced4
+{
+	clear: left;
+	padding: 20px 0 0;
+	border-top: 2px solid #aaa;
+}
+
+#emu-advanced4 li { margin: 0 0 1em 0; }
+
+#emu-advanced5
+{
+	float: left;
+	width: 420px;
+	margin: 0 30px 0 0;
+}
+
+#emu-advanced5 div
+{
+	clear: left;
+	padding: 5px 0 0;
+}
+
+#emu-advanced5a label
+{
+	float: left;
+	width: 150px;
+	text-align: right;
+	margin: 0 10px 0 0;
+	padding: 5px 0 0;
+}
+
+#emu-advanced5a input
+{
+	float: left;
+	width: 200px;
+	border: 1px solid #aaa;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+}
+
+div#emu-advanced5b
+{
+	clear: left;
+	margin: 0 0 0 157px;
+	width: 400px;
+}
+
+div#emu-advanced5c
+{
+	clear: left;
+	margin: 0 0 0 160px;
+	padding: 15px 0 20px;
+	width: 200px;
+}
+
+#emu-advanced6
+{
+	float: left;
+	width: 420px;
+}
+
+#emu-advanced6 div
+{
+	clear: left;
+	padding: 5px 0 0;
+}
+
+#emu-advanced6a label
+{
+	float: left;
+	width: 150px;
+	text-align: right;
+	margin: 0 10px 0 0;
+	padding: 5px 0 0;
+}
+
+#emu-advanced6a input
+{
+	float: left;
+	width: 200px;
+	border: 1px solid #aaa;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+}
+
+div#emu-advanced6b
+{
+	clear: left;
+	margin: 0 0 0 157px;
+	width: 400px;
+}
+
+div#emu-advanced6c
+{
+	clear: left;
+	margin: 0 0 0 160px;
+	padding: 15px 0 20px;
+	width: 200px;
+}
+
+div#emu-advanced6c
+{
+	clear: left;
+	margin: 0 0 0 160px;
+	padding: 15px 0 20px;
+	width: 200px;
+}
+
+#emu-advanced7
+{
+	float: left;
+	width: 890px;
+	padding: 0 0 20px;
+}
+
+#emu-advanced7 label
+{
+	float: left;
+	width: 150px;
+	text-align: right;
+	margin: 0 10px 0 0;
+	padding: 5px 0 0;
+}
+
+#emu-advanced7 #Search
+{
+	float: left;
+	width: 200px;
+	border: 1px solid #aaa;
+	height: 22px;
+	margin: 0 5px 0 0;
+	padding: 0;
+}
+
+#emu-advanced7 #search-button { float: left; }
+
+#emu-results
+{
+	margin: 0;
+	padding: 0;
+	float: left;
+	width: 890px;
+	border-bottom: 2px solid #4e8300;
+}
+
+#emu-results li
+{
+	margin: 0;
+	padding: 0;
+	display: inline;
+}
+
+#emu-results li a
+{
+	float: left;
+	margin-right: 2px;
+	font-size: 120%;
+	font-weight: bold;
+	color: #fff;
+	text-decoration: none;
+	background: #92B364 url(/images/site/emu-results03.gif) no-repeat;
+}
+
+#emu-results li span
+{
+	display: block;
+	padding: 7px 15px;
+	color: #fff;
+	background: url(/images/site/emu-results04.gif) no-repeat 100% 0;
+}
+
+#emu-results li.current a { background: #4e8301 url(/images/site/emu-results01.gif) no-repeat; }
+#emu-results li.current span { background: url(/images/site/emu-results02.gif) no-repeat 100% 0; }
+
+#emu-results-table
+{
+	clear: left;
+	width: 890px;
+	margin: 0;
+	padding: 0;
+	border-collapse: collapse;
+}
+
+#emu-results-table th, #emu-results-table td
+{
+	text-align: left;
+	padding: 7px;
+	border-top: 1px solid #aaa;
+}
+
+#emu-results-table .col1 { width: 20px; }
+#content-wide #emu-dl dt { width: 18em; }
+#content-wide #emu-dl dd { margin: 0 0 0 19em; }
+
+.floatright
+{
+	float: right;
+	margin: 0 0 1em 1em;
+	padding: 2px;
+	border: 1px solid #aaa;
+}
+
+.floatleft
+{
+	float: left;
+	margin: 0 1em 1em 0;
+}
+
+.floatleft img
+{
+	padding: 2px;
+	border: 1px solid #aaa;
+
+}
+
+.emu-item-images {
+	width: 800px;
+	float: left;
+	background-color: #e7e7e7;
+}
+
+.emu-main-image {
+	float: left;
+	width: 520px;
+	height: auto;
+}
+
+.emu-image-credits {
+	font-size: 80%;
+	width: 520px;
+	float: left;
+	clear: both;
+}
+
+.emu-footnote-credits {
+	font-size: 60%;
+	text-align: center;
+	width: 90px;
+	float: left;
+}
+
+.emu-footnotes {
+	margin: 2em 0 0 0;
+	width: 520px;
+	float: left;
+	background-color: #e7e7e7;
+}
+
+.emu-mini-image-credits {
+	margin: 2px;
+	font-size: 80%;
+	width: 520px;
+	float: left;
+}
+
+.emu-mini-image-credits div {
+	float: left;
+}
+
+.emu-footnote-header {
+	width: 190px;
+	float: left;
+	text-align: center;
+}
+
+
+.emu-image-caption {
+	float: left;
+}
+.emu-image-rights {
+	float: left;
+}
+.emu-image-creator {
+	float: left;
+}
+
+.emu-thumbnail-row {
+	margin-left: 1em;
+	float: left;
+	width: 220px;
+}
+.emu-image-link {
+	float: left;
+	clear: none;
+	width: 92px;
+	height: 92px;
+}
+
+.emu-highlight-div {
+	border: 1px solid gray;
+}
+
+.emu-goback {
+	float: left;
+	clear: both;
+	height: 1em;
+	width: 10em;
+}
+
+.emu-highlight-term {
+	font-weight: bold;
+	background-color: #d0d0d0;
+}

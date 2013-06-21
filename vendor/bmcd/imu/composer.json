@@ -1,0 +1,23 @@
+{
+    "name": "bmcd/imu",
+    "description": "",
+    "authors": [
+        {
+            "name": "BMCD AP",
+            "email": "support@bmcdap.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.0.x"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Bmcd\\Imu": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}

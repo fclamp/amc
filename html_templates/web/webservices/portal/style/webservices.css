@@ -1,0 +1,146 @@
+body {
+		background-color: #000066;
+		color: #7fffff;
+		font-family:"Trebuchet MS",Arial,Tahoma,Verdana,Geneva,Arial,Helvetica,sans-serif;
+		font-size:small;
+		margin:2em 1%;
+		padding:0;
+}
+ul {
+		list-style-type:square;
+		list-style-position:inside;
+}	
+div {
+		margin-left: auto; 
+		margin-right: auto; 
+		border: 0px solid #ababab;
+}
+table {
+		margin-left: auto; 
+		margin-right: auto; 
+		text-align: center;
+		white-space: nowrap; 
+		border: 0px solid #115577;
+		border-collapse:collapse;
+		background-color: #336699;
+		color: #cccccc;
+}
+tr.bordered td.bordered {
+		text-align: center; 
+		white-space: nowrap; 
+		border: 1px solid #115577;
+		border-collapse:collapse;
+		background-color: #336699;
+		color: #cccccc;
+}
+
+#heading {
+		margin-left: auto; 
+		margin-right: auto; 
+		text-align: center;
+		width: 100%;
+		font-size: 200%; 
+}
+
+#body {
+		overflow: auto; 
+		overflow-y: visible; 
+		width: 100%;
+		padding-top: 1px;
+		padding-left: 1px;
+		padding-right: 1px;
+		padding-bottom: 25px;
+}
+
+#branding {
+		font-size: 70%; 
+		margin-left: auto; 
+		margin-right: auto; 
+		text-align: center;
+		width: 100%;
+}
+
+.centred {
+		margin-left: auto; 
+		margin-right: auto; 
+		width: 100%;
+		text-align: center;
+}		
+
+.dataset {
+		border: 0px solid #000000;
+		margin-left: auto; 
+		margin-right: auto; 
+		text-align: center;
+		margin-top: 10px;
+		margin-bottom: 10px;
+		padding: 1px;
+}
+
+.datasetHeading {
+		font-size: 120%; 
+}
+.datasetControls {
+}
+
+.dataGrid {
+		white-space: nowrap; 
+}
+
+.cell {
+		font-size: 70%; 
+		white-space: nowrap; 
+		border: 1px solid #115577;
+		text-align:center;
+}
+
+.hide, .action, .selectors, .help, .searchAgain { 
+	color: #ffffff;
+	font-size: smaller; 
+	font-weight: bold; 
+	text-decoration: none; 
+	padding-left: 3px;
+	padding-right: 3px;
+	margin-left: 5px;
+	margin-right: 5px;
+	border: 2px outset #7f7f7f;
+}
+
+.summary {
+	margin-left: auto; 
+	margin-right: auto; 
+	text-align: center;
+}
+
+.dataRow {
+}
+
+.markedHover {
+	color: #7fffff;
+	background-color: #0000ff;
+}
+.unmarkedHover {
+	color: #ffffff;
+	background-color: #0000ff;
+}
+.marked {
+	color: #7fffff;
+	background-color: #00007f;
+}
+.unmarked {
+	color: #ffffff;
+	background-color: #000000;
+}
+.nestedSelect {
+}
+
+.small {
+	font-size: 70%;
+}
+.statusOK {
+	color: #7fff7f;
+}
+.statusError {
+	color: #ff0000;
+	background-color: #333333;
+}

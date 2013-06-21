@@ -1,0 +1,341 @@
+<?php
+
+/*
+ *  Copyright (c) 2005 - KE Software Pty Ltd
+ */
+
+// NB this file probably best viewed with tabspace=3 if using 80
+// character line terminal
+
+
+if (!isset($WEB_ROOT))
+        $WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($WEB_ROOT . '/webservices/translator/DigirTranslator.php');
+require_once ($WEB_ROOT . '/webservices/translator/EMuTranslator.php');
+require_once ($WEB_ROOT . '/webservices/translator/TexxmlTranslator.php');
+require_once ($WEB_ROOT . '/webservices/translator/OzcamTranslator.php');
+
+
+
+/**
+*
+* Translation Factory class
+*
+* used to create right instance of client
+* specific Translator from common program
+* interface
+*
+* to add new translator:
+* 1. add require_once (translator-source.php)
+* 2. add case matching it in switch statement
+*
+*
+* Copyright (c) 2005 - KE Software Pty Ltd
+*
+* @package EMuWebServices
+*
+*/
+
+
+class TranslatorFactory
+{
+	function TranslatorFactory($backendType='',$webRoot='',$webDirName='',$debugOn=0)
+	{
+		$this->backendType = $backendType;
+		$this->webRoot = $webRoot;
+		$this->webDirName = $webDirName;
+		$this->debugOn = $debugOn;
+	}
+
+	function getInstance($type='Generic')
+	{
+		switch ($type)
+		{
+			case 'Emu'  :
+			case 'EMu'  :
+				$translator = new AmEMuTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'texxml'  :
+			case 'Texxml'  :
+			case 'TexXml'  :
+			case 'TexXML'  :
+				$translator = new AmTexxmlTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'Digir':
+				$translator = new DigirTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'Ozcam':
+				$translator = new OzcamTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			case 'Generic':
+				$translator = new GenericTranslator($this->backendType,$this->webRoot,$this->webDirName,$this->debugOn);
+				break;
+			default:
+				WebServiceObject::errorResponse("Error: creation of type: '$type' not implemented in TranslatorFactory.php");
+				break;
+		}
+		return $translator;
+	}
+}
+
+class AmEMuTranslator extends EMuTranslator 
+{
+	var $serviceName = "AmEMuTranslator";
+	var $recordElement = 'tuple';
+	var $potentialGroups = array (
+			'CatalogNumber' => '0',
+			'ScientificName' => '1',
+			'Class' => '2', 
+			'Family' => '3', 
+			'Genus' => '4', 
+			'Species' => '5', 
+			'Latitude' => '6',
+			'Longitude' => '7',
+			'Description' => '8',
+			'TypeStatus' => '9', 
+		);	
+
+	var $translations = array (
+		'atom[name=CatNumber]' => 'CatalogNumber',
+		'atom[name=CitTypeStatus]' => 'TypeStatus',
+		'atom[name=QuiTaxonLocal]' => 'ScientificName',
+		'atom[name=QuiLatitude]' => 'latitude',
+		'atom[name=QuiLongitude]' => 'longitude',
+		'atom[name=QuiTaxonomyPhylum]' => 'Phylum',
+		'atom[name=QuiTaxonomyClass]' => 'Class',
+		'atom[name=QuiTaxonomyFamily]' => 'Family',
+		'atom[name=QuiTaxonomyGenus]' => 'Genus',
+		'atom[name=QuiTaxonomySpecies]' => 'Species',
+		'atom[name=QuiTaxonomySubSpecies]' => 'SubSpecies',
+	);
+
+	function describe()
+	{
+		return	
+			"An AmEMuTranslator is a AM specific EMuTranslator\n\n".
+			parent::describe();
+	}
+
+	function makeTestPage()
+	{
+		$args = array();
+		$args['EMu XML Record (enter 1 or more EMu xml records)'] = "<textarea cols='120' rows='15' name='data'>".
+			"<table name='ecatalogue'>\n".
+			"<!-- Row 1 -->\n".
+			"  <tuple>\n".
+			"    <atom name='irn'>10260889</atom>\n".
+			"    <atom name='CatPrefix'>C</atom>\n".
+			"    <atom name='CatNumber'>339052</atom>\n".
+			"    <atom name='QuiTaxonomyPhylum'>\n".
+			"    </atom>\n".
+			"    <atom name='QuiTaxonomyClass'>Gastropoda</atom>\n".
+			"    <atom name='QuiTaxonomyOrder'>\n".
+			"    </atom>\n".
+			"    <atom name='QuiTaxonomyFamily'>Helicidae</atom>\n".
+			"    <atom name='QuiTaxonomyGenus'>Helix</atom>\n".
+			"    <atom name='QuiTaxonomySpecies'>cincta</atom>\n".
+			"    <atom name='QuiTaxonomySubSpecies'>\n".
+			"    </atom>\n".
+			"    <table name='QuiLongitude0'>\n".
+			"      <tuple>\n".
+			"        <atom name='QuiLongitude'>033 30 00 E</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <table name='QuiLatitude0'>\n".
+			"      <tuple>\n".
+			"        <atom name='QuiLatitude'>35 00 00 N</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <atom name='SummaryData'>C.339052 - Helicidae: Helix cincta ,\n".
+			"    (35&#176; N , 033&#176; 30' E), 1998</atom>\n".
+			"    <atom name='QuiTaxonLocal'>Helix cincta Mueller, 1774 :\n".
+			"    Helicidae : : Gastropoda :</atom>\n".
+			"  </tuple>\n".
+			"<!-- Row 2 -->\n".
+			"  <tuple>\n".
+			"    <atom name='irn'>10323468</atom>\n".
+			"    <atom name='CatPrefix'>C</atom>\n".
+			"    <atom name='CatNumber'>83955</atom>\n".
+			"    <atom name='QuiTaxonomyPhylum'>\n".
+			"    </atom>\n".
+			"    <atom name='QuiTaxonomyClass'>Gastropoda</atom>\n".
+			"    <atom name='QuiTaxonomyOrder'>\n".
+			"    </atom>\n".
+			"    <atom name='QuiTaxonomyFamily'>Camaenidae</atom>\n".
+			"    <atom name='QuiTaxonomyGenus'>Helix</atom>\n".
+			"    <atom name='QuiTaxonomySpecies'>coriaria</atom>\n".
+			"    <atom name='QuiTaxonomySubSpecies'>\n".
+			"    </atom>\n".
+			"    <table name='QuiLongitude0'>\n".
+			"      <tuple>\n".
+			"        <atom name='QuiLongitude'>150 51 00 E</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <table name='QuiLatitude0'>\n".
+			"      <tuple>\n".
+			"        <atom name='QuiLatitude'>34 40 00 S</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <table name='CitTypeStatus_tab'>\n".
+			"      <tuple>\n".
+			"        <atom name='CitTypeStatus'>Figured Specimen</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <atom name='SummaryData'>C.83955 - Camaenidae: Helix coriaria -\n".
+			"    NSW, Kiama , (34&#176; 40' S , 150&#176; 51' E), 1868 , Figured\n".
+			"    Specimen</atom>\n".
+			"    <atom name='QuiTaxonLocal'>Helix coriaria Pfeiffer, 1847 :\n".
+			"    Camaenidae : : Gastropoda :</atom>\n".
+			"  </tuple>\n".
+			"<!-- Row 3 -->\n".
+			"  <tuple>\n".
+			"    <atom name='irn'>10325583</atom>\n".
+			"    <atom name='CatPrefix'>C</atom>\n".
+			"    <atom name='CatNumber'>171239</atom>\n".
+			"    <atom name='QuiTaxonomyPhylum'>\n".
+			"    </atom>\n".
+			"    <atom name='QuiTaxonomyClass'>Gastropoda</atom>\n".
+			"    <atom name='QuiTaxonomyOrder'>\n".
+			"    </atom>\n".
+			"    <atom name='QuiTaxonomyFamily'>Camaenidae</atom>\n".
+			"    <atom name='QuiTaxonomyGenus'>Helix</atom>\n".
+			"    <atom name='QuiTaxonomySpecies'>scotti</atom>\n".
+			"    <atom name='QuiTaxonomySubSpecies'>\n".
+			"    </atom>\n".
+			"    <table name='QuiLongitude0'>\n".
+			"      <tuple>\n".
+			"        <atom name='QuiLongitude'>150 51 00 E</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <table name='QuiLatitude0'>\n".
+			"      <tuple>\n".
+			"        <atom name='QuiLatitude'>34 24 00 S</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <table name='CitTypeStatus_tab'>\n".
+			"      <tuple>\n".
+			"        <atom name='CitTypeStatus'>Holotype</atom>\n".
+			"      </tuple>\n".
+			"    </table>\n".
+			"    <atom name='SummaryData'>C.171239 - Camaenidae: Helix scotti -\n".
+			"    NSW, Wollongong W, Mt. Keira , (34&#176; 24' S , 150&#176; 51'\n".
+			"    E), 1864 , Holotype</atom>\n".
+			"    <atom name='QuiTaxonLocal'>Helix scotti Cox, 1864 : Camaenidae\n".
+			"    : : Gastropoda :</atom>\n".
+			"  </tuple>\n".
+			"</table>\n".
+			"</textarea>";
+		$vars = array();
+		$submission = "<input type='submit' name='action' value='translate' />";
+
+		return $this->makeDiagnosticPage(
+					'Test EMu Translator',
+					'simple test',
+					'',
+					'./TranslatorFactory.php',
+					$args,
+					$submission,
+					$vars,
+					$this->describe()
+				);
+	}
+
+}
+
+class AmTexxmlTranslator extends TexxmlTranslator 
+{
+	var $serviceName = "AmTexxmlTranslator";
+	var $potentialGroups = array (
+			'ScientificName' => '0',
+			'Class' => '1', 
+			'Family' => '2', 
+			'Genus' => '3', 
+			'Species' => '4', 
+			'TypeStatus' => '5',
+			'Latitude' => '6',
+			'Longitude' => '7',
+			'irn' => '8',
+		);	
+
+	var $translations = array (
+		'irn_1' => 'irn',
+		'QuiTaxonScientificName' => 'ScientificName',
+		'QuiLatitude' => 'Latitude',
+		'QuiLongitude' => 'Longitude',
+		'QuiTaxonomyClass' => 'Class',
+		'QuiTaxonomyFamily' => 'Family',
+		'QuiTaxonomyGenus' => 'Genus',
+		'QuiTaxonomySpecies' => 'Species',
+		'QuiTaxonomySubSpecies' => 'SubSpecies',
+		'CitTypeStatus_tab' => 'TypeStatus',
+	);
+	var $latitudeElement = 'Latitude';
+	var $longitudeElement = 'Longitude';
+
+	function returnAllFields()
+	{
+		// to translate a SELECT ALL into SELECT fields know by translator
+		$fields = parent::returnAllFields();
+		$fields = preg_replace("/QuiLatitude/","QuiLatitude0",$fields);
+		$fields = preg_replace("/QuiLongitude/","QuiLongitude0",$fields);
+		return $fields;
+	}
+
+	function makeTestPage()
+	{
+		$args = array();
+		$args['EMu XML Record (enter 1 or more EMu xml records)'] = "<textarea cols='120' rows='15' name='data'>". <<<XML
+<results status="success" matches="71">
+  <record>
+    <irn_1>10260889</irn_1>
+    <QuiTaxonScientificName>Helix cincta</QuiTaxonScientificName>
+    <QuiLatitude0>
+      <QuiLatitude>35 00 00 N</QuiLatitude>
+    </QuiLatitude0>
+    <QuiLongitude0>
+      <QuiLongitude>033 30 00 E</QuiLongitude>
+    </QuiLongitude0>
+    <QuiTaxonomyClass>Gastropoda</QuiTaxonomyClass>
+    <QuiTaxonomyFamily>Helicidae</QuiTaxonomyFamily>
+    <QuiTaxonomyGenus>Helix</QuiTaxonomyGenus>
+    <QuiTaxonomySpecies>cincta</QuiTaxonomySpecies>
+    <QuiTaxonomySubSpecies />
+    <CitTypeStatus_tab>Holotype</CitTypeStatus_tab>
+  </record>
+</results>
+
+XML
+		."</textarea>";
+		$vars = array();
+		$submission = "<input type='submit' name='action' value='translate' />";
+
+		return $this->makeDiagnosticPage(
+					'Test EMu Translator',
+					'simple test',
+					'',
+					'./TranslatorFactory.php',
+					$args,
+					$submission,
+					$vars,
+					$this->describe()
+				);
+	}
+
+}
+
+
+
+if (isset($_REQUEST['test']))
+{
+	if (basename($_SERVER['PHP_SELF']) == 'TranslatorFactory.php')
+	{
+		$factory = new TranslatorFactory();
+		$translator = $factory->getInstance('Texxml');
+		//$translator = $factory->getInstance('EMu');
+		$translator->test(true);
+	}
+}
+
+
+?>

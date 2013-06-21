@@ -103,7 +103,7 @@ abstract class AbstractPlatform
     protected $doctrineTypeComments = null;
 
     /**
-     * @var Doctrine\Common\EventManager
+     * @var \Doctrine\Common\EventManager
      */
     protected $_eventManager;
 
@@ -757,7 +757,7 @@ abstract class AbstractPlatform
     }
 
     /**
-     * Returns a series of strings concatinated
+     * Returns a series of strings concatenated
      *
      * concat() accepts an arbitrary number of parameters. Each parameter
      * must contain an expression
@@ -1000,7 +1000,7 @@ abstract class AbstractPlatform
     /**
      * Get the sql snippet to append to any SELECT statement which locks rows in shared read lock.
      *
-     * This defaults to the ASNI SQL "FOR UPDATE", which is an exclusive lock (Write). Some database
+     * This defaults to the ANSI SQL "FOR UPDATE", which is an exclusive lock (Write). Some database
      * vendors allow to lighten this constraint up to be a real read lock.
      *
      * @return string
@@ -1013,7 +1013,7 @@ abstract class AbstractPlatform
     /**
      * Get the SQL snippet to append to any SELECT statement which obtains an exclusive lock on the rows.
      *
-     * The semantics of this lock mode should equal the SELECT .. FOR UPDATE of the ASNI SQL standard.
+     * The semantics of this lock mode should equal the SELECT .. FOR UPDATE of the ANSI SQL standard.
      *
      * @return string
      */
@@ -1166,9 +1166,7 @@ abstract class AbstractPlatform
                 /* @var $index Index */
                 if ($index->isPrimary()) {
                     $platform = $this;
-                    $options['primary'] = array_map(function ($columnName) use ($table, $platform) {
-                        return $table->getColumn($columnName)->getQuotedName($platform);
-                    }, $index->getColumns());
+                    $options['primary']       = $index->getQuotedColumns($this);
                     $options['primary_index'] = $index;
                 } else {
                     $options['indexes'][$index->getName()] = $index;
@@ -1193,26 +1191,14 @@ abstract class AbstractPlatform
                 }
             }
 
-            $columnData = array();
+            $columnData = $column->toArray();
             $columnData['name'] = $column->getQuotedName($this);
-            $columnData['type'] = $column->getType();
-            $columnData['length'] = $column->getLength();
-            $columnData['notnull'] = $column->getNotNull();
-            $columnData['fixed'] = $column->getFixed();
-            $columnData['unique'] = false; // TODO: what do we do about this?
             $columnData['version'] = $column->hasPlatformOption("version") ? $column->getPlatformOption('version') : false;
+            $columnData['comment'] = $this->getColumnComment($column);
 
             if (strtolower($columnData['type']) == "string" && $columnData['length'] === null) {
                 $columnData['length'] = 255;
             }
-
-            $columnData['unsigned'] = $column->getUnsigned();
-            $columnData['precision'] = $column->getPrecision();
-            $columnData['scale'] = $column->getScale();
-            $columnData['default'] = $column->getDefault();
-            $columnData['columnDefinition'] = $column->getColumnDefinition();
-            $columnData['autoincrement'] = $column->getAutoincrement();
-            $columnData['comment'] = $this->getColumnComment($column);
 
             if (in_array($column->getName(), $options['primary'])) {
                 $columnData['primary'] = true;
@@ -1349,11 +1335,7 @@ abstract class AbstractPlatform
 
         $query = 'ALTER TABLE ' . $table . ' ADD CONSTRAINT ' . $constraint->getQuotedName($this);
 
-        $columns = array();
-        foreach ($constraint->getColumns() as $column) {
-            $columns[] = $column;
-        }
-        $columnList = '('. implode(', ', $columns) . ')';
+        $columnList = '('. implode(', ', $constraint->getQuotedColumns($this)) . ')';
 
         $referencesClause = '';
         if ($constraint instanceof Index) {
@@ -1369,12 +1351,8 @@ abstract class AbstractPlatform
         } else if ($constraint instanceof ForeignKeyConstraint) {
             $query .= ' FOREIGN KEY';
 
-            $foreignColumns = array();
-            foreach ($constraint->getForeignColumns() as $column) {
-                $foreignColumns[] = $column;
-            }
-
-            $referencesClause = ' REFERENCES '.$constraint->getForeignTableName(). ' ('.implode(', ', $foreignColumns).')';
+            $referencesClause = ' REFERENCES ' . $constraint->getQuotedForeignTableName($this) .
+                ' (' . implode(', ', $constraint->getQuotedForeignColumns($this)) . ')';
         }
         $query .= ' '.$columnList.$referencesClause;
 
@@ -1395,7 +1373,7 @@ abstract class AbstractPlatform
             $table = $table->getQuotedName($this);
         }
         $name = $index->getQuotedName($this);
-        $columns = $index->getColumns();
+        $columns = $index->getQuotedColumns($this);
 
         if (count($columns) == 0) {
             throw new \InvalidArgumentException("Incomplete definition. 'columns' required.");
@@ -1433,7 +1411,7 @@ abstract class AbstractPlatform
      */
     public function getCreatePrimaryKeySQL(Index $index, $table)
     {
-        return 'ALTER TABLE ' . $table . ' ADD PRIMARY KEY (' . $this->getIndexFieldDeclarationListSQL($index->getColumns()) . ')';
+        return 'ALTER TABLE ' . $table . ' ADD PRIMARY KEY (' . $this->getIndexFieldDeclarationListSQL($index->getQuotedColumns($this)) . ')';
     }
 
     /**
@@ -1833,6 +1811,10 @@ abstract class AbstractPlatform
                     $default = " DEFAULT ".$field['default'];
                 } else if ((string)$field['type'] == 'DateTime' && $field['default'] == $this->getCurrentTimestampSQL()) {
                     $default = " DEFAULT ".$this->getCurrentTimestampSQL();
+                } else if ((string)$field['type'] == 'Time' && $field['default'] == $this->getCurrentTimeSQL()) {
+                    $default = " DEFAULT ".$this->getCurrentTimeSQL();
+                } else if ((string)$field['type'] == 'Date' && $field['default'] == $this->getCurrentDateSQL()) {
+                    $default = " DEFAULT ".$this->getCurrentDateSQL();
                 } else if ((string) $field['type'] == 'Boolean') {
                     $default = " DEFAULT '" . $this->convertBooleans($field['default']) . "'";
                 }
@@ -1881,12 +1863,14 @@ abstract class AbstractPlatform
      */
     public function getUniqueConstraintDeclarationSQL($name, Index $index)
     {
-        if (count($index->getColumns()) === 0) {
+        $columns = $index->getQuotedColumns($this);
+
+        if (count($columns) === 0) {
             throw new \InvalidArgumentException("Incomplete definition. 'columns' required.");
         }
 
         return 'CONSTRAINT ' . $name . ' UNIQUE ('
-             . $this->getIndexFieldDeclarationListSQL($index->getColumns())
+             . $this->getIndexFieldDeclarationListSQL($columns)
              . ')';
     }
 
@@ -1901,24 +1885,20 @@ abstract class AbstractPlatform
      */
     public function getIndexDeclarationSQL($name, Index $index)
     {
-        $type = '';
+        $columns = $index->getQuotedColumns($this);
 
-        if ($index->isUnique()) {
-            $type = 'UNIQUE ';
-        }
-
-        if (count($index->getColumns()) === 0) {
+        if (count($columns) === 0) {
             throw new \InvalidArgumentException("Incomplete definition. 'columns' required.");
         }
 
-        return $type . 'INDEX ' . $name . ' ('
-             . $this->getIndexFieldDeclarationListSQL($index->getColumns())
+        return $this->getCreateIndexSQLFlags($index) . 'INDEX ' . $name . ' ('
+             . $this->getIndexFieldDeclarationListSQL($columns)
              . ')';
     }
 
     /**
      * getCustomTypeDeclarationSql
-     * Obtail SQL code portion needed to create a custom column,
+     * Obtain SQL code portion needed to create a custom column,
      * e.g. when a field has the "columnDefinition" keyword.
      * Only "AUTOINCREMENT" and "PRIMARY KEY" are added if appropriate.
      *
@@ -1984,16 +1964,6 @@ abstract class AbstractPlatform
     public function getTemporaryTableName($tableName)
     {
         return $tableName;
-    }
-
-    /**
-     * Get sql query to show a list of database.
-     *
-     * @return string
-     */
-    public function getShowDatabasesSQL()
-    {
-        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -2084,10 +2054,10 @@ abstract class AbstractPlatform
             throw new \InvalidArgumentException("Incomplete definition. 'foreignTable' required.");
         }
 
-        $sql .= implode(', ', $foreignKey->getLocalColumns())
+        $sql .= implode(', ', $foreignKey->getQuotedLocalColumns($this))
               . ') REFERENCES '
               . $foreignKey->getQuotedForeignTableName($this) . ' ('
-              . implode(', ', $foreignKey->getForeignColumns()) . ')';
+              . implode(', ', $foreignKey->getQuotedForeignColumns($this)) . ')';
 
         return $sql;
     }
@@ -2432,7 +2402,7 @@ abstract class AbstractPlatform
 
     /**
      * Whether the platform supports identity columns.
-     * Identity columns are columns that recieve an auto-generated value from the
+     * Identity columns are columns that receive an auto-generated value from the
      * database on insert of a row.
      *
      * @return boolean
@@ -2568,7 +2538,7 @@ abstract class AbstractPlatform
     }
 
     /**
-     * Does this plaform support to add inline column comments as postfix.
+     * Does this platform support to add inline column comments as postfix.
      *
      * @return boolean
      */
@@ -2578,11 +2548,21 @@ abstract class AbstractPlatform
     }
 
     /**
-     * Does this platform support the propriortary synatx "COMMENT ON asset"
+     * Does this platform support the proprietary syntax "COMMENT ON asset"
      *
      * @return boolean
      */
     public function supportsCommentOnStatement()
+    {
+        return false;
+    }
+
+    /**
+     * Does this platform have native guid type.
+     *
+     * @return boolean
+     */
+    public function hasNativeGuidType()
     {
         return false;
     }
@@ -2733,7 +2713,7 @@ abstract class AbstractPlatform
     }
 
     /**
-     * Maximum length of any given databse identifier, like tables or column names.
+     * Maximum length of any given database identifier, like tables or column names.
      *
      * @return integer
      */

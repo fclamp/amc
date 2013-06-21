@@ -1,0 +1,600 @@
+<style type="text/css">
+<!--
+.navTopTable {background-color:#FF0031;}
+.navTopTableCell{background-color:#FF0031;text-align:center;}
+.navTopTableCellHover{background-color:#003399;text-align:center;}
+.navTopFont{color:#FFFFFF; font: Bold 12px Arial, Helvetica;text-decoration: none;}
+.navMenuTableCell{background-color:#FFFFFF;border:1px solid black;}
+.navMenuTableCellHover{background-color:#FFC750;border:1px solid black;}
+.navMenuFont{color:#FF0000; font: Bold 12px Arial, Helvetica;text-decoration: none;}
+.navBorder { border: 1px solid black }
+.pageTopTitle{color:#FF0000; font: Bold 24px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageSectionTitle{color:#0000FF; font: Bold 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageSectionTitleBlue{color:#0000FF; font: Bold 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageSectionTitleRed{color:#FF0000; font: Bold 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageSectionTitleGreen{color:#00CC00; font: Bold 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageIndexTitle{color:#0000FF; font: Bold 14px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageText{color:#000000; font: 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageTextSmall{color:#000000; font: 12px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageTextBold{color:#000000; font: Bold 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageTextItalic{color:#000000; font: Italic 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageTextBoldItalic{color:#000000; font: Bold Italic 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageTextWhite{color:#FFFFFF; font: Bold 16px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageTextTiny{color:#000000; font: 10px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+.pageBlueAddress{color:#333399; font: Bold 12px Arial, Helvetica, Geneva, Swiss, SunSans-Regular; text-decoration: none;}
+-->
+</style>
+
+<!--Start HTML portion of menu:This is the table with the menu - cut and copy this HTML to the HTML document-->
+<table id="navTopTableTable" class="navTopTable" cellpadding="0" cellspacing="0" border="0" width="650"><tr>
+<td width="106" id="navTopCell1" class="navTopTableCell"><ilayer width="106" id="navTopLayer1"><a href="../generalinfo/generalinfo.htm" target="" onMouseOver="ShowSubMenu(1,3)" onMouseOut="HideSubMenu(1,3)" class="navTopFont">General Info</a></ilayer></td>
+<td width="89" id="navTopCell2" class="navTopTableCell"><ilayer width="89" id="navTopLayer2"><a href="../themuseum/themuseum.htm" target="" onMouseOver="ShowSubMenu(2,3)" onMouseOut="HideSubMenu(2,3)" class="navTopFont">The Museum</a></ilayer></td>
+<td width="35" id="navTopCell4" class="navTopTableCell"><ilayer width="35" id="navTopLayer4"><a href="../kids/kids.htm" target="" onMouseOver="ShowSubMenu(4,3)" onMouseOut="HideSubMenu(4,3)" class="navTopFont">Kids</a></ilayer></td>
+<td width="62" id="navTopCell5" class="navTopTableCell"><ilayer width="62" id="navTopLayer5"><a href="../parents/parents.htm" target="" onMouseOver="ShowSubMenu(5,3)" onMouseOut="HideSubMenu(5,3)" class="navTopFont">Parents</a></ilayer></td>
+<td width="71" id="navTopCell6" class="navTopTableCell"><ilayer width="71" id="navTopLayer6"><a href="../teachers/teachers.html" target="" onMouseOver="ShowSubMenu(6,3)" onMouseOut="HideSubMenu(6,3)" class="navTopFont">Teachers</a></ilayer></td>
+<td width="89" id="navTopCell7" class="navTopTableCell"><ilayer width="89" id="navTopLayer7"><a href="../membership/membership.htm" target="" onMouseOver="ShowSubMenu(7,3)" onMouseOut="HideSubMenu(7,3)" class="navTopFont">Membership</a></ilayer></td>
+<td width="71" id="navTopCell8" class="navTopTableCell"><ilayer width="71" id="navTopLayer8"><a href="http://www.childrensmuseum.org/catalog/catalog.asp" target="" onMouseOver="ShowSubMenu(8,3)" onMouseOut="HideSubMenu(8,3)" class="navTopFont">Register</a></ilayer></td>
+<td width="89" id="navTopCell9" class="navTopTableCell"><ilayer width="89" id="navTopLayer9"><a href="../donate/support.htm" target="" onMouseOver="ShowSubMenu(9,3)" onMouseOut="HideSubMenu(9,3)" class="navTopFont">Support Us</a></ilayer></td>
+<td width="38" id="navTopCell10" class="navTopTableCell"><ilayer width="38" id="navTopLayer10"><a href="../catalog/catalog.asp" target="" onMouseOver="ShowSubMenu(10,3)" onMouseOut="HideSubMenu(10,3)" class="navTopFont">Shop</a></ilayer></td>
+
+</tr></table>
+<!--End HTML portion of menu-->
+
+
+
+<script language="JavaScript" type="text/javascript">
+var gbDOM = (document.getElementById ? true : false); 
+var gbIE4 = ((document.all && !gbDOM) ? true : false);
+var gbIE = ((document.all) ? true : false);
+var gbNS4 = (document.layers ? true : false);
+var gbMac = (String(navigator.appVersion).indexOf('Mac')>0 ? true : false);
+var gbGecko = (String(navigator.userAgent).indexOf('Gecko')>0 ? true : false);
+var gbNS6 = (String(navigator.userAgent).indexOf('Netscape6')>0 ? true : false);
+function gfGetReference(id) {
+	if (gbDOM) return document.getElementById(id);
+	if (gbIE4) return document.all[id];
+	if (gbNS4) return document.layers[id];
+}
+function gfGetStyle(id) {
+	return (gbNS4 ? gfGetReference(id) : gfGetReference(id).style);
+}
+function gfDebug(str){
+ psDebugLog+=str;
+} 
+function pfToggleSelectsVisibility(on){
+ if (gbDOM) {
+   if (typeof(on)!='undefined') {
+    if (on) var v='visible'; else var v='hidden';
+   } else {
+    var v='toggle';
+   } 
+   var j=document.forms.length;
+   for (j--;j>=0;j--){
+      eval('var i=document.forms['+j+'].elements.length;');
+      var b;
+      for (i--;i>=0;i--){
+         eval("b=(document.forms["+j+"].elements["+i+"].type=='select-one');");
+         if (b&&on!='toggle') {
+          eval("document.forms["+j+"].elements["+i+"].style.visibility='"+v+"';");
+         } else if (b) {
+          eval("var lsCur=document.forms["+j+"].elements["+i+"].style.visibility")
+          if (lsCur='visible') eval("document.forms["+j+"].elements["+i+"].style.visibility='hidden';");
+          if (lsCur='hidden') eval("document.forms["+j+"].elements["+i+"].style.visibility='visible';");
+         } 
+      }
+   }
+ }  
+}
+
+var poTimer=0;
+var poTimerGlobal=0;
+var textClass='navMenuFont';
+var backCol='#FFFFFF';
+var pnTotalWidth=650;
+var poNS4Menu=null;
+var actionlog='';
+var pnHeight=20;
+var pnTopSection=3;
+var psNavTopMenuFore='#FFFFFF';
+var psNavTopMenuBack='#FF0031';
+var psNavTopMenuHover='#003399';
+var psNavSubMenuFore='#FF0000';
+var psNavSubMenuBack='#FFFFFF';
+var psNavSubMenuHover='#FFC750';
+var psNavBorderClass='navBorder';
+var pnTopMenuOffset=20;
+var psNavSubMenuTextClass='navMenuFont';
+
+var psDebugLog='';
+
+function pfCreateSubMenu(id,parentid){
+ gfDebug('\r\nStarted CreateSubMenu('+id+','+parentid+')');
+ //Only process if this menu has not already been created and referenced
+ if (String(poNavMenus[id].NavItemsList).length>0&&poNavMenus[id].ref==null){
+  //Determine if the submenu being created is a child of a top level menu
+  if (poNavMenus[id].parentid==pnTopSection) var lbTopMenu=true; else var lbTopMenu=false;
+  //Determine the initial placement
+  if (gbNS4){
+   var loLayer=gfGetReference('navTopLayer' + id);
+   if (loLayer==null) loLayer=gfGetReference('NavItem' + id);
+   if (loLayer==null) loLayer=poNavMenus[parentid].ref.layers['NavItem' + id];
+   var lnLeft=loLayer.pageX;
+   if (!lbTopMenu) lnLeft+=poNavMenus[parentid].navwidth; //Add the width of an already created menu
+   var lnTop=loLayer.pageY;
+   if (lbTopMenu) lnTop+=pnTopMenuOffset;
+  } else {
+   if (lbTopMenu){
+    var loCell=gfGetReference('navTopCell' + id);
+    var loTable=gfGetReference('navTopTableTable');
+    if (gbIE) var lnLeft=loCell.offsetLeft+loTable.offsetLeft; else var lnLeft=loCell.offsetLeft;
+    //var lnTop=Number(String(String(loTable.offsetTop).replace('px','')).replace('pt',''));
+    var lnTop=parseInt(loTable.offsetTop);
+   } else { 
+    var loDiv=gfGetReference('NavItem' + id);
+    var loTable=gfGetReference('navTopTableTable');
+    if (gbIE){
+     //var lnLeft=Number(String(loDiv.style.left).replace('px',''))+Number(loTable.offsetLeft)+Number(String(loDiv.style.width).replace('px',''));
+     var lnLeft=parseInt(loDiv.style.left)+parseInt(loTable.offsetLeft)+parseInt(loDiv.style.width);
+    } else {
+//     var lnLeft=Number(String(loDiv.style.left).replace('px',''))+Number(String(loDiv.style.width).replace('px',''));
+     var lnLeft=parseInt(loDiv.style.left)+parseInt(loDiv.style.width);
+    } 
+    var lnTop=Number(String(String(loDiv.style.top).replace('px','')).replace('pt',''));
+    var lnTop=parseInt(loDiv.style.top);
+   }
+  }
+  var laSubMenu=String(poNavMenus[id].NavItemsList).split(','); 
+
+  //Determine the width of the sub menu
+  if (poNavMenus[id].setwidth==0){
+   var lnMaxLength=0;
+   for (var i=0;i<laSubMenu.length;i++){
+    if (String(poNavItems[laSubMenu[i]].text).length>lnMaxLength) lnMaxLength=String(poNavItems[laSubMenu[i]].text).length;
+   }
+   var lnWidth=8*lnMaxLength;  
+  } else {
+   var lnWidth=poNavMenus[id].setwidth;
+  }
+  
+  lsMenuAlign="left";
+  
+  //Determine if the submenu should come up on the left because making it come up on the right would put it too far
+  if (poNavMenus[id].parentid!=pnTopSection){
+   if (poNavMenus[parentid].navleft>=pnTotalWidth/3){
+    lnLeft=poNavMenus[parentid].navleft-lnWidth;
+    lsMenuAlign="right";
+   } else {
+    lnLeft=lnLeft;
+   }
+  }
+   
+  //Adjust the top and left of the menu for relativity to a container of the top level menu
+  lnStartTop=lnTop;
+  if (gbIE||gbDOM) {
+   if (gbNS6&&lbTopMenu) {
+    lnStartTop+=pnTopMenuOffset;
+    lnTop=0;
+   } else {
+    lnStartTop=Number(String(String(loTable.offsetTop).replace('px','')).replace('pt',''));
+    loTmp=loTable;  
+    while (loTmp.tagName!='BODY') {
+     lnStartTop+=loTmp.offsetParent.offsetTop;
+     if (lbTopMenu) lnLeft+=loTmp.offsetParent.offsetLeft;
+     loTmp=loTmp.offsetParent;
+    }    
+    lnStartTop+=pnHeight;
+   } 
+  } 
+  if (lnLeft+lnWidth>pnTotalWidth) lnLeft=pnTotalWidth-lnWidth;
+  poNavMenus[id].navleft=lnLeft;
+  poNavMenus[id].navwidth=lnWidth;
+  
+  lnHeight=pnHeight;
+  
+  var lsSubMenus=new String();
+  for (var lnM=0;lnM<laSubMenu.length;lnM++){
+   var lsID = 'NavItem' + poNavItems[laSubMenu[lnM]].id;
+
+   if (gbDOM || gbIE4) {
+    lsSubMenus += '<div class="navMenuTableCell" id="' + lsID + '" style="position: absolute; left: ' + lnLeft + '; top: ' + lnTop + '; width: ' + lnWidth + '; height: ' + lnHeight + '; visibility: inherit; ';
+    lsSubMenus += '" ';
+   }
+
+   if (gbNS4) {
+    lsSubMenus += '<layer id="' + lsID + '" left="' + lnLeft + '" top="' + lnTop + '" width="' +  (lnWidth +8) + '" height="' + lnHeight + '" visibility="inherit" ';
+    if (psNavSubMenuBack) lsSubMenus += 'bgcolor="' + psNavSubMenuBack + '" ';
+    if (psNavBorderClass) lsSubMenus += 'class="' + psNavBorderClass + '" ';
+   }
+
+   lsSubMenus += 'onMouseOver="ShowSubMenu(' + poNavItems[laSubMenu[lnM]].id + ',' + id + ')" onMouseOut="HideSubMenu(' + poNavItems[laSubMenu[lnM]].id + ',' + id + ')"';
+   lsSubMenus += '>';
+
+   lsRightMarker='&nbsp;'
+   lsLeftMarker='&nbsp;';
+   if (poNavMenus[poNavItems[laSubMenu[lnM]].id]!=null) {
+    lsLeftMarker='<';
+    lsRightMarker='>';
+    if (lnLeft>=pnTotalWidth/3) lsRightMarker='&nbsp;'; else lsLeftMarker='&nbsp;';
+   }
+
+   lsSubMenus += '<table width="' + lnWidth + '" border="0" cellspacing="0" cellpadding="0"><tr>';
+
+   lsSubMenus += '<td width="10" class="' + psNavSubMenuTextClass + '" align="left">' + lsLeftMarker + '</td>';
+
+   lsSubMenus += '<td width="' +(lnWidth-20) + '" align="' + lsMenuAlign + '" height="' + lnHeight + '">';
+   lsSubMenus += '<a class="' + psNavSubMenuTextClass + '" href="' + poNavItems[laSubMenu[lnM]].url + '"';
+   if (poNavItems[laSubMenu[lnM]].navtarget!='') lsSubMenus += ' target="' + poNavItems[laSubMenu[lnM]].navtarget + '"';
+   lsSubMenus += '>';
+   lsSubMenus += '<nobr>' + poNavItems[laSubMenu[lnM]].text + '</nobr></a></td>';
+  
+   lsSubMenus += '<td width="10" class="' + psNavSubMenuTextClass + '" align="right">' + lsRightMarker + '</td>';
+
+   lsSubMenus += '</tr></table>';
+			
+   if (gbNS4) lsSubMenus += '</layer>\r\n'; else lsSubMenus += '</div>\r\n';
+   
+   lnTop+=lnHeight;
+    
+  }
+
+  if (gbDOM) {
+   var loDiv = document.createElement('div');
+   loDiv.style.position = 'absolute';
+   loDiv.style.visibility = 'hidden';
+   if (gbMac&&gbIE) lnStartTop-=100;
+   loDiv.style.top=lnStartTop;
+   loDiv.style.left=0;
+   document.getElementsByTagName('body').item(0).appendChild(loDiv);
+   loDiv.innerHTML = lsSubMenus;
+   poNavMenus[id].ref=loDiv.style;
+  } else if (gbIE4) {
+   document.body.insertAdjacentHTML('beforeEnd', '<div id="NavMenu' + id +'" ' + 'style="position: absolute; visibility: hidden; top:'+lnStartTop+'">' + lsSubMenus + '</div>');
+   loRef = gfGetStyle('NavMenu'+id);
+   poNavMenus[id].ref=loRef;
+  } else if (gbNS4) {
+   loRef = new Layer(0);
+   loRef.document.write(lsSubMenus);
+   loRef.document.close();
+   poNavMenus[id].ref=loRef;
+  }
+ } 
+ gfDebug('Ended CreateSubMenu('+id+','+parentid+')\r\n');
+}
+
+function ShowSubMenu(id,parentid){
+ gfDebug('\r\nStart ShowSubMenu('+id+','+parentid+')');
+ clearTimeout(poTimer);
+ clearTimeout(poTimerGlobal);
+ gfDebug('|Timers Cleared');
+ HideAllSubMenus(parentid);
+ pfToggleSelectsVisibility(false);
+ if (gbNS4&&poNS4Menu==null){
+  poNS4Menu=gfMakeNS4Menus(id,parentid);
+ }
+ lbTopMenu=false;
+ lbHasMenu=false;
+ if (poNavMenus[id]!=null) {
+  if (String(poNavMenus[id].NavItemsList).length>0) lbHasMenu=true;
+  if (poNavMenus[id].parentid==pnTopSection) lbTopMenu=true;
+ } 
+
+
+ //Change the hovered over thing to the hover color background
+ if (lbTopMenu){
+  if (gbNS4){
+   var loLayer=gfGetReference('navTopLayer' + id);
+   loLayer.bgColor=psNavTopMenuHover;
+  } else {
+   var loCell=gfGetReference('navTopCell' + id);
+   loCell.className='navTopTableCellHover';
+  }
+ } else {
+  if (gbNS4){
+   loLayer=gfGetReference('NavItem' + id);
+   if (loLayer==null) loLayer=poNavMenus[parentid].ref.layers['NavItem' + id];
+   loLayer.bgColor=psNavSubMenuHover;
+  } else {
+   var loDiv=gfGetReference('NavItem' + id);
+   loDiv.className='navMenuTableCellHover';
+  } 
+ } 
+ 
+
+ //There are submenus to this - create the submenu if it has not already been created
+ if (lbHasMenu) {
+  if (poNavMenus[id].ref==null){
+   pfCreateSubMenu(id,parentid)
+  }
+ 
+  gfDebug('|Showing Menu id');
+  loRef=poNavMenus[id].ref;
+  loRef.visibility='visible';
+  loRef.zIndex=1;
+ } 
+ gfDebug('End ShowSubMenu('+id+','+parentid+')\r\n');
+}
+function HideSubMenu(id,parentid){
+ gfDebug('\\Start HideSubMenu('+id+','+parentid+')');
+ 
+ if (poNavMenus[id]==null) unHighlight(id);
+ if (gbNS4) {
+  clearTimeout(poTimer);
+  clearTimeout(poTimerGlobal);
+  if (parentid!=pnTopSection) {
+   poTimer=setTimeout('HideAllSubMenus('+parentid+')', 600);
+  } else {
+   poTimer=setTimeout('HideAllSubMenus('+parentid+')', 300);
+  } 
+  poTimerGlobal = setTimeout('HideAllSubMenus('+pnTopSection+')', 1000);
+ } else {
+  clearTimeout(poTimerGlobal);
+  poTimerGlobal = setTimeout('HideAllSubMenus('+pnTopSection+')', 600);
+ } 
+ 
+ gfDebug('End HideSubMenu('+id+','+parentid+')\r\n');
+}
+
+function HideAllSubMenus(theException){
+ gfDebug('\r\nStart HideAllSubMenus('+theException+')');
+ pfToggleSelectsVisibility(true);
+ for (var id=poNavMenus.length-1;id>0;id--){
+  if (Number(id)!=Number(theException)) {
+   if (poNavMenus[id]!=null) {
+    if (poNavMenus[id].ref!=null){
+     if (theException==pnTopSection){
+      if (poNavMenus[id].ref!==null){
+       ref=poNavMenus[id].ref;
+       if (ref.visibility!='hidden'&&ref.visibility!='hide'){
+        gfDebug('|hiding ' + id);
+        ref.visibility='hidden';
+        ref.zIndex=0;
+        unHighlight(id);
+       } 
+      } 
+     } else if (Number(poNavMenus[theException].parentid)!=Number(id)) {
+       if (poNavMenus[id].ref!==null){
+        ref=poNavMenus[id].ref;
+        if (ref.visibility!='hidden'&&ref.visibility!='hide'){
+         gfDebug('|hiding ' + id);
+         ref.visibility='hidden';
+         ref.zIndex=0;
+         unHighlight(id);
+        } 
+       } 
+     } 
+    }
+   }
+  } 
+ } 
+ gfDebug('End HideAllSubMenus('+theException+')\r\n');
+}
+
+function unHighlight(id){
+ if (gbNS4){
+  if (poNavMenus[id]!=null){
+   if (poNavMenus[id].parentid==pnTopSection) {
+    loLayer=gfGetReference('navTopLayer' + id);
+    loLayer.bgColor=psNavTopMenuBack;
+   } else {
+    loLayer=gfGetReference('NavItem' + id);
+    if (loLayer==null) loLayer=poNavMenus[poNavMenus[id].parentid].ref.layers['NavItem' + id];
+    loLayer.bgColor=psNavSubMenuBack;
+   }
+  } else {
+   loLayer=gfGetReference('NavItem' + id);
+   if (loLayer==null) loLayer=poNavMenus[poNavItems[id].NavMenuID].ref.layers['NavItem' + id];
+   loLayer.bgColor=psNavSubMenuBack;
+  }
+ } else {
+  if (poNavMenus[id]!=null&&poNavMenus[id].parentid==pnTopSection) {
+   var loCell=gfGetReference('navTopCell' + id);
+   loCell.className='navTopTableCell';
+  } else {
+   var loCell=gfGetReference('NavItem' + id);
+   loCell.className='navMenuTableCell';
+  }
+ } 
+}
+
+function gfMakeNS4Menus(id,parentid){
+ gfDebug('\r\nStart gfMakeNS4Menus('+id+','+parentid+')');
+ var lsNavLayer='';
+ for (var lnM=1;lnM<poNavMenus.length;lnM++){
+  if (poNavMenus[lnM]!=null){
+   if (poNavMenus[lnM].parentid==pnTopSection) {
+    var loLayer=gfGetReference('navTopLayer' + lnM);
+    lsNavLayer+='<layer align="center" z-index="0" onmouseout="HideSubMenu('+lnM+','+poNavMenus[lnM].parentid+')"';
+    lsNavLayer+=' onmouseover="ShowSubMenu('+lnM+','+poNavMenus[lnM].parentid+')"';
+    lsNavLayer+=' id="navTopLayerDyn'+lnM+'" left="' + loLayer.pageX + '" top="' + loLayer.pageY + '"';
+    lsNavLayer+=' width="' + poNavMenus[lnM].navtopwidth + '" height="'+pnHeight+'">';
+   
+    lsNavLayer+='<table border="0" cellpadding="0" cellspacing="0"><tr>';
+    lsNavLayer+='<td valign="middle" align="center" width="' + poNavMenus[lnM].navtopwidth + '">';
+    lsNavLayer+='<a class="navTopFont" href="'+ poNavItems[lnM].url + '"';
+    if (poNavItems[lnM].navtarget!='') lsNavLayer += ' target="' + poNavItems[lnM].navtarget + '"';
+    lsNavLayer+='>';
+
+    lsNavLayer+=poNavItems[lnM].text;
+
+    lsNavLayer+='</a></td></tr></table></layer>';
+    //pfCreateSubMenu(lnM,poNavMenus[lnM].parentid);
+   } 
+  }
+ } 
+ for (var lnM=1;lnM<poNavMenus.length;lnM++){
+  if (poNavMenus[lnM]!=null){
+   if (poNavMenus[lnM].parentid!=pnTopSection&&poNavMenus[lnM].parentid!=0) {
+    //pfCreateSubMenu(lnM,poNavMenus[lnM].parentid);
+   } 
+  }
+ }  
+ loRef = new Layer(0);
+ loRef.zIndex=99;
+ loRef.document.write(lsNavLayer);
+ loRef.document.close();
+ loRef.visibility='visible';
+ gfDebug('End gfMakeNS4Menus('+id+','+parentid+')\r\n');
+ return loRef;
+}
+
+poNavMenus=new Array();
+poNavItems=new Array();
+function pfNavMenu(id,parentid,setwidth,navtopwidth,navtopleft){
+ this.id=id;
+ this.parentid=parentid;
+ this.NavItemsList='';
+ this.navleft=0;
+ this.navwidth=0;
+ this.setwidth=setwidth;
+ this.navtopwidth=navtopwidth;
+ this.navtopleft=navtopleft;
+}
+function pfNavItem(id,NavMenuID,url,navtarget,text){
+ this.id=id
+ this.NavMenuID=NavMenuID;
+ this.url=url;
+ this.navtarget=navtarget;
+ this.text=text;
+ if (poNavMenus[NavMenuID].NavItemsList=='') poNavMenus[NavMenuID].NavItemsList=id; else poNavMenus[NavMenuID].NavItemsList+=','+id;
+ this.ref=null;
+}
+//Client side script information for menus
+poNavMenus[0] = new pfNavMenu(0,0,0,0,0)
+poNavMenus[3] = new pfNavMenu(3,0,0,0,0)
+poNavMenus[1] = new pfNavMenu(1,3,250,106,0)
+poNavMenus[11] = new pfNavMenu(11,1,0,0,0)
+poNavMenus[15] = new pfNavMenu(15,1,0,0,0)
+poNavMenus[2] = new pfNavMenu(2,3,0,89,106)
+poNavMenus[35] = new pfNavMenu(35,2,0,0,0)
+poNavMenus[36] = new pfNavMenu(36,2,0,0,0)
+poNavMenus[4] = new pfNavMenu(4,3,0,35,195)
+poNavMenus[5] = new pfNavMenu(5,3,0,62,230)
+poNavMenus[6] = new pfNavMenu(6,3,0,71,292)
+poNavMenus[80] = new pfNavMenu(80,6,0,0,0)
+poNavMenus[81] = new pfNavMenu(81,6,0,0,0)
+poNavMenus[7] = new pfNavMenu(7,3,0,89,363)
+poNavMenus[106] = new pfNavMenu(106,7,0,0,0)
+poNavMenus[8] = new pfNavMenu(8,3,0,71,452)
+poNavMenus[9] = new pfNavMenu(9,3,0,89,523)
+poNavMenus[10] = new pfNavMenu(10,3,0,38,612)
+poNavItems[3] = new pfNavItem(3,0,'','','HOME')
+poNavItems[1] = new pfNavItem(1,3,'../generalinfo/generalinfo.htm','','General Info')
+poNavItems[11] = new pfNavItem(11,1,'../generalinfo/planyourvisit.htm','','Plan Your Visit')
+poNavItems[20] = new pfNavItem(20,11,'../generalinfo/hours.htm','','Hours, Admission')
+poNavItems[21] = new pfNavItem(21,11,'../generalinfo/directions.htm','','Directions')
+poNavItems[22] = new pfNavItem(22,11,'http://tcmcal.childrensmuseum.org/GWExtranet/scp.dll?user=tcmcal@childrensmuseum.org&template=gwextra','','Calendar Highlights')
+poNavItems[23] = new pfNavItem(23,11,'../catalog/catalog.asp?C=1','','Museum Store')
+poNavItems[137] = new pfNavItem(137,11,'../generalinfo/reflections.htm','','Reflections Restaurant')
+poNavItems[138] = new pfNavItem(138,11,'../generalinfo/amenities.htm','','Amenities')
+poNavItems[24] = new pfNavItem(24,11,'../generalinfo/floorplan.htm','','Floor Plan')
+poNavItems[25] = new pfNavItem(25,11,'../generalinfo/currentexhibits.htm','','Current Exhibits')
+poNavItems[26] = new pfNavItem(26,11,'../generalinfo/theaters.htm','','Theaters')
+poNavItems[28] = new pfNavItem(28,11,'../generalinfo/familyfun.htm','','Indy Family Fun Getaway')
+poNavItems[29] = new pfNavItem(29,11,'http://www.indy.org','indy.org','About Indianapolis')
+poNavItems[13] = new pfNavItem(13,1,'../generalinfo/rental.htm','','Facility Rentals')
+poNavItems[14] = new pfNavItem(14,1,'../generalinfo/birthdayparty.htm','','Birthday Parties')
+poNavItems[15] = new pfNavItem(15,1,'../generalinfo/employment.htm','','Employment / Volunteer / Internship')
+poNavItems[31] = new pfNavItem(31,15,'../generalinfo/employmentopps.htm','','Employment')
+poNavItems[32] = new pfNavItem(32,15,'../generalinfo/volunteeropps.htm','','Adult Volunteers')
+poNavItems[33] = new pfNavItem(33,15,'../generalinfo/youthopps.htm','','Youth Participation')
+poNavItems[34] = new pfNavItem(34,15,'../generalinfo/internopps.htm','','Interns')
+poNavItems[16] = new pfNavItem(16,1,'../pressrelease/pressreleases.htm','','Press Releases')
+poNavItems[17] = new pfNavItem(17,1,'../catalog/catalog.asp','','Register / Shop On-Line')
+poNavItems[18] = new pfNavItem(18,1,'../traveling_exhibits/index.html','','International Traveling Exhibit Program')
+poNavItems[19] = new pfNavItem(19,1,'../generalinfo/privacypolicy.htm','','Privacy Policy and Terms of Use')
+poNavItems[2] = new pfNavItem(2,3,'../themuseum/themuseum.htm','','The Museum')
+poNavItems[35] = new pfNavItem(35,2,'../themuseum/whoweare.htm','','Who We Are')
+poNavItems[40] = new pfNavItem(40,35,'../themuseum/presidentsmessage.htm','','President\'s Message')
+poNavItems[41] = new pfNavItem(41,35,'../themuseum/overview.htm','','Museum Overview')
+poNavItems[42] = new pfNavItem(42,35,'../themuseum/mission.htm','','Mission')
+poNavItems[43] = new pfNavItem(43,35,'../themuseum/mission.htm#vision','','Vision')
+poNavItems[44] = new pfNavItem(44,35,'../themuseum/mission.htm#coreprinciples','','Core Principles')
+poNavItems[46] = new pfNavItem(46,35,'../themuseum/mission.htm#goals','','Goals')
+poNavItems[48] = new pfNavItem(48,35,'../themuseum/guild.htm','','Museum Guild')
+poNavItems[49] = new pfNavItem(49,35,'../themuseum/staff.htm','','Museum Staff')
+poNavItems[50] = new pfNavItem(50,35,'../themuseum/2002_annual_report_pt1.pdf','annual_report','Annual Report')
+poNavItems[51] = new pfNavItem(51,35,'../themuseum/past.htm','','Explore Our Past')
+poNavItems[36] = new pfNavItem(36,2,'../themuseum/exhibits.htm','','Exhibits and Places')
+poNavItems[52] = new pfNavItem(52,36,'../themuseum/currentexhibits.htm','','Current Exhibits')
+poNavItems[53] = new pfNavItem(53,36,'../themuseum/pastexhibits.htm','','Past Exhibits')
+poNavItems[54] = new pfNavItem(54,36,'../themuseum/futureexhibits.htm','','Future Exhibits')
+poNavItems[55] = new pfNavItem(55,36,'../themuseum/theaters.htm','','Theaters')
+poNavItems[56] = new pfNavItem(56,36,'../catalog/catalog.asp?C=1','','Store')
+poNavItems[57] = new pfNavItem(57,36,'../generalinfo/reflections.htm','','Restaurant')
+poNavItems[59] = new pfNavItem(59,36,'../generalinfo/floorplan.htm','','Floor Plan')
+poNavItems[37] = new pfNavItem(37,2,'../themuseum/youthopps.htm','','Youth Participation')
+poNavItems[38] = new pfNavItem(38,2,'../themuseum/collection.htm','','The Museum Collection')
+poNavItems[39] = new pfNavItem(39,2,'http://tcmcal.childrensmuseum.org/GWExtranet/scp.dll?user=tcmcal@childrensmuseum.org&template=gwextra','','Calendar Highlights')
+poNavItems[4] = new pfNavItem(4,3,'../kids/kids.htm','','Kids')
+poNavItems[60] = new pfNavItem(60,4,'../kids/games.htm','','Games and Activities')
+poNavItems[61] = new pfNavItem(61,4,'../catalog/catalog.asp?C=1','','Museum Store')
+poNavItems[62] = new pfNavItem(62,4,'../catalog/catalog.asp?C=6','','Classes')
+poNavItems[63] = new pfNavItem(63,4,'../kids/youthopps.htm','','Participate at The Museum')
+poNavItems[64] = new pfNavItem(64,4,'../dinosphere/paleopreplab.htm','','Paleo Prep Lab')
+poNavItems[65] = new pfNavItem(65,4,'../kids/privacypolicy.htm','','Privacy Policy and Terms of Use')
+poNavItems[5] = new pfNavItem(5,3,'../parents/parents.htm','','Parents')
+poNavItems[66] = new pfNavItem(66,5,'../parents/presidentsmessage.htm','','President\'s Message')
+poNavItems[67] = new pfNavItem(67,5,'../parents/aboutthiswebsite.htm','','About this Website')
+poNavItems[68] = new pfNavItem(68,5,'../parents/homeactivities.htm','','Home Activities')
+poNavItems[69] = new pfNavItem(69,5,'http://www.childrensmuseum.org/catalog/catalog.asp?C=193','','Home School')
+poNavItems[70] = new pfNavItem(70,5,'../parents/youthopps.htm','','Youth Participation')
+poNavItems[71] = new pfNavItem(71,5,'../parents/birthdayparty.htm','','Birthday Parties')
+poNavItems[72] = new pfNavItem(72,5,'../catalog/catalog.asp?C=6','','Register')
+poNavItems[73] = new pfNavItem(73,5,'../catalog/catalog.asp?C=1','','Museum Store')
+poNavItems[74] = new pfNavItem(74,5,'../parents/earlyclub.htm','','Early Discoveries Club')
+poNavItems[75] = new pfNavItem(75,5,'../parents/privacypolicy.htm','','Privacy Policy and Terms of Use')
+poNavItems[6] = new pfNavItem(6,3,'../teachers/teachers.html','','Teachers')
+poNavItems[76] = new pfNavItem(76,6,'../teachers/presidentsmessage.htm','','President\'s Message')
+poNavItems[77] = new pfNavItem(77,6,'../teachers/unitsofstudy.htm','','Units of Study')
+poNavItems[80] = new pfNavItem(80,6,'../teachers/visit.htm','','Plan a Field Trip')
+poNavItems[100] = new pfNavItem(100,80,'../catalog/catalog.asp?C=4','','Field Trip Info and Registration')
+poNavItems[142] = new pfNavItem(142,80,'../teachers/visit_guides.htm','','Field Trip Guides')
+poNavItems[152] = new pfNavItem(152,80,'../teachers/museumvisitstandards.htm','','Field Trip Standards Matches')
+poNavItems[98] = new pfNavItem(98,80,'../teachers/whatsforlunch.htm','','What\'s For Lunch?')
+poNavItems[81] = new pfNavItem(81,6,'../teachers/classroom.htm','','Classroom Resources')
+poNavItems[126] = new pfNavItem(126,81,'../teachers/online_resources_activities.htm','','On-line Interactive Activities')
+poNavItems[102] = new pfNavItem(102,81,'../catalog/catalog.asp?C=3','','Teacher Resource Link')
+poNavItems[105] = new pfNavItem(105,81,'../teachers/unitsofstudy.htm','','Units of Study')
+poNavItems[147] = new pfNavItem(147,6,'../teachers/standards/index.htm','','Indiana Academic Standards')
+poNavItems[82] = new pfNavItem(82,6,'../teachers/teacherclub.htm','','Teacher Club')
+poNavItems[84] = new pfNavItem(84,6,'../teachers/educatoremail.htm','','Educator E-Mail Network')
+poNavItems[141] = new pfNavItem(141,6,'../teachers/exchange.htm','','Teacher Project Exchange')
+poNavItems[146] = new pfNavItem(146,6,'../catalog/catalog.asp?C=3','','Teacher Resource Link')
+poNavItems[83] = new pfNavItem(83,6,'http://www.childrensmuseum.org/catalog/cmsform.asp?cmsFormID=30','','Teacher Field Trip Survey')
+poNavItems[78] = new pfNavItem(78,6,'http://www.childrensmuseum.org/catalog/catalog.asp?C=2','','Professional Development')
+poNavItems[7] = new pfNavItem(7,3,'../membership/membership.htm','','Membership')
+poNavItems[106] = new pfNavItem(106,7,'../catalog/catalog.asp?C=5','','Become a Member')
+poNavItems[114] = new pfNavItem(114,106,'../catalog/catalog.asp?C=5','','New Memberships and Membership Renewals')
+poNavItems[115] = new pfNavItem(115,106,'../membership/devindiv.htm','','Discovery Builders Membership')
+poNavItems[116] = new pfNavItem(116,106,'../membership/earlyclub.htm','','Early Discoveries Club')
+poNavItems[107] = new pfNavItem(107,7,'http://www.childrensmuseum.org/catalog/catalog.asp?C=5','','Membership Types')
+poNavItems[108] = new pfNavItem(108,7,'../catalog/catalog.asp?C=6','','Program Registration')
+poNavItems[109] = new pfNavItem(109,7,'../membership/memacctchg.htm','','Submit an Account Change')
+poNavItems[143] = new pfNavItem(143,7,'../membership/travel_program.htm','','Members Travel Program')
+poNavItems[110] = new pfNavItem(110,7,'../membership/memberevents.htm','','Member Events')
+poNavItems[111] = new pfNavItem(111,7,'../catalog/catalog.asp?C=116','','Gift Memberships')
+poNavItems[112] = new pfNavItem(112,7,'../membership/memcommunity.htm','','Community Connections')
+poNavItems[113] = new pfNavItem(113,7,'../membership/memsend.htm','','Send Us Your Comments')
+poNavItems[8] = new pfNavItem(8,3,'http://www.childrensmuseum.org/catalog/catalog.asp','','Register')
+poNavItems[120] = new pfNavItem(120,8,'../catalog/catalog.asp?C=6','','Program Registration')
+poNavItems[145] = new pfNavItem(145,8,'../catalog/catalog.asp?C=3','','Teacher Resource Link')
+poNavItems[121] = new pfNavItem(121,8,'../catalog/catalog.asp?C=4','','School Group Registration')
+poNavItems[122] = new pfNavItem(122,8,'http://www.childrensmuseum.org/catalog/catalog.asp?C=2','','Professional Development')
+poNavItems[148] = new pfNavItem(148,8,'http://www.childrensmuseum.org/catalog/catalog.asp?C=193','','Home School')
+poNavItems[150] = new pfNavItem(150,8,'http://www.childrensmuseum.org/catalog/catalog.asp?C=187','','Member Events')
+poNavItems[9] = new pfNavItem(9,3,'../donate/support.htm','','Support Us')
+poNavItems[12] = new pfNavItem(12,9,'../donate/support.htm','','Supporting the Museum')
+poNavItems[123] = new pfNavItem(123,9,'https://dnbweb1.blackbaud.com/OPXDONATE/Donate.asp?cguid=56AE6051-BBDF-45D8-9418-098EFC8C62D5','donate','Donate On-Line')
+poNavItems[128] = new pfNavItem(128,9,'../donate/individual.htm','','Individual Support')
+poNavItems[129] = new pfNavItem(129,9,'../donate/corporate.htm','','Corporate Support')
+poNavItems[130] = new pfNavItem(130,9,'../donate/planned.htm','','Planned Giving')
+poNavItems[131] = new pfNavItem(131,9,'../generalinfo/volunteeropps.htm','','Volunteer')
+poNavItems[132] = new pfNavItem(132,9,'../donate/devstaff.htm','','Development Staff Listing')
+poNavItems[133] = new pfNavItem(133,9,'../donate/devbillof.htm','','Donor Bill of Rights')
+poNavItems[10] = new pfNavItem(10,3,'../catalog/catalog.asp','','Shop')
+poNavItems[124] = new pfNavItem(124,10,'../catalog/catalog.asp?C=1','','Museum Store')
+poNavItems[134] = new pfNavItem(134,10,'../catalog/catalog.asp?C=5','','Membership')
+poNavItems[135] = new pfNavItem(135,10,'../catalog/catalog.asp?C=116','','Gift Certificates')
+poNavItems[151] = new pfNavItem(151,10,'http://www.childrensmuseum.org/catalog/catalog.asp?C=183','','E-Tickets')
+
+</script>

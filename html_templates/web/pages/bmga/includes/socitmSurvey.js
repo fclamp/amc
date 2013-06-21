@@ -1,0 +1,5 @@
+var socitm_my_domains = "http://www.bristol.gov.uk/,http://maps.bristol.gov.uk/,http://e2eweb.bristol.gov.uk/,https://ctstatements.bristol-city.gov.uk/,https://ctstatements.bristol.gov.uk/,https://www.e-paycapita.com/bristol/,http://buy.bristol.gov.uk/,http://www.everyoneactive.com/,http://www.bristolpartnership.org/,http://www.bristol-cyps.org.uk/,http://www.1bigdatabase.org.uk/,http://jobs.bristol.gov.uk/,https://jobs.bristol.gov.uk/,http://www.homechoicebristol.co.uk/,http://www.librarieswest.org.uk/,http://www.bristol.public-i.tv/,http://www.traveline.org.uk/";
+var socitm_custcode = "78";
+var socitm_intro_file = "/ccm-ldn-theme/__ccm__/themes-prod/bristol/html/socitm_intro-v2.html";
+var _rsCL='<scr'+'ipt language="JavaScript" type="text/javascript" src="http://socitm.govmetric.com/js/socitm_wrapper.aspx"><\/scr'+'ipt>';
+document.write(_rsCL);

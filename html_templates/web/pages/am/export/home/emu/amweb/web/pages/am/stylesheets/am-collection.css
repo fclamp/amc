@@ -1,0 +1,32 @@
+/* 
+-----------------------------------------
+collection-finder-form styles
+-----------------------------------------
+*/
+
+#collection-finder-form
+{
+	margin: 20px 0 20px 0;
+	padding: 0;
+}
+
+#collection-finder-form div
+{
+	clear: left;
+	margin: 0 0 .5em;
+}
+
+#collection-finder-form label
+{
+	float: left;
+	width: 12em;
+}
+
+#collection-finder-form input,
+#collection-finder-form select { width: 15em; }
+
+input#collection-submit-button
+{
+	width: auto;
+	margin: 1em 0 0 14em;
+}

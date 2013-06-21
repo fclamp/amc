@@ -1,5 +1,45 @@
 <?php
 
+if(! function_exists('clean_xss'))
+{
+	/**
+	 * 
+	 * Clean XSS
+	 * @author fc_lamp
+	 * @param $string
+	 * @param $low 
+	 * @internal
+	 * clean_xss($_POST);
+	 */
+	function clean_xss(&$string, $low = False)
+	{
+		if (! is_array ( $string ))
+		{
+			$string = trim ( $string );
+			$string = strip_tags ( $string );
+			$string = htmlspecialchars ( $string );
+			if ($low)
+			{
+				return True;
+			}
+			$string = str_replace ( array ('"', "\\", "'", "/", "..", "../", "./", "//" ), '', $string );
+			$no = '/%0[0-8bcef]/';
+			$string = preg_replace ( $no, '', $string );
+			$no = '/%1[0-9a-f]/';
+			$string = preg_replace ( $no, '', $string );
+			$no = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';
+			$string = preg_replace ( $no, '', $string );
+			return True;
+		}
+		$keys = array_keys ( $string );
+		foreach ( $keys as $key )
+		{
+			clean_xss ( $string [$key] );
+		}
+	}
+}
+
+
 if ( ! function_exists('action'))
 {
 	/**
@@ -338,6 +378,21 @@ if ( ! function_exists('array_set'))
 		}
 
 		$array[array_shift($keys)] = $value;
+	}
+}
+
+if ( ! function_exists('array_sort'))
+{
+	/**
+	 * Sort the array using the given Closure.
+	 *
+	 * @param  array  $array
+	 * @param  \Closure  $callback
+	 * @return array
+	 */
+	function array_sort($array, Closure $callback)
+	{
+		return Illuminate\Support\Collection::make($array)->sortBy($callback)->all();
 	}
 }
 

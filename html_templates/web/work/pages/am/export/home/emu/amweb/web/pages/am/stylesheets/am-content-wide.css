@@ -1,0 +1,121 @@
+/* 
+-----------------------------------------
+content-wide styles
+-----------------------------------------
+*/
+
+#content-wide
+{
+	float: left;
+	width: 756px;
+	margin: 0 0 0 24px;
+	padding: 0 0 2em;
+}
+
+#content-wide h3 { margin: 1em 0 .5em; }
+
+/* 
+-----------------------------------------
+dl
+-----------------------------------------
+*/
+
+#content-wide dl { margin: 0 0 1em; }
+
+#content-wide dl dt
+{
+	clear: left;
+	float: left;
+	width: 10em;
+	margin: 0;
+	padding: .2em 0 0;
+}
+
+#content-wide dl dd
+{
+	margin: 0 0 0 11em;
+	padding: .2em 0 0;
+}
+
+/* 
+-----------------------------------------
+ul
+-----------------------------------------
+*/
+
+#content-wide ul
+{
+	margin: 0 0 1em;
+	padding: 0;
+}
+
+#content-wide li
+{
+	margin: 0 0 .2em;
+	padding: 0 0 0 10px;
+	list-style-type: none;
+	background: url(../images/site/icon-bullet.gif) no-repeat 0 .4em;
+}
+
+#content-wide p.author
+{
+	font-size: 90%;
+	font-style: italic;
+	margin: 2em 0 0;
+}
+
+/* 
+-----------------------------------------
+images
+-----------------------------------------
+*/
+
+#main-image img
+{
+	clear: both;
+	margin-bottom: .5em;
+	padding: 1px;
+	border: 1px solid #c8c8c8;
+	display: block;
+}
+
+#movie
+{
+	clear: both;
+	margin-bottom: .5em;
+}
+
+#audio
+{
+	clear: both;
+	margin-bottom: .5em;
+}
+
+#flash
+{
+	clear: both;
+	margin-bottom: 1em;
+}
+
+#flash img
+{
+	padding: 1px;
+	border: 1px solid #c8c8c8;
+	display: block;
+}
+
+#document
+{
+	clear: both;
+	float: left;
+	width: 532px;
+	margin-bottom: 1em;
+	font-size: 120%;
+	font-weight: bold;
+}
+
+#document img
+{
+	float: left;
+	margin: 0 10px 0 0;
+}

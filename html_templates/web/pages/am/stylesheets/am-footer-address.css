@@ -1,0 +1,55 @@
+/* 
+-----------------------------------------
+footer-address styles
+-----------------------------------------
+*/
+
+#footer-address
+{
+	clear: both;
+	width: 940px;
+	padding: 10px 20px 20px;
+	background: #e3e3e3;
+}
+
+#footer-address h3
+{
+	position: absolute;
+	left: -500em;
+}
+
+#footer-address dl
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer-address dt
+{
+	clear: left;
+	float: left;
+	width: 9em;
+	margin: 0;
+	padding: .5em 0 0;
+	font-weight: bold;
+}
+
+#footer-address dd
+{
+	margin: 0 0 0 10em;
+	padding: .5em 0 0;
+}
+
+#footer-address ul
+{
+	margin: 0;
+	padding: 0;
+}
+
+#footer-address li
+{
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	display: inline;
+}

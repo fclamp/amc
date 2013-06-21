@@ -1,0 +1,167 @@
+<?php
+/*
+**  Copyright (c) 1998-2007 KE Software Pty Ltd
+*/
+
+if ( ! isset( $WEB_ROOT ) )
+{
+	$WEB_ROOT = dirname( dirname( dirname( dirname( realpath( __FILE__ ) ) ) ) );
+}
+
+require_once ( $WEB_ROOT . '/objects/lib/webinit.php' );
+require_once ( $WEB_ROOT . '/objects/nmnh/NmnhDisplayObjects.php' );
+
+//=====================================================================================================
+//=====================================================================================================
+class
+NmnhEntoStandardDisplay extends NmnhStandardDisplay
+{
+	function
+	NmnhEntoStandardDisplay()
+	{
+		$this->NmnhStandardDisplay();
+		$this->HeaderField = 'IdeFiledAsQualifiedNameWeb';
+
+		$filedAsIdentBy = new FormatField;
+		$filedAsIdentBy->Name = 'IdeFiledAsIdentifiedByRef';
+		if (filled('IdeFiledAsIdentifiedByRef', 'ecatalogue', $this->IRN))
+		{
+			$filedAsIdentByRef = get('IdeFiledAsIdentifiedByRef', 'ecatalogue', $this->IRN);
+			if (filled('NamOrganisation', 'eparties', $filedAsIdentByRef))
+			{ 
+				$filedAsIdentBy->Format = '{IdeFiledAsIdentifiedByRef->eparties->NamBriefName}';
+				$filedAsIdentBy->Format .= ', ';
+				$filedAsIdentBy->Format .= '{IdeFiledAsIdentifiedByRef->eparties->NamOrganisation}';
+			}
+			else
+			{
+				$filedAsIdentBy->Format = '{IdeFiledAsIdentifiedByRef->eparties->NamBriefName}';
+			}
+		}
+
+		// START type citations
+		$typeCitations       = new FormatField;
+		$typeCitations->Name = 'TypeCitations';
+		$typeCitationFormat  = $this->BuildRawTypeCitationFormat();
+
+		if ( ! empty( $typeCitationFormat ) )
+		{
+			$typeCitations->RawDisplay = 1;
+			$typeCitations->Format     = $typeCitationFormat;
+		}
+		else
+		{
+			$typeCitations->Format = '';
+		}
+		// END type citations
+
+		// Other identifications name
+		$ideOtherQualifiedName = new Field;
+		$ideOtherQualifiedName->ColName = 'IdeOtherQualifiedName_tab';
+
+		$ideDateIdentified = new Field;
+		$ideDateIdentified->ColName = 'IdeOtherDateIdentified0';
+
+		$ideIdentifiedBy = new Field;
+		$ideIdentifiedBy->ColName = 'IdeOtherIdentifiedByRef_tab->eparties->NamBriefName';
+
+		$otherIdentTable = new Table;
+		$otherIdentTable->Name = 'IdeOtherQualifiedName_tab';
+		$otherIdentTable->Headings = array('Identification', 'Date Identified', 'Identified By');
+		$otherIdentTable->Columns = array($ideOtherQualifiedName, $ideDateIdentified, $ideIdentifiedBy);
+
+		// Zoo Sex Table
+		$sexStageCount = new Field;
+		$sexStageCount->ColName = 'ZooSexStageCount_tab';
+
+		$sexStageModifier = new Field;
+		$sexStageModifier->ColName = 'ZooSexStageModifier_tab';
+
+		$sex = new Field;
+		$sex->ColName = 'ZooSex_tab';
+
+		$stage = new Field;
+		$stage->ColName = 'ZooStage_tab';
+
+		$sexStageTable = new Table;
+		$sexStageTable->Name = 'SexAndStage';
+		$sexStageTable->Headings = array('Count', 'Modifier', 'Sex', 'Stage');
+		$sexStageTable->Columns = array($sexStageCount, $sexStageModifier, $sex, $stage);
+		// end Zoo Sex Table
+
+		$specimenCount = new Field;
+		$specimenCount->ColName = 'CatSpecimenCount';
+
+		$specimenCountMod = new Field;
+		$specimenCountMod->ColName = 'CatSpecimenCountModifier';
+
+		$specimenCountTable = new Table;
+		$specimenCountTable->Name = 'ObjectCount';
+		$specimenCountTable->Headings = array('', '');
+		$specimenCountTable->Columns = array($specimenCount, $specimenCountMod);
+		
+		// START date visited from and date visited to
+                $dateCollected         = new FormatField;
+                $dateCollected->Name   = 'Date Collected';
+		$dateCollected->Format = $this->BuildDateCollectedFormat();
+		// END date visited from and date visited to
+	
+                $aquDepth         = new FormatField;
+                $aquDepth->Name   = 'Depth(m)';
+		$aquDepth->Format = $this->BuildDepthFormat();
+
+                $commonName = new FormatField;
+                $commonName->Name = "Common Name(s)";
+                $commonName->Format = $this->BuildCommonNameFormat();
+
+		$catNumber = new FormatField;
+		$catNumber->Name = "CatNumber";
+		$catNumber->Format = $this->BuildCatalogNumberFormat();
+
+		$this->Fields = array
+		(
+			'IdeFiledAsQualifiedNameWeb',
+			$catNumber,
+			'IdeFiledAsQualifiedNameWeb',
+			$commonName,
+			'CatCollectionName_tab',
+			$filedAsIdentBy,
+			'IdeFiledAsDateIdentified',
+			'IdeFiledAsRef->etaxonomy->ClaFamily',
+			'IdeFiledAsRef->etaxonomy->ClaOrder',
+			'IdeFiledAsRef->etaxonomy->ClaClass',
+			'IdeFiledAsRef->etaxonomy->ClaPhylum',
+			'IdeFiledAsRef->etaxonomy->ComName_tab',
+			$otherIdentTable, 		
+			$typeCitations,
+			$specimenCountTable,
+			$sexStageTable,
+			'ZooPreparation_tab',
+			$dateCollected,
+			'ColCollectionMethod',
+			'BioEventSiteRef->ecollectionevents->AquVesselName',
+			'BioEventSiteRef->ecollectionevents->AquCruiseNumber',
+			'BioEventSiteRef->ecollectionevents->ExpExpeditionName',
+			'ColParticipantRef_tab->eparties->NamFullName',
+			'BioEventSiteRef->ecollectionevents->LocSiteStationNumber',
+			'BioEventSiteRef->ecollectionevents->LocOcean',
+			'BioEventSiteRef->ecollectionevents->LocSeaGulf',
+			'BioEventSiteRef->ecollectionevents->LocBaySound',
+			'BioEventSiteRef->ecollectionevents->LocCountry',
+			'BioEventSiteRef->ecollectionevents->LocProvinceStateTerritory',
+			'BioEventSiteRef->ecollectionevents->LocDistrictCountyShire',
+			'BioEventSiteRef->ecollectionevents->LocTownship',
+			'BioEventSiteRef->ecollectionevents->LocNearestNamedPlace',
+			'BioEventSiteRef->ecollectionevents->LocPreciseLocation',
+			'BioEventSiteRef->ecollectionevents->AquRiverBasin',
+			'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLatDec',
+                        'BioEventSiteRef->ecollectionevents->LatPreferredCentroidLongDec',
+			$aquDepth,
+			'BioMicrohabitatDescription',
+			'MulMultiMediaRef_tab->emultimedia->MulDescription_tab',
+		);
+	}
+}
+//=====================================================================================================
+//=====================================================================================================
+?>

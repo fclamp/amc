@@ -1,0 +1,221 @@
+/* 
+-----------------------------------------
+homecol1
+-----------------------------------------
+*/
+
+#homecol1
+{
+	float: left;
+	width: 220px;
+	padding: 20px 24px;
+	margin: 0 24px 0 0;
+	background: url(http://australianmuseum.net.au/images/site/back-homecol1.jpg) no-repeat;
+}
+
+#homecol1 h2
+{
+	position: absolute;
+	left: -500em;
+}
+
+#homecol1 .intro
+{
+	color: #0046ad;
+	font-weight: bold;
+	font-size: 120%;
+}
+
+#homecol1 h4
+{
+	margin: 0;
+	font-size: 105%;
+}
+
+#homecol1 ul
+{
+	margin: 0 0 1em;
+	padding: 0;
+}
+
+#homecol1 li
+{
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+
+#homecol1-image
+{
+	width: 180px;
+	height: 100px;
+	background: url(http://australianmuseum.net.au/images/site/back-butterfly.jpg) no-repeat;
+}
+
+/* 
+-----------------------------------------
+homecol2
+-----------------------------------------
+*/
+
+#homecol2
+{
+	float: left;
+	width: 200px;
+	padding: 20px 0;
+	margin: 0 24px 0 0;
+}
+
+#homecol2 h3
+{
+	border-bottom: 1px solid #c8c8c8;
+	padding-bottom: .3em;
+}
+
+/* 
+-----------------------------------------
+homecol3
+-----------------------------------------
+*/
+
+#homecol3
+{
+	float: left;
+	width: 200px;
+	padding: 20px 0;
+}
+
+#homecol3 h3
+{
+	border-bottom: 1px solid #c8c8c8;
+	padding-bottom: .3em;
+}
+
+#home-features
+{
+	background: none;
+	padding: 0 0 10px;
+	margin: 0 0 10px;
+}
+
+#home-features ul
+{
+	margin: 0 0 1em;
+	padding: 0;
+}
+
+#home-features li
+{
+	margin: 0;
+	padding: 0 0 0 20px;
+	list-style-type: none; 
+	background: url(http://australianmuseum.net.au/images/site/icon-general.gif) no-repeat 0 0;
+}
+
+#home-features li p { margin: 5px 0 10px; }
+
+/* 
+-----------------------------------------
+icons
+-----------------------------------------
+*/
+#home-features li.Animal{padding: 0 0 0 20px;background: url(/images/site/icon-special.gif) no-repeat 0 0;}
+#home-features li.AnimalFinder{padding: 0 0 0 20px;background: url(/images/site/icon-special.gif) no-repeat 0 0;}
+#home-features li.Audio{padding: 0 0 0 20px;background: url(/images/site/icon-audio.gif) no-repeat 0 0;}
+#home-features li.Blog{padding: 0 0 0 20px;background: url(/images/site/icon-section.gif) no-repeat 0 0;}
+#home-features li.BlogPost{padding: 0 0 0 20px;background: url(/images/site/icon-section.gif) no-repeat 0 0;}
+#home-features li.Category{padding: 0 0 0 20px;background: url(/images/site/icon-category.gif) no-repeat 0 0;}
+#home-features li.Comment{padding: 0 0 0 20px;background: url(/images/site/icon-comment.gif) no-repeat 0 0;}
+#home-features li.Document{padding: 0 0 0 20px;background: url(/images/site/icon-document.gif) no-repeat 0 0;}
+#home-features li.Event{padding: 0 0 0 20px;background: url(/images/site/icon-event.gif) no-repeat 0 0;}
+#home-features li.General{padding: 0 0 0 20px;background: url(/images/site/icon-section.gif) no-repeat 0 0;}
+#home-features li.Image{padding: 0 0 0 20px;background: url(/images/site/icon-image.gif) no-repeat 0 0;}
+#home-features li.Interactive{padding: 0 0 0 20px;background: url(/images/site/icon-interactive.gif) no-repeat 0 0;}
+#home-features li.MediaRelease{padding: 0 0 0 20px;background: url(/images/site/icon-media.gif) no-repeat 0 0;}
+#home-features li.Movie{padding: 0 0 0 20px;background: url(/images/site/icon-movie.gif) no-repeat 0 0;}
+#home-features li.PositionVacant{padding: 0 0 0 20px;background: url(/images/site/icon-general.gif) no-repeat 0 0;}
+#home-features li.Publication{padding: 0 0 0 20px;background: url(/images/site/icon-publication.gif) no-repeat 0 0;}
+#home-features li.ResearchProject{padding: 0 0 0 20px;background: url(/images/site/icon-research-project.gif) no-repeat 0 0;}
+#home-features li.Restricted{padding: 0 0 0 20px;background: url(/images/site/icon-section.gif) no-repeat 0 0;}
+#home-features li.Section{padding: 0 0 0 20px;background: url(/images/site/icon-section.gif) no-repeat 0 0;}
+#home-features li.StaffProfile{padding: 0 0 0 20px;background: url(/images/site/icon-staff.gif) no-repeat 0 0;}
+
+#home-features li.AudioGallery{padding: 0 0 0 20px;background: url(/images/site/icon-gallery-audio.gif) no-repeat 0 0;}
+#home-features li.ImageGallery{padding: 0 0 0 20px;background: url(/images/site/icon-gallery-image.gif) no-repeat 0 0;}
+#home-features li.MovieGallery{padding: 0 0 0 20px;background: url(/images/site/icon-gallery-movie.gif) no-repeat 0 0;}
+
+#home-features li.InteractiveGallery{padding: 0 0 0 20px;background: url(/images/site/icon-interactive.gif) no-repeat 0 0;}
+
+/* 
+-----------------------------------------
+extras
+-----------------------------------------
+*/
+
+#home #extras-my
+{
+	padding: 20px 0 0;
+	margin: 0 0 15px;
+}
+
+#home #extras-my h3
+{
+	border-bottom: 1px solid #c8c8c8;
+	padding-bottom: .3em;
+}
+
+#home #footer-primary
+{
+	clear: both;
+	float: left;
+	width: 940px;
+	padding: 20px 20px 15px;
+	background: #e3e3e3 url(http://australianmuseum.net.au/images/site/back-footer-primary.gif) no-repeat;
+	border-bottom: 1px solid #fff;
+}
+
+#home-events
+{
+	background: url(http://australianmuseum.net.au/images/site/back-turtle.jpg) no-repeat 50% 100%;
+	margin: 0 0 0.5em;
+	padding: 0 0 110px;
+}
+
+#home-events ul
+{
+	margin: 0 0 10px;
+	padding: 0;
+}
+
+#home-events ul li
+{
+	margin: 0 0 5px;
+	padding: 0 0 0 20px;
+	list-style-type: none;
+	background: url(http://australianmuseum.net.au/images/site/icon-event.gif) no-repeat 0 0;
+}
+
+#home-blogs { margin: 10px 0 0; }
+
+#home-blogs ul
+{
+	margin: 0 0 10px;
+	padding: 0;
+}
+
+#home-blogs ul li
+{
+	margin: 0 0 5px;
+	padding: 0 0 0 20px;
+	list-style-type: none;
+	background: url(http://australianmuseum.net.au/images/site/icon-media.gif) no-repeat 0 0;
+}
+
+#home-image { margin: 0 0 20px; }
+
+#home-image img, #home-movie img
+{
+	display: block;
+	padding: 1px;
+	border: 1px solid #ccc;
+}

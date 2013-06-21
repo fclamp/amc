@@ -1,0 +1,57 @@
+<?php
+
+/* CURRENTLY THIS STUFF IS UNDER CONSTRUCTION */
+
+/*
+ *  Copyright (c) 2005 - KE Software Pty Ltd
+ */
+
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(realpath(__FILE__)));
+
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+
+
+/*  A factory to create the correct instance of a Source.
+ * (also provides method to configure where specific instances of sources are
+ * to be placed)
+ */
+
+class SourceFactory
+{
+	var 	$serviceName = "SourceFactory";
+
+	function getSourceDirectory()
+	{
+		// All actual instances of portal sources will be placed under
+		// the directory this method returns
+
+		global $WEB_ROOT;
+		return $WEB_ROOT . "/portal/";
+	}
+
+	function getInstance($source)
+	{
+		global $BACKEND_TYPE;
+		global $WEB_ROOT;
+		global $WEB_DIR_NAME;
+		
+		$sourceDirectory = $this->getSourceDirectory();
+		$sourceFile = $sourceDirectory ."/". $source ."/Source.php";
+
+		if ($source && is_file($sourceFile))
+		{
+			require ($sourceFile);
+			eval('$instance = new '. 
+				$source .
+				"Source('$BACKEND_TYPE','$WEB_ROOT','$WEB_DIR_NAME','$sourceDirectory');"
+				);
+			return $instance;
+		}
+		else
+			return null;
+	}
+}
+
+?>

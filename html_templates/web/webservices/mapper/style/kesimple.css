@@ -1,0 +1,51 @@
+body {
+        font-family: arial, "lucida console", sans-serif;
+}
+
+a:link {color: #E07f7f}     /* unvisited link */
+a:visited {color: #A0A0A0}  /* visited link */
+a:hover {color: #FF0000}   /* mouse over link */
+a:active {color: #FF0000}   /* selected link */
+
+.header {
+        color: white;
+        background: #00527c;
+        font-size: 120%;
+        width: 100%;
+        text-align: center;
+}
+.right {
+        color: white;
+        background: #00527c;
+        text-align: right;
+        float: right;
+}
+
+.status {
+        color: black;
+        background: #e0e0e0;
+        border: 0px solid black;
+        font-size: 90%;
+}
+
+.control {
+        color: blue;
+        background: #e0e0e0;
+        border: 0px solid black;
+        text-decoration: none;
+}
+
+.display {
+        color: black;
+        background: white; margin: 1px;
+        border: 0px solid black;
+        font-size: 110%;
+}
+.footer {
+        color: white;
+        width: 100%;
+        background: #00527c; margin: 1px;
+        border: 0px solid black;
+        text-align: center;
+}
+

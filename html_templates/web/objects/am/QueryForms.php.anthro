@@ -1,0 +1,77 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2003
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseQueryForms.php');
+
+
+class
+AmBasicQueryForm extends BaseBasicQueryForm
+{
+
+	var $Options = array(	'any' => 'SummaryData'
+					);
+
+} 
+
+class
+AmAdvancedQueryForm extends BaseAdvancedQueryForm
+{
+	var $Options = array(	'any' => 'SummaryData|AdmWebMetadata',
+					'title' => 'SummaryData',
+					'notes' => 'NotNotes'
+					);
+
+}  
+	
+
+class
+AmDetailedQueryForm extends BaseDetailedQueryForm
+{
+	var $Fields = array(	'Countries',
+				'Regions',
+				'DesGeographicLocation_tab',
+				'Cultures',
+				'Objects',
+				'People',
+				);
+
+
+
+	var $Hints = array(	'Countries' 	=> '[ eg. Australia ]',
+				'Regions' 	=> '[ eg. NSW ]',
+				'DesGeographicLocation_tab' 	=> '[ eg. Sydney ]',
+				'Cultures'	=> '[ eg. Type name of people, culture, language ]',
+				'Objects' 	=> '[ eg. Mask, boomerang, toy ]',
+				'People'	=> '[ eg. Name of a person ]',
+				);
+
+} 
+
+
+
+class
+AmDetailedObjectQueryForm extends BaseDetailedQueryForm
+{
+	var $Fields = array(	'Countries',
+				'Objects',
+				'People',
+				);
+
+
+
+	var $Hints = array(	'Countries' 	=> '[ eg. Australia ]',
+				'Regions' 	=> '[ eg. NSW ]',
+				'DesGeographicLocation_tab' 	=> '[ eg. Sydney ]',
+				'Cultures'	=> '[ eg. Type name of people, culture, language ]',
+				'Objects' 	=> '[ eg. Mask, boomerang, toy ]',
+				'People'	=> '[ eg. Name of a person ]',
+				);
+
+} 
+
+
+?>

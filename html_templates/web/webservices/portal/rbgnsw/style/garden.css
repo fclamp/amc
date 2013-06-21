@@ -1,0 +1,89 @@
+.columnHeader {
+}
+
+a.columnHeader {
+	color: #000000; ;
+	text-decoration: none;
+}
+
+.dataCell {
+	width: 16em;
+	padding: 0;
+	font-size: 80%;
+}
+
+.dataHeader {
+	width: 16em;
+}
+
+#mapHolder {
+	border: 0px black solid;
+	position: absolute;
+	margin-left: auto;
+	margin-right: auto;
+	width: 250px;
+}
+
+#mapArea {
+	width: 315px;
+	height: 500px;
+}
+
+#dataArea {
+	text-align: left; 
+	vertical-align: top;
+	width: 600px;
+}
+
+
+/* used for alternating lines in table */
+.zebraEven {
+        background: #e0e0e0;
+}
+.zebraOdd {
+        background: #f0f0f0;
+}
+.dataTable {
+	float:left;
+        color: black;
+        background: #d0d0d0;
+}
+.header {
+        background: #e0eee0;
+}
+
+.comboInputText {
+	/* the text input control of a combo box */
+	width: 28em;
+}
+
+.comboDropButton {
+	/* the combo box drop down activation button */
+	height:23px;
+	width:22px;
+	font-family: helvetica;
+}
+
+.comboSelectHolder {
+	/* the holder of the drop down list of a combo box */
+	display: none;
+	position: absolute;
+	width: 30em;
+	top: 0px;
+	left: 0px;
+	z-index: 10;
+}
+
+.comboDropList {
+	/* the select element of a combo box */
+	border-style: none
+	float: right;
+	width: 30em;
+}
+
+
+.comboSelectOption {
+	/* options in the the select element of a combo box */
+	width: 28em;
+}
+

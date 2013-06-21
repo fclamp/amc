@@ -1,0 +1,875 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2009
+*/
+
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(realpath(__FILE__))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+require_once ($LIB_DIR . 'BaseResultsLists.php');
+require_once ($WEB_ROOT . '/objects/am/media.php');
+
+
+/**
+ *
+ * These classes produce simplified, unstyled html, removing inline style of
+ * the older classes they inherit from.
+ *
+ **/
+
+class
+AmStandardResultsList extends BaseStandardResultsList
+{
+	var $Fields = array(	'SummaryData', 'MulMultiMediaRef_tab'
+				);	
+	var $highlightTerms = "";			
+
+	function queryPageLink()
+	{
+		if ($this->QueryPage != '')
+		{
+			return $this->QueryPage;
+		}
+		else
+		{
+			return ".";
+		}
+	}
+
+
+	function
+	display()
+	{
+
+		$this->highlightTerms = $_REQUEST['QueryTerms'];
+
+		$this->AdditionalTransferVariables["highlight_term"] = $this->highlightTerms;
+
+		$records =& $this->records;
+
+		// Find out how many coloums (one extra for image coloum)
+		$numcol = count($this->Fields) + 1;
+
+		//Print Table header
+		print "<!--START OBJECT-->\n";
+		$this->printNavBasicLinks();
+		print "\t\t\t\t\t\t\t\t<table id='emu-results-table'>\n";
+
+		// Loop over the results
+		$rownum = 1;
+		foreach ($records as $rec)
+		{
+			if ($rownum > $this->LimitPerPage)
+				break;
+
+			print "\t\t<!--START RECORD-->\n";
+
+			$displaylink = $this->displayPageLink($rec);
+
+			print "\t\t\t\t\t\t\t\t\t<tr>\n";
+
+			if ($this->DisplayThumbnails)
+			{
+				// AKB print "\t\t\t<td class='dataThumbnail'>" . "\n";
+				print "\t\t\t\t\t\t\t\t\t\t<td>";
+				// Display the thumbnail image
+				// if we are on the multimedia module then the image IRN is the
+				//  irn of the current record.
+				if ($this->Database == "emultimedia")
+				{
+					$mediaIrn = $rec->{'irn_1'};
+				}
+				else
+				{
+					$mediaIrn = $rec->{'MulMultiMediaRef:1'};
+				}
+				
+				if ($mediaIrn)
+				{
+					$thumbNail = "/" . $GLOBALS['WEB_DIR_NAME'] . "/objects/am/webmedia.php?irn=$mediaIrn&thumb=yes";
+					$mr = new AmMediaRetriever;
+					if ($mr->imageIsViewable($mediaIrn))
+					{
+						$imageLink = "/" . $GLOBALS['WEB_DIR_NAME'] . "/pages/common/imagedisplay.php?irn=$mediaIrn";
+						print "<a href='$imageLink'><img class='emu-icon-image' src='$thumbNail'/></a>";
+					}
+					else
+					{
+						print "\t\t\t\t<img src='$thumbNail'/>\n";
+					}
+
+				}	
+				else
+				{
+					print "\t\t\t\t<img src='/" .
+						$GLOBALS['WEB_DIR_NAME'] .
+						"/objects/am/images/noimage.gif'/>";
+				}
+				print "</td>\n";
+			}
+
+			// Display Other Fields
+
+			for ($j = 0; $j < $numcol - 1; $j++)
+			{
+				print "\t\t\t\t\t\t\t\t\t\t<td>";
+				$fieldData = '';
+
+				if (is_string($this->Fields[$j]))
+				{
+					$fieldData = $rec->{$this->Fields[$j]};
+				}
+				elseif (strtolower(get_class($this->Fields[$j])) == 'formatfield')
+				{
+					$field = $this->Fields[$j]->Format;
+					$fieldData = preg_replace('/{([^}]*)}/e', ' $rec->{"\\1"}', $field);
+				}
+				$fieldData = $this->adjustData($this->Fields[$j], $rec, $fieldData);
+
+				if ($fieldData == '')
+				{
+					$fieldData = $this->_STRINGS['NOT_STATED'];
+				}
+					
+				// First one is a link to display record
+				if ($j == 0)
+				{
+					$fieldData = preg_replace("/\b($this->highlightTerms)\b/i", "<span class='emu-highlight-term'>$1</span>", $fieldData);
+					print "<a href=\"$displaylink\">";
+						print($fieldData); 
+					print '</a>';
+				}
+				elseif ($fieldData != '')
+				{
+					print($fieldData);
+				}
+				else
+				{
+					print '&nbsp;';
+				}
+				print "</td>\n";
+			}
+
+			print "\t\t\t\t\t</tr>\n\t\t<!--END RECORD-->\n";
+			$rownum++;
+		}
+
+		//End Table
+		print "\t\t\t</table>\n";
+		print "<!--END OBJECT-->\n";
+
+	}
+
+	function
+	printNavBasicLinks()
+	{
+		// Print summary (i.e 10 to 20 of 234)
+		if ($this->Matches > 0)
+		{
+			$onpage = count($this->records);
+			if ($onpage > $this->LimitPerPage)
+				$onpage = $this->LimitPerPage;
+
+			$upper = $this->StartAt + $onpage - 1;
+
+			$matches = $this->Matches;
+			if ($onpage < $this->LimitPerPage
+					&& $matches > $upper)
+				$matches = $upper;
+
+			$summary = "<span> Search results for \"" . $_REQUEST['QueryTerms'] . "\" " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>" .
+				" of <span>$matches </span>";
+		}
+		else
+		{
+			$upper = $this->StartAt + $this->LimitPerPage -1;
+			$summary = "<span> Search results for " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>";
+		}
+		print("<p>$summary" );
+
+		// Pass all post/get vars through except 'StartAt'
+		// increment 'StartAt' by the page limit ($this->LimitPerPage)
+
+		// Note: This should be phased out in the future and changed to:
+		//	array_merge($_POST', $_GET);
+		$perams = $_REQUEST;
+		if(empty($perams))
+		{
+			$perams = array_merge($GLOBALS['HTTP_POST_VARS'],
+				$GLOBALS['HTTP_GET_VARS']);
+		}
+
+		while(list($key, $val) = each($perams))
+		{ 
+			// Don't pass through empty vars 
+			// try to keep url length down
+			if ($val == '')
+				continue;
+			if ($key != 'StartAt')
+			{
+				$key = urlencode(stripslashes($key)); 
+				$val = urlencode(stripslashes($val)); 
+				$getString .= "$key=$val&amp;"; 
+			}
+		} 
+
+		$thisPage = isset($GLOBALS['PHP_SELF'])
+			? $GLOBALS['PHP_SELF'] : $_SERVER['PHP_SELF'];
+		$numresults = $this->LimitPerPage;
+
+		// Print the Back button if required
+		if ($this->StartAt > 1)
+		{
+			$backlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt - $this->LimitPerPage);
+
+			print "<a  href=\"$backlink\">";
+			print($this->_STRINGS['PREVIOUS'] );
+			print "</a>";
+			print(' | ');
+		}
+
+		// Print the Next button if required
+		if (count($this->records) > $this->LimitPerPage)
+		{
+			$nextlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt + $this->LimitPerPage);
+			print "<a class='forwardPageLink' href=\"$nextlink\">";
+			print($this->_STRINGS['NEXT'] );
+			print "</a>";
+		}
+		print "</p>\n";
+	}
+
+	function
+	printNavPageLinks()
+	{
+		$matches = $this->Matches;
+		$totalpages = ceil($matches/$this->LimitPerPage);
+
+		// Pass all post/get vars through except 'StartAt'
+		// increment 'StartAt' by the page limit ($this->LimitPerPage)
+
+		// Note: This should be phased out in the future and changed to:
+		//	array_merge($_POST', $_GET);
+		$perams = $_REQUEST;
+		if(empty($perams))
+		{
+			$perams = array_merge($GLOBALS['HTTP_POST_VARS'],
+				$GLOBALS['HTTP_GET_VARS']);
+		}
+
+		while(list($key, $val) = each($perams))
+		{ 
+			// Don't pass through empty vars 
+			// try to keep url length down
+			if ($val == '')
+				continue;
+			if ($key != 'StartAt')
+			{
+				$key = urlencode(stripslashes($key)); 
+				$val = urlencode(stripslashes($val)); 
+				$getString .= "$key=$val&amp;"; 
+			}
+		} 
+
+		$thisPage = isset($GLOBALS['PHP_SELF'])
+			? $GLOBALS['PHP_SELF'] : $_SERVER['PHP_SELF'];
+		$numresults = $this->LimitPerPage;
+
+		$curStartAt = $this->StartAt;
+		$curPage = (($curStartAt-1)/$this->LimitPerPage)+1;
+		$lowerPage = 0;
+		$upperPage = $totalpages;
+
+		// Print summary (i.e 10 to 20 of 234)
+		if ($this->Matches > 0)
+		{
+			$onpage = count($this->records);
+			if ($onpage > $this->LimitPerPage)
+				$onpage = $this->LimitPerPage;
+
+			$upper = $this->StartAt + $onpage - 1;
+
+			$matches = $this->Matches;
+			if ($onpage < $this->LimitPerPage
+					&& $matches > $upper)
+				$matches = $upper;
+
+			// AKB $summary = "<span> Search results for " . $this->StartAt . "</span>" .
+			$summary = "<span> Search results for \"" . $_REQUEST['QueryTerms'] . "\" " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>" .
+				" of <span>$matches </span>";
+		}
+		else
+		{
+			$upper = $this->StartAt + $this->LimitPerPage -1;
+			$summary = "<span> Search results for " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>";
+		}
+		print("<p>$summary" );
+
+		// Print the First page button if required
+		if ($this->StartAt > 1)
+		{
+			$firstlink = "$thisPage?$getString" . 
+				'StartAt=1'; 
+			print "\t<a class='firstPageLink' href=\"$firstlink\">";
+			print($this->_STRINGS['FIRST'] );
+			print "</a>\n";
+		}
+
+		// Print the Back button if required
+		if ($this->StartAt > 1)
+		{
+			$backlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt - $this->LimitPerPage);
+			print('| ');
+			print "\t<a  href=\"$backlink\">";
+			Print($this->_STRINGS['PREVIOUS']);
+			print "</a>\n";
+		}
+
+		// It is not practical to show all the pages so a limit will be set to show
+		// only 3 pages either side of the current one. In the future this can be made
+		// more global.
+		if($totalpages > 5)
+		{
+			if($curPage < 3)
+			{
+				$lowerPage = 0;
+				$upperPage = 5;
+			}
+			elseif($curPage > ($totalpages - 3))
+			{
+				$lowerPage = $totalpages - 5;
+				$upperPage = $totalpages;
+			}
+			else
+			{
+				$lowerPage = $curPage - 3;
+				$upperPage = $curPage + 2;
+			}
+		}
+
+		// This is where the page numbers go.....
+		//
+		if ($this->Matches > 0)
+		{
+			//for($i=0; $i<$totalpages; $i++)
+			for($i=$lowerPage; $i<$upperPage; $i++)
+			{
+				$navpage = $i+1;
+				$localStartAt = (($this->LimitPerPage * $i) + 1);
+				if($localStartAt == $curStartAt)
+				{
+					print "\t<b class='currentPage'>";
+					print( $navpage );
+					print "</b>\n";
+				}
+				else
+				{
+					$nextlink = "$thisPage?$getString" . 
+						'StartAt=' . 
+						$localStartAt;
+					print "\t<a  href=\"$nextlink\">";
+					print( $navpage );
+					print "</a>\n";
+				}
+
+			}
+		}
+
+		// Print the Next button if required
+		if (count($this->records) > $this->LimitPerPage)
+		{
+			$nextlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt + $this->LimitPerPage);
+			print "\t<a  href=\"$nextlink\">";
+			print( $this->_STRINGS['NEXT'] );
+			print "</a>\n";
+			print(' |');
+		}
+
+		// Print the Next button if required
+		if (count($this->records) > $this->LimitPerPage)
+		{
+			$lastlink .= "$thisPage?$getString" . 
+				'StartAt=' . 
+				(($this->LimitPerPage * ($totalpages-1)) + 1);
+			print "\t<a  href=\"$lastlink\">";
+			print( $this->_STRINGS['LAST']);
+			print "</a>\n";
+		}
+
+		print "</p>\n";
+	}
+
+	function
+	printRedisplay($page, $linktext, $newLimit=0)
+	{
+		$getString = $this->RedirectLink($page, $newLimit);
+		print "<a href=\"$getString\">";
+		print($linktext );
+		print "</a>";
+	}
+
+} // end AmResultsList class
+
+class
+AmContactSheet extends BaseContactSheet
+{
+	var $Fields = array(	'SummaryData',
+				);	
+
+	function queryPageLink()
+	{
+		if ($this->QueryPage != '')
+		{
+			return $this->QueryPage;
+		}
+		else
+		{
+			return ".";
+		}
+	}
+
+	function getMMCredits($mmIrn, $copyrightOnly)
+	{
+		$qry = new ConfiguredQuery;
+		$qry->Select = array(	'MulTitle',
+					'MulCreator_tab',
+					'MulDescription',
+					'DetPublisher',
+					'DetRights',
+				);
+		$qry->From = 'emultimedia';
+		$qry->Where = "irn=$mmIrn";
+		$r = $qry->Fetch();
+
+		$creator = "";
+		if ($r[0]->{"MulCreator:1"} != "")
+			$creator = "photographer:" . $r[0]->{"MulCreator:1"};
+
+		$rights = "(c) assumed Australian Museum.";
+		if ($r[0]->DetRights != "")
+			$rights = $r[0]->DetRights;
+
+		if ($copyrightOnly)
+			return
+				"<div class='emu-image-rights'>" .
+					$rights . 
+				"</div>";
+		else
+			return "<div class='emu-image-caption'>" . 
+					$r[0]->MulDescription .
+				"&nbsp;</div>" .
+				"<div class='emu-image-rights'>" .
+					$rights . 
+				"&nbsp;</div>" .
+				"<div class='emu-image-creator'>" .
+					$creator .
+				"</div>";	
+	}
+
+
+	function
+	display()
+	{
+		$records =& $this->records;
+
+		$colwidth = (int) ((float) 100 / (float) $this->NumColumns);
+
+		//Print Table header
+		print "<!--START OBJECT-->\n";
+		$this->printNavBasicLinks();
+		print "\t<table class='dataContactSheetTable'>\n<tbody>\n";
+
+		// Loop over the results
+		$rownum = 1;
+		$recordnum = 0;
+		$hasMore = 1;
+		while($hasMore)
+		{
+			print "\t\t<tr class='contactSheetRow'>\n";
+
+			for($colnum = 1; $colnum <= $this->NumColumns; $colnum++)
+			{
+				print "\t\t\t<td class='contactSheetItem'>\n";
+				print "\t\t\t<!--START RECORD-->\n";
+				if (isset($records[$recordnum]) && ($recordnum < $this->LimitPerPage))
+				{
+					$displaylink = $this->displayPageLink($records[$recordnum]);
+
+					$credits = "";
+
+					// Display the thumbnail image
+					// if we are on the multimedia module then the image IRN is the
+					//  irn of the current record.
+					if ($this->Database == "emultimedia")
+					{
+						$mediaIrn = $records[$recordnum]->{'irn_1'};
+					}
+					else
+					{
+						$mediaIrn = $records[$recordnum]->{'MulMultiMediaRef:1'};
+					}
+
+					if ($mediaIrn)
+					{
+						$thumbNail = "/" . $GLOBALS['WEB_DIR_NAME'] . "/objects/am/webmedia.php?irn=$mediaIrn";
+
+						$mr = new AmMediaRetriever;
+						if ($mr->imageIsViewable($mediaIrn))
+						{
+							$credits = $this->getMMCredits($mediaIrn, true);
+							$imageLink = "/" . $GLOBALS['WEB_DIR_NAME'] . "/pages/common/imagedisplay.php?irn=$mediaIrn";
+							print "<span class='emu-tiny-image-credits'>$credits</span>\n";
+							print "\t\t\t\t\t\t<a class='imageLink'  href='$imageLink'>" .
+								"<img class='contactImage' src='$thumbNail&thumb=yes'/></a>\n";
+						}
+						else
+						{
+							print "\t\t\t\t\t\t<img class='contactImage' src='$thumbNail&thumb=yes'/>\n";
+						}
+					}
+					else
+					{
+						print "\t\t\t\t\t\t<img class='contactImage' src='/" .
+							$GLOBALS['WEB_DIR_NAME'] .
+							"/objects/am/images/noimage.gif'/>\n";
+					}
+				
+	
+					print "\t\t\t\t\t</p>\n";
+
+					$fieldnum = 1;
+					foreach($this->Fields as $fld)
+					{
+					
+						if (is_string($fld))
+						{
+							$fieldData = $records[$recordnum]->{"$fld"};
+						}
+						elseif (strtolower(get_class($fld)) == 'formatfield')
+						{
+							$field = $fld->Format;
+							$fieldData = preg_replace('/{([^}]*)}/e', ' $records[$recordnum]->{"\\1"}', $field);
+						}
+
+						if ($fieldData == '')
+						{
+							$fieldData = $this->_STRINGS['NOT_STATED'];
+						}
+
+						if ($fieldnum++ == 1)
+						{
+							print "\t\t\t\t\t<a href=\"$displaylink\" class='dataLink'>";
+							print($fieldData);
+							print '</a>';
+						}
+						else
+						{
+							print($fieldData); 
+						}
+						print "<br />\n";
+					}
+
+				}
+				else
+				{
+					$hasMore = 0;
+				}
+
+				$recordnum++;
+				print "\t\t\t<!--END RECORD-->\n";
+				print "\t\t\t</td>\n";
+				if (! isset($records[$recordnum]) || ($recordnum >= $this->LimitPerPage))
+				{
+					$hasMore = 0;
+				}
+			}
+			print "\t\t</tr>\n";
+			// Display Other Fields
+			$rownum++;
+		}
+
+		//End Table
+		print "\t</tbody>\n</table>\n";
+		$this->printNavBasicLinks();
+		print "</p>\n";
+		print "<!--END OBJECT-->\n";
+
+	}
+
+	function
+	printNavPageLinks()
+	{
+		$matches = $this->Matches;
+		$totalpages = ceil($matches/$this->LimitPerPage);
+
+		// Pass all post/get vars through except 'StartAt'
+		// increment 'StartAt' by the page limit ($this->LimitPerPage)
+
+		// Note: This should be phased out in the future and changed to:
+		//	array_merge($_POST', $_GET);
+		$perams = $_REQUEST;
+		if(empty($perams))
+		{
+			$perams = array_merge($GLOBALS['HTTP_POST_VARS'],
+				$GLOBALS['HTTP_GET_VARS']);
+		}
+
+		while(list($key, $val) = each($perams))
+		{ 
+			// Don't pass through empty vars 
+			// try to keep url length down
+			if ($val == '')
+				continue;
+			if ($key != 'StartAt')
+			{
+				$key = urlencode(stripslashes($key)); 
+				$val = urlencode(stripslashes($val)); 
+				$getString .= "$key=$val&amp;"; 
+			}
+		} 
+
+		$thisPage = isset($GLOBALS['PHP_SELF'])
+			? $GLOBALS['PHP_SELF'] : $_SERVER['PHP_SELF'];
+		$numresults = $this->LimitPerPage;
+
+		$curStartAt = $this->StartAt;
+		$curPage = (($curStartAt-1)/$this->LimitPerPage)+1;
+		$lowerPage = 0;
+		$upperPage = $totalpages;
+
+		// Print summary (i.e 10 to 20 of 234)
+		if ($this->Matches > 0)
+		{
+			$onpage = count($this->records);
+			if ($onpage > $this->LimitPerPage)
+				$onpage = $this->LimitPerPage;
+
+			$upper = $this->StartAt + $onpage - 1;
+
+			$matches = $this->Matches;
+			if ($onpage < $this->LimitPerPage
+					&& $matches > $upper)
+				$matches = $upper;
+
+			$summary = "<span> Search results for \"" . $_REQUEST['QueryTerms'] . "\" " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>" .
+				" of <span>$matches </span>";
+		}
+		else
+		{
+			$upper = $this->StartAt + $this->LimitPerPage -1;
+			$summary = "<span> Search results for " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>";
+		}
+		print("<p>$summary" );
+
+		// Print the First page button if required
+		if ($this->StartAt > 1)
+		{
+			$firstlink = "$thisPage?$getString" . 
+				'StartAt=1'; 
+			print "\t<a class='firstPageLink' href=\"$firstlink\">";
+			print($this->_STRINGS['FIRST'] );
+			print "</a>\n";
+		}
+
+		// Print the Back button if required
+		if ($this->StartAt > 1)
+		{
+			$backlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt - $this->LimitPerPage);
+			print('| ');
+			print "\t<a  href=\"$backlink\">";
+			Print($this->_STRINGS['PREVIOUS']);
+			print "</a>\n";
+		}
+
+		// It is not practical to show all the pages so a limit will be set to show
+		// only 3 pages either side of the current one. In the future this can be made
+		// more global.
+		if($totalpages > 5)
+		{
+			if($curPage < 3)
+			{
+				$lowerPage = 0;
+				$upperPage = 5;
+			}
+			elseif($curPage > ($totalpages - 3))
+			{
+				$lowerPage = $totalpages - 5;
+				$upperPage = $totalpages;
+			}
+			else
+			{
+				$lowerPage = $curPage - 3;
+				$upperPage = $curPage + 2;
+			}
+		}
+
+		// This is where the page numbers go.....
+		//
+		if ($this->Matches > 0)
+		{
+			//for($i=0; $i<$totalpages; $i++)
+			for($i=$lowerPage; $i<$upperPage; $i++)
+			{
+				$navpage = $i+1;
+				$localStartAt = (($this->LimitPerPage * $i) + 1);
+				if($localStartAt == $curStartAt)
+				{
+					print "\t";
+					print( $navpage );
+					print "\n";
+				}
+				else
+				{
+					$nextlink = "$thisPage?$getString" . 
+						'StartAt=' . 
+						$localStartAt;
+					print "\t<a  href=\"$nextlink\">";
+					print( $navpage );
+					print "</a>\n";
+				}
+
+			}
+		}
+
+		// Print the Next button if required
+		if (count($this->records) > $this->LimitPerPage)
+		{
+			$nextlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt + $this->LimitPerPage);
+			print "\t<a  href=\"$nextlink\">";
+			print( $this->_STRINGS['NEXT'] );
+			print "</a>\n";
+			print(' |');
+		}
+
+		// Print the Next button if required
+		if (count($this->records) > $this->LimitPerPage)
+		{
+			$lastlink .= "$thisPage?$getString" . 
+				'StartAt=' . 
+				(($this->LimitPerPage * ($totalpages-1)) + 1);
+			print "\t<a  href=\"$lastlink\">";
+			print( $this->_STRINGS['LAST']);
+			print "</a>\n";
+		}
+
+		print "</p>\n";
+	}
+
+	function
+	printNavBasicLinks()
+	{
+		// Print summary (i.e 10 to 20 of 234)
+		if ($this->Matches > 0)
+		{
+			$onpage = count($this->records);
+			if ($onpage > $this->LimitPerPage)
+				$onpage = $this->LimitPerPage;
+
+			$upper = $this->StartAt + $onpage - 1;
+
+			$matches = $this->Matches;
+			if ($onpage < $this->LimitPerPage
+					&& $matches > $upper)
+				$matches = $upper;
+
+			$summary = "<span> Search results for \"" . $_REQUEST['QueryTerms'] . "\" " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>" .
+				" of <span>$matches </span>";
+		}
+		else
+		{
+			$upper = $this->StartAt + $this->LimitPerPage -1;
+			$summary = "<span> Search results for " . $this->StartAt . "</span>" .
+				" to <span>$upper</span>";
+		}
+		print("<p>$summary" );
+
+		// Pass all post/get vars through except 'StartAt'
+		// increment 'StartAt' by the page limit ($this->LimitPerPage)
+
+		// Note: This should be phased out in the future and changed to:
+		//	array_merge($_POST', $_GET);
+		$perams = $_REQUEST;
+		if(empty($perams))
+		{
+			$perams = array_merge($GLOBALS['HTTP_POST_VARS'],
+				$GLOBALS['HTTP_GET_VARS']);
+		}
+
+		while(list($key, $val) = each($perams))
+		{ 
+			// Don't pass through empty vars 
+			// try to keep url length down
+			if ($val == '')
+				continue;
+			if ($key != 'StartAt')
+			{
+				$key = urlencode(stripslashes($key)); 
+				$val = urlencode(stripslashes($val)); 
+				$getString .= "$key=$val&amp;"; 
+			}
+		} 
+
+		$thisPage = isset($GLOBALS['PHP_SELF'])
+			? $GLOBALS['PHP_SELF'] : $_SERVER['PHP_SELF'];
+		$numresults = $this->LimitPerPage;
+
+		// Print the Back button if required
+		if ($this->StartAt > 1)
+		{
+			$backlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt - $this->LimitPerPage);
+
+			print "<a  href=\"$backlink\">";
+			print($this->_STRINGS['PREVIOUS'] );
+			print "</a>";
+			print(' | ');
+		}
+
+		// Print the Next button if required
+		if (count($this->records) > $this->LimitPerPage)
+		{
+			$nextlink = "$thisPage?$getString" . 
+				'StartAt=' . 
+				($this->StartAt + $this->LimitPerPage);
+			print "<a class='forwardPageLink' href=\"$nextlink\">";
+			print($this->_STRINGS['NEXT'] );
+			print "</a>";
+		}
+		print "</p>\n";
+	}
+
+
+
+	function
+	printRedisplay($page, $linktext, $newLimit=0)
+	{
+		$getString = $this->RedirectLink($page, $newLimit);
+		print "<a href=\"$getString\">";
+		print($linktext );
+		print "</a>";
+	}
+
+
+} // end AmContactSheetResultsList class
+
+?>

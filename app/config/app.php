@@ -79,7 +79,7 @@ return array(
 	*/
 
 	'providers' => array(
-
+		'Way\Generators\GeneratorsServiceProvider',
 		'Illuminate\Foundation\Providers\ArtisanServiceProvider',
 		'Illuminate\Auth\AuthServiceProvider',
 		'Illuminate\Cache\CacheServiceProvider',
@@ -113,8 +113,7 @@ return array(
 		'Illuminate\Validation\ValidationServiceProvider',
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
-		'Fclamp\Imu\ImuServiceProvider'
-
+		'Bmcd\Imu\ImuServiceProvider',
 	),
 
 	/*

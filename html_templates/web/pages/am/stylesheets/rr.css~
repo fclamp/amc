@@ -1,0 +1,108 @@
+.input-validation-error
+{
+	border: 1px solid #ff0000;
+	background-color: #ffeeee;
+}
+
+.ErrorMessage, .validation-summary-errors { color: red; }
+#SuccessMessage { color: blue; }
+
+/* Section Nav */
+ul.openClose, ul.openClose ul, ul.moreLess, ul.moreLess ul
+{
+	margin: 0;
+	padding: 0;
+}
+
+ul.openClose ul { margin: 0 0 0 10px; }
+
+ul.openClose li, ul.moreLess li
+{
+	list-style-type: none;
+	margin: 0;
+	padding: 0 0 0 15px;
+	background: url(/images/site/icon-minus.gif) no-repeat left top;
+}
+
+a.toggleButton
+{
+	display: block;
+	margin-left: -15px;
+	padding-left: 15px;
+	background: url(/images/site/icon-plus.gif) no-repeat left 2px #fff;
+	cursor: pointer;
+}
+
+a.showMinus { background-image: url(/images/site/icon-minus.gif); }
+
+ul.moreLess a.toggleButton
+{
+	bottom: 1px;
+	top: auto;
+	margin-left: 0;
+}
+
+ul.moreLess ul li { margin-left: -15px; }
+
+ul.moreLess li.removeBullet
+{
+	padding: 0;
+	background: none;
+}
+
+ul.moreLess li.removeBullet ul { margin: 0 0 0 15px; }
+
+#animal-finder p
+{
+	padding: 0 15px 10px 20px;
+	margin: 0;
+	background: url(../images/site/icon-arrow-white.gif) no-repeat 10px .4em;
+}
+
+#animal-finder a
+{
+	color: #fff;
+	text-decoration: none;
+}
+
+#home-features p { background: none; }
+/*p.BlogPost, li.BlogPost{background: url(/images/site/icon-general.gif) no-repeat 0 0 !important;padding-bottom: 2px !important;}*/
+
+/*
+Missing:
+-Campaign
+-DonationPanel
+-PositionVacant
+-PromotionalTile
+-ShopPromotionalTile
+-Supporter
+-Tender
+*/
+p.Animal, li.Animal { background: url(/images/site/icon-special.gif) no-repeat 0 0 !important; }
+p.AnimalFinder, li.Animal Finder{ background: url(/images/site/icon-special.gif) no-repeat 0 0 !important; }
+p.Audio, li.Audio { background: url(/images/site/icon-audio.gif) no-repeat 0 0 !important; }
+p.Blog, li.Blog{background: url(/images/site/icon-general.gif) no-repeat 0 0 !important;padding-bottom: 2px !important;}
+p.BlogPost, li.BlogPost{background: url(/images/site/icon-general.gif) no-repeat 0 0 !important;padding-bottom: 2px !important;}
+p.Category, li.Category{background: url(/images/site/icon-category.gif) no-repeat 0 0 !important;padding-bottom: 2px !important;}
+p.Comment, li.Comment { background: url(/images/site/icon-comment.gif) no-repeat 0 0 !important; }
+p.Document, li.Document { background: url(/images/site/icon-document.gif) no-repeat 0 0 !important; }
+p.Event, li.Event { background: url(/images/site/icon-event.gif) no-repeat 0 0 !important; }
+p.General, li.General { background: url(/images/site/icon-general.gif) no-repeat 0 0 !important; }
+p.Image, li.Image { background: url(/images/site/icon-image.gif) no-repeat 0 0 !important; }
+p.Interactive, li.Interactive { background: url(/images/site/icon-interactive.gif) no-repeat 0 0 !important; }
+p.MediaRelease, li.MediaRelease { background: url(/images/site/icon-media.gif) no-repeat 0 0 !important; }
+p.Movie, li.Movie { background: url(/images/site/icon-movie.gif) no-repeat 0 0 !important; }
+p.PositionVacant, li.PositionVacant { background: url(/images/site/icon-general.gif) no-repeat 0 0 !important; }
+p.Publication, li.Publication { background: url(/images/site/icon-publication.gif) no-repeat 0 0 !important; }
+p.ResearchProject, li.ResearchProject { background: url(/images/site/icon-research-project.gif) no-repeat 0 0 !important; }
+p.Restricted, li.Restricted { background: url(/images/site/icon-general.gif) no-repeat 0 0 !important; }
+p.Section, li.Section { background: url(/images/site/icon-section.gif) no-repeat 0 0 !important; }
+p.StaffProfile, li.StaffProfile { background: url(/images/site/icon-staff.gif) no-repeat 0 0 !important; }
+
+p.AudioGallery, li.AudioGallery { background: url(/images/site/icon-gallery-audio.gif) no-repeat 0 0 !important; }
+p.ImageGallery, li.ImageGallery { background: url(/images/site/icon-gallery-image.gif) no-repeat 0 0 !important; }
+p.MovieGallery, li.MovieGallery { background: url(/images/site/icon-gallery-movie.gif) no-repeat 0 0 !important; }
+
+/* need to change related icons for gallerys also, for now using the Interactive icon */
+p.InteractiveGallery, li.InteractiveGallery { background: url(/images/site/icon-interactive.gif) no-repeat 0 0 !important; }
+

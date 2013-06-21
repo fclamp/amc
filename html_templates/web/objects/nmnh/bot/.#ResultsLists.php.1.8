@@ -1,0 +1,430 @@
+<?php
+/*
+*  Copyright (c) KE Software Pty Ltd - 2001
+*/
+if (!isset($WEB_ROOT))
+	$WEB_ROOT = dirname(dirname(dirname(dirname(realpath(__FILE__)))));
+require_once ($WEB_ROOT . '/objects/lib/webinit.php');
+//require_once ($LIB_DIR . 'BaseResultsLists.php');
+require_once ($LIB_DIR . 'BaseResultsLists.php');
+
+$GLOBALS['STRINGS_DIR'] = $WEB_ROOT . "/objects/" . $GLOBALS['BACKEND_TYPE'] . "/" . $GLOBALS['DEPARTMENT'] . "/strings/";
+
+class
+NmnhBotanyStandardResultsList extends BaseStandardResultsList
+{
+	function
+	NmnhBotanyStandardResultsList()
+	{
+		$this->BaseStandardResultsList();
+		
+		$this->Database = 'enmnh';
+		$this->DisplayThumbnails = 0;
+		
+		$details = new FormatField;
+                $details->Format = "Detailed View";
+                $details->Label = "Click for Details";
+
+		$catNumber = new FormatField;
+        	$catNumber->Label = "Catalog #";
+            	$catNumber->Format = "{CatPrefix}{CatNumber} {CatSuffix}";
+
+		$this->Fields = array
+		(
+			$details,
+			'CatCatalog',
+			'IdeFiledAsFamily',
+			'IdeFiledAsQualifiedName',
+			'CatBarcode',
+			$catNumber,
+			'IdeFiledAsTypeStatus',
+			'BioEventSiteRef->ecollectionevents->ColPrimaryParticipantLocal',
+			'BioPrimaryCollNumber',
+			'BioEventSiteRef->ecollectionevents->LocCountry',
+		);
+                $this->Order = "+CatCatalog|+CatDivision|+IdeFiledAsFamily|+IdeFiledAsQualifiedName";
+                $this->OrderLimit = 5000;
+	}
+} // end NmnhBotanyStandardResultsList class
+
+class
+NmnhBotanyContactSheet extends BaseContactSheet
+{
+	function
+	NmnhBotanyContactSheet()
+	{
+		$this->BaseContactSheet();
+		$this->Database = 'enmnh';
+
+		$details = new FormatField;
+                $details->Format = "Detailed View";
+
+		$catNumber = new FormatField;
+            	$catNumber->Format = "{CatPrefix}{CatNumber} {CatSuffix}";
+
+		$this->Fields = array
+		(
+			$details,
+			$catNumber,
+			'IdeFiledAsQualifiedName',
+		);	
+	}
+
+	function
+	doQuery ()
+	{
+		/*
+		*  Dynamicall create the specified QueryGenerator and
+		*    call a method corresponding to the QueryName.
+		*    Set the results in the $this->records array for
+		*    use elsewhere.
+		*/
+
+		// only run once
+		if ($this->_queryDone)
+			return;
+		$this->_queryDone = 1;
+
+		// Add mandatory fields to $this->Fields for select
+		$select = array();
+		if (is_array($this->DisplayPage) && 
+				$this->DisplayPage['ConditionField'] != '')
+		{
+			$select = array('irn', 
+					  'MulMultiMediaRef_tab', 
+					  'AdmPublishWebNoPasswordLocal_tab', 
+					  $this->DisplayPage['ConditionField']);
+		}
+		else
+		{
+			if ($this->Database == "emultimedia")
+			{
+				$select = array('irn');
+			}
+			else
+			{
+				$select = array('irn', 'MulMultiMediaRef_tab', 'AdmPublishWebNoPasswordLocal_tab');
+			}
+		}
+
+		foreach ($this->Fields as $fld)
+		{
+			if (is_string($fld))
+			{
+				array_push($select, $fld);
+			}
+			elseif (strtolower(get_class($fld)) == 'formatfield')
+			{
+				// format in the form "{ColName1} {ColName2}"
+				preg_match_all('/{([^}]*)}/', 
+						$fld->Format, 
+						$matches);
+				foreach ($matches[1] as $colName)
+				{
+					array_push($select, $colName);
+				}
+			}
+		}
+
+		$where = '';
+		if ($this->Where == '')
+		{
+			$qryGenerator = new $this->QueryGenerator;
+			// these properties are used by the RandomQuery
+			$qryGenerator->Database = $this->Database;
+			$qryGenerator->Limit = $this->LimitPerPage;
+			$qryGenerator->Intranet = $this->Intranet;
+			// Use reflection to call query method
+			$queryAttrib = $qryGenerator->{$this->QueryName}();
+			$where = $queryAttrib->Where;
+		}
+		else
+		{
+			$where = $this->Where;
+		}
+
+		if ($this->Restriction != '')
+		{
+			if ($where == "")
+				$where = "true";
+			$where = "($where) AND (" . $this->Restriction . ")";
+		}
+
+		$qry = new ConfiguredQuery;
+		$qry->SelectedLanguage = $this->LanguageData;
+		$qry->Intranet = $this->Intranet;
+		$qry->Select = $select;
+		$qry->From = $this->Database;
+		$qry->Where = $where;
+		if ( !empty($queryAttrib->RankTerm) || !empty($queryAttrib->RankOn) )
+		{
+			$qry->RankTerm = $queryAttrib->RankTerm;
+			$qry->RankOn = $queryAttrib->RankOn;
+		}
+		// One extra so we know it there are more records
+		$qry->Limit = $this->LimitPerPage + 1;	
+		$qry->Offset = $this->StartAt;
+
+		$this->records = $qry->Fetch();
+		$this->Matches = $qry->Matches;
+		if ($qry->Status == 'failed')
+		{
+			print $qry->Where;
+			WebDie ('Query Error - Texxmlserver: ' . 
+				$qry->Error , 
+				'where: ' . $where);
+		}
+
+		/*
+		** If $this->Order set, and # matches < OrderLimit, perform the same
+		** query again but this time order it.
+		*/
+		if ($this->Order != "" && $this->Matches <= $this->OrderLimit)
+		{
+			$orderfields = explode("|", $this->Order);
+			foreach ($orderfields as $orderfield)
+			{
+				if (preg_match("/^[\+-]((.*)_tab)$/", $orderfield, $matches))
+					$orderstring .= $matches[1] . "[" . $matches[2] . "], ";
+				elseif (preg_match("/^\+(.*)$/", $orderfield, $matches))
+					$orderstring .= $matches[1] . " asc, ";
+				elseif (preg_match("/^-(.*)$/", $orderfield, $matches))
+					$orderstring .= $matches[1] . " desc, ";
+				else
+					$orderstring .= $orderfield . " asc, ";
+
+				$fieldname = empty($matches[1]) ? $orderfield : $matches[1];
+
+				if (array_search($fieldname, $select) === FALSE)
+					array_push($select, $fieldname);
+			}
+			$orderstring = preg_replace("/,\s$/", "", $orderstring);
+			$qry->Select = $select;
+			$qry->Order = $orderstring;
+			$this->records = $qry->Fetch();
+
+			if ($qry->Status == 'failed')
+			{
+				print $qry->Where;
+				WebDie ('Query Error - Texxmlserver: ' . 
+					$qry->Error , 
+					'where: ' . $where);
+			}
+		}
+	}
+
+	function
+	display()
+	{
+		$records =& $this->records;
+
+		$widthAttrib = '';
+		$backgroundColorAttrib = '';
+		$highlightColorAttrib = '';
+		$borderColorAttrib = '';
+		if ($this->Width != '')
+			$widthAttrib 	= 'width="' . $this->Width . '"' ;
+		if ($this->BodyColor != '')
+			$backgroundColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->HighlightColor != '')
+			$highlightColorAttrib	= 'bgcolor="' . $this->HighlightColor . '"';
+		else
+			$highlightColorAttrib	= 'bgcolor="' . $this->BodyColor . '"';
+		if ($this->BorderColor != '')
+			$borderColorAttrib= 'bgcolor="' . $this->BorderColor . '"';
+
+		$colwidth = (int) ((float) 100 / (float) $this->NumColumns);
+
+		//Print Table header
+		print "<!--START OBJECT-->\n";
+		print "<table $widthAttrib border=\"0\" cellspacing=\"0\" cellpadding=\"2\">\n";
+		print "<tr><td width=\"25%\" align=\"left\" nowrap=\"nowrap\">";
+		$this->printBackLink();
+		if ($this->ResultsListPage != '')
+		{
+			PPrint(' | ', 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+
+			PPrint(' ', 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+
+			$this->printRedisplay($this->ResultsListPage, 
+						$this->_STRINGS["LIST_VIEW"]);
+		}
+		print "</td>";
+		print "<td width=\"75%\" align=\"right\">\n";
+		$this->printNavLinks();
+		print "</td></tr>";
+		print "<tr><td colspan=\"2\">\n";
+		print "<table $borderColorAttrib width=\"100%\" border=\"0\" cellspacing=\"1\" cellpadding=\"3\">\n";
+
+		// Loop over the results
+		$rownum = 1;
+		$recordnum = 0;
+		$hasMore = 1;
+		while($hasMore)
+		{
+			if ($rownum % 2 == 0 && $this->HighlightColor != '')
+				print "  <tr $highlightColorAttrib>\n";
+			else
+				print "  <tr $backgroundColorAttrib>\n";
+
+			for($colnum = 1; $colnum <= $this->NumColumns; $colnum++)
+			{
+				print "    <td align=\"center\" valign=\"top\" width=\"$colwidth%\">\n";
+				if (isset($records[$recordnum]) 
+					&& $recordnum < $this->LimitPerPage)
+				{
+					$displaylink = $this->displayPageLink($records[$recordnum]);
+
+					// Display the thumbnail image
+					print "<table width=\"100%\"><tr><td height=\"120\" align=\"center\" valign=\"middle\">";
+					print "<!--START RECORD-->\n";
+					$image = new MediaImage();
+					if (! $this->ThumbnailsLinkToFullView)
+					{
+						$image->Link = $displaylink;
+					}
+					$image->Intranet = $this->Intranet;
+					if ($this->Database == "emultimedia")
+					{
+						$mediairn = $records[$recordnum]->{'irn_1'};
+					}
+					else
+					{
+						$i = 1;
+                        			$mmField = "MulMultiMediaRef:$i";
+                        			$publishField = "AdmPublishWebNoPasswordLocal:$i";
+                        			$mediairn = $records[$recordnum]->{$mmField};
+                        			$mediairntmp = $mediairn;
+                        			$publish = $records[$recordnum]->{$publishField};
+
+                        			while ($mediairntmp != '')
+                        			{
+                                			if (strtolower($publish) == "yes")
+							{
+								$mediairn = $mediairntmp;
+                                				break;
+							}
+
+							$i++;
+                                			$mmField = "MulMultiMediaRef:$i";
+                                			$publishField = "AdmPublishWebNoPasswordLocal:$i";
+                        				$mediairntmp = $records[$recordnum]->{$mmField};
+                        				$publish = $records[$recordnum]->{$publishField};
+						}
+					}
+
+					$image->IRN = $mediairn;
+					$image->BorderColor = $this->HeaderColor;
+					$image->HighLightColor = $this->HeaderColor;
+					$image->Width = 100;
+					$image->Height = 100;
+					$image->KeepAspectRatio = 1;
+					$image->RefIRN = $records[$recordnum]->{'irn_1'};
+					$image->RefTable = $this->Database;
+					$image->ShowBorder = $this->ShowImageBorders;
+					if ($this->ImageDisplayPage != "")
+					{
+						$image->ImageDisplayPage = $this->ImageDisplayPage;
+					}
+					elseif($this->Intranet)
+					{
+						$image->ImageDisplayPage = $GLOBALS['INTRANET_DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}	
+					else
+					{
+						$image->ImageDisplayPage = $GLOBALS['DEFAULT_IMAGE_DISPLAY_PAGE'];
+					}
+					$image->Show();
+
+					print "</td></tr><tr><td align=\"center\" valign=\"top\">";
+
+					$fieldnum = 1;
+					foreach($this->Fields as $fld)
+					{
+					
+						if (is_string($fld))
+						{
+							$fieldData = $records[$recordnum]->{"$fld"};
+						}
+						elseif (strtolower(get_class($fld)) == 'formatfield')
+						{
+							$field = $fld->Format;
+							$fieldData = preg_replace('/{([^}]*)}/e', ' $records[$recordnum]->{"\\1"}', $field);
+						}
+
+						if ($fieldData == '')
+						{
+							$fieldData = $this->_STRINGS['NOT_STATED'];
+						}
+
+						if ($fieldnum++ == 1)
+						{
+							print "<a href=\"$displaylink\">";
+							PPrint($fieldData, 
+								$this->FontFace,
+								$this->FontSize,
+								$this->TextColor, 
+								$this->HighlightTextColor);
+							print '</a><br />';
+						}
+						else
+						{
+							PPrint($fieldData, 
+								$this->FontFace,
+								$this->SmallFontSize, 
+								$this->TextColor);
+								print "<br />";
+						}
+					}
+					print "</td></tr></table>";
+
+					print "<!--END RECORD-->\n";
+				}
+				else
+					$hasMore = 0;
+
+				$recordnum++;
+				print "    </td>\n";
+			}
+			print "</tr>\n";
+			// Display Other Fields
+			$rownum++;
+		}
+
+		//End Table
+		print "</table>\n";
+		print "</td></tr>";
+		// Nav Links
+		print "<tr><td width=\"25%\" align=\"left\" nowrap=\"nowrap\">";
+		$this->printBackLink();
+		if ($this->ResultsListPage != '')
+		{
+			PPrint(' | ', 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+
+			PPrint(' ', 
+				$this->FontFace, 
+				$this->FontSize, 
+				$this->TextColor);
+
+			$this->printRedisplay($this->ResultsListPage, 
+						$this->_STRINGS["LIST_VIEW"]);
+		}
+		print "</td>";
+		print "<td width=\"75%\" align=\"right\">";
+		$this->printNavLinks();
+		print "</td></tr>";
+		print "</table>\n";
+		print "<!--END OBJECT-->\n";
+
+	}
+} // end NmnhBotanyContactSheetResultsList class
+?>

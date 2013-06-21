@@ -1,0 +1,76 @@
+<?php
+$STRINGS = array(
+	"LANGUAGE"		=> "English",
+
+
+// Catalogue Field Names
+	"CreDateCreated|AssAssociatedDates" => "Date",
+	"AssAssociatedDates" => "Associated Date",
+	"TitTitle"		=> "Title",
+	"CreSHIC_tab|TitKeyName_tab"	=> "Key Word",
+	"TitKeyName_tab"	=> "Key Word",
+	"AssAssociatedPlaces"	=> "Place",
+	"AssAssociatedPeople"	=> "People",
+	"AssAssociatedEvents"	=> "Event",
+	"AssAssociatedDates|CreDateCreated"			=> "Date",
+	"TitMainTitle|TitSeriesTitle|TitCollectionTitle|TitAlternateTitles_tab"		=> "Title",
+	"TitObjectName"		=> "Object Name",
+	"TitSeriesTitle"	=> "Series Title",
+	"TitCollectionTitle"	=> "Collection Title",
+	"TitAlternateTitles_tab"=> "Alternate Titles",
+	"PhyDescription|TitObjectName|TitMainTitle|TitAlternateTitles_tab"	=> "Keyword",
+	"CreCreatorLocal:1"	=> "Maker/Creator",
+	"CreCreatorLocal_tab"	=> "Maker/Creator",
+	"CreCreatorRef_tab"	=> "Maker/Creator",
+	"CreCreatorRef_tab->eparties->SummaryData"              => "Creator or/and National Banner Survey (NBS) banner Holder, banner Owner",
+	"LocCurrentLocationRef->elocations->SummaryData"	=> "Current Location",
+	"AccAccessionLotRef->eaccessionlots->SummaryData"	=> "Accession Information",
+	"TitTitleNotes"		=> "Title Notes",
+	"TitAccessionNo"	=> "Catalogue Number",
+	"TitAccessionDate"	=> "Accession Date",
+	"CreDateCreated"	=> "Date Created",
+	"CreCreatorLocal"	=> "Maker/Creator",
+	"CreCulturalOrigin1"	=> "Cultural Origin",
+	"CreCreationPlace1_tab"	=> "Creation Place",
+	"CrePrimaryInscriptions"=> "Inscription",
+	"CrePrimaryInscriptions|CreOtherInscriptions" => "Inscription",
+	"CreTertiaryInscriptions"=> "Tertiary Inscription",
+	"CreSubjectClassification"=> "Subject Classification",
+	"PhyMedium_tab"		=> "Medium",
+	"PhyMaterial_tab"	=> "Materials",
+	"PhyDescription"	=> "Description",
+	"CreOtherInscriptions"	=> "Other Inscriptions",
+	"PhySupport"		=> "Support",
+	"PhyTechnique"		=> "Technique",
+	"PhyTechnique_tab"	=> "Technique",
+	"PhyMediaCategory"	=> "Media Category",
+	"NotNotes"		=> "Text",
+	"CreCountry_tab"	=> "Created In",
+	"AdmPublishWebPassword"	=> "Publish on Internet",
+	"TitCollectionGroup_tab" => "Collection Group",
+	"AssOtherAssociationNotes0" => "Associated Creator",
+// Party Field Names
+	"NamTitle"		=> "Title",
+	"NamFirst"		=> "First Name",
+	"NamLast"		=> "Last Name",
+	"NamMiddle"		=> "Middle Name",
+	"BioBirthPlace"		=> "Birth Place",
+	"BioDeathPlace"		=> "Death Place",
+	"BioEthnicity"		=> "Ethnicity",
+
+
+// Query Form Strings
+	"QUERY_OPTION_CREATOR"	=> "Creator",
+	"QUERY_OPTION_OBJECT"	=> "Object Name",
+	"QUERY_OPTION_KEYWORD"	=> "Key Word",
+	"QUERY_OPTION_OBJECTNAME"	=> "Object Name",
+	"QUERY_OPTION_TITLE"	=> "Title",
+//	"QUERY_OPTION_PLACE"	=> "Creation Place",
+	"NUMBER_OF_RECORDS"	=> "Records per page",
+	"ONLY_WITH_IMAGES"	=> "List works only with images",
+
+// Display Strings
+	"CREATOR"		=> "Creator",
+
+	);
+?>

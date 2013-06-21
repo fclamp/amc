@@ -1,0 +1,6 @@
+cp AmLocalSettings.php /export/home/emu/master/web/objects/am/
+webmedia.php /export/home/emu/master/web/objects/am/
+ResultsLists.php /export/home/emu/master/web/objects/am/
+DisplayObjects.php /export/home/emu/master/web/objects/am/
+media.php /export/home/emu/master/web/objects/am/
+QueryForms.php /export/home/emu/master/web/objects/am/

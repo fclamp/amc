@@ -1,0 +1,20 @@
+#!/bin/sh
+
+clear
+
+echo "Java Version Information ... ";
+java -version
+
+echo "Removing old class files ... ";
+rm *.class
+
+echo "Compiling Java Source Files ... ";
+javac *.java
+
+echo "Making Packaged Jar File ... ";
+jar cvf ../objectlocator.jar *.class
+
+echo "Creating Jar File index information ... ";
+jar i ../objectlocator.jar
+
+echo "All done ... ";

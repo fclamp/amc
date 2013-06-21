@@ -1,0 +1,144 @@
+<?php
+/*
+** Copyright (c) 1998-2012 KE Software Pty Ltd
+*/
+
+$EMU_GLOBALS = array();
+
+/*
+** The host and port the web objects are to connect to
+** i.e. whichever host and port texxmlserver is running on
+*/
+$EMU_GLOBALS['TEXXMLSERVER_HOST'] = "localhost";
+$EMU_GLOBALS['TEXXMLSERVER_PORT'] = 30200;
+
+/*
+** The default Internet / Intranet query flags. This default will
+** be picked up by the Query and Media classes, but may be overridden
+** manually in the Query class only
+**	Set to:
+**	1 - Query for records marked as publish on the Internet only
+**	2 - Intranet records
+**	3 - All
+**	Anything else - Internet
+ */
+$EMU_GLOBALS['DEFAULT_VISIBILITY'] = 2;
+
+/*
+** The maximum width and height of images that are available for
+** access through media.php. No media with dimensions larger than
+** this will be accessible through media.php (and therefore EMuweb).
+** Note this only looks at the width / height as specified on the
+** resolutions tab of multimedia. Records without this information
+** will be fully accessible.
+**
+** No limit by default.
+*/
+//$EMU_GLOBALS['MAX_IMAGE_WIDTH'] = 0;
+//$EMU_GLOBALS['MAX_IMAGE_HEIGHT'] = 0;
+
+/*
+** Whether to cache results from queries.
+** CACHE sets the time in hours for which to cache results
+** CACHETMP sets the directory used for storing serialised query
+**  results
+**
+** No caching by default.
+*/
+//$EMU_GLOBALS['CACHE'] = "";
+//$EMU_GLOBALS['CACHETMP'] = "/tmp";
+
+/*
+** The value for System Yes.
+** You only need to change this for systems which are not English.
+** Defaults to "Yes".
+*/
+//$EMU_GLOBALS['SYSTEM_YES'] = "Yes";
+
+/*
+** DEBUG - set to 1 to provide prints of all texql and additional
+** exception information
+*/
+$EMU_GLOBALS['DEBUG'] = 0;
+
+/*
+** PHP error handling - E_ALL is everything except E_STRICT, 0 is off
+*/
+error_reporting(E_ALL | E_STRICT);
+
+/*
+** This is the function used to catch unhandled exceptions.
+** It may be customised on a per-installation basis
+*/
+function
+emuweb_exception_handler($e)
+{
+?>
+	<html>
+	<body>
+		<center><h4>Uncaught Web5 exception:</h4></center>
+		<table>
+		<tr valign="top">
+			<th>Message:</th>
+			<td><?php print $e->getMessage(); ?></td>
+		</tr>
+		<tr valign="top">
+			<th>Code:</th>
+			<td><?php print $e->getCode(); ?></td>
+		</tr>
+		<tr valign="top">
+			<th>File:</th>
+			<td><?php print $e->getFile(); ?></td>
+		</tr>
+		<tr valign="top">
+			<th>Line:</th>
+			<td><?php print $e->getLine(); ?></td>
+		</tr>
+		<tr valign="top">
+			<th>Call Stack:</th>
+			<td>
+				<?php
+				$calls = $e->getTrace();
+				for ($i=0; $i<count($calls); $i++)
+				{
+					$call = $calls[$i];
+				?>
+					<strong>Call <?php print $i;?>:</strong>
+					<table>
+					<tr>
+						<th>File:</th>
+						<td><?php print $call['file']; ?></td>
+					</tr>
+					<tr>
+						<th>Line:</th>
+						<td><?php print $call['line']; ?></td>
+					</tr>
+					<tr>
+						<th>Function:</th>
+						<td><?php print $call['function']; ?></td>
+					</tr>
+					<tr>
+						<th>Class:</th>
+						<td><?php print $call['class']; ?></td>
+					</tr>
+					<tr>
+						<th>Type:</th>
+						<td><?php print $call['type'];?></td>
+					</tr>
+					<tr>
+						<th>Arguments:</th>
+						<td><?php print_r($call['args']); ?></td>
+					</tr>
+					</table>
+					<?php
+				}
+				?>
+			</td>
+		</tr>
+		</table>
+	</body>
+	</html>
+	<?php
+}
+set_exception_handler('emuweb_exception_handler');
+?>

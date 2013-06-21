@@ -1,0 +1,375 @@
+body
+{
+	font-family:tahoma;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 70%;
+	color: #59636D;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	/*background-color: #102039;*/
+	background-color: Azure;
+}
+
+A
+{
+	color: #336699
+}
+
+.NewSearchLink
+{
+	color: #336699;
+	font-size:90%;
+}
+
+.labels
+{
+	font-weight: 700;
+	margin-top:5px;
+	margin-bottom:5px;
+	vertical-align: top;
+}
+
+img
+{
+	text-align: left;
+}
+
+.PageHeaderImage
+{
+	text-align: left;
+	border: 0;
+	width:84px;
+	height:120px;
+} 
+
+/* Boxes with Rounded Corners.   */
+/* These used for floating       */
+/* 'tooltip' dialog box on map.  */
+/*                               */
+/* NB no images used - instead   */
+/* the rounded top and bottoms   */
+/* consist of 1px high elements  */
+/* of slightly different margin  */
+/* widths.  A hack but fast and  */
+/* convenient                    */
+
+.b1, .b2, .b3, .b4, .roundBoxContent {
+
+	/* colour of box */
+	background-color: White ;
+	/*background-color: #336699;*/
+
+	/* border around tooltip */
+	border-color: black; 
+	border-width: 0px 1px 0 1px;
+	border-style: solid; 
+}
+
+.b1, .b2, .b3, .b4, .roundBoxContent, .roundBoxContent div {
+	/* the great thing about standards is there are just so many to choose
+	 * from!
+	 */
+	filter:alpha(opacity=85); 
+	-moz-opacity: 0.85; 
+	opacity: 0.85;  
+	/* hack to get IE to do opacity on elements with no width set */
+	zoom: 100%;
+}
+
+.b1, .b2, .b3, .b4 {
+	font-size:1px; 
+	overflow:hidden; 
+	display:block;
+	height: 1px;
+}
+.b1 {
+	margin: 0px 5px;
+	background: black;
+}
+.b2 {
+	margin: 0px 3px 0 3px;
+	border-width: 0 2px 0 2px;
+}
+.b3 {
+	margin: 0px 2px;
+}
+.b4 {
+	margin: 0px 1px;
+	height: 2px;
+}
+.roundBoxContent div {
+	margin: 0px 5px 0px 5px;
+}
+
+/* map control button class */
+.controlButton {
+	width: 40px;
+	height: 20px;
+	border: 3px outset #ffffff;
+	color: #000000;
+	background: #d0d0d0;
+	font-size: 0.7em;
+}
+
+
+/* the hot region around a point - not displayed */
+/* but active for mouse activity                 */
+/* change border to 1px to see if spots line up  */
+.hotSpot {
+	position: absolute;
+	border: 0px solid green;
+	position: absolute;
+	float: left;
+	width:15px;
+	height:15px;
+	z-index: 10;
+}
+
+/* a link displayed on a tooltip */
+.tooltipLink {
+	color: red;
+	text-decoration: underline;
+}
+
+/* the tooltip close button */
+.tooltipCloseButton {
+	float: right;
+	clear: both;
+	width: 20px;
+	height: 20px;
+	border: 0px solid red;
+	color: red;
+}
+
+/* the display info that pops up when hotSpot active */
+.tooltip {
+	position: relative;
+	width: 400px;
+	height: 400px;
+	z-index: 5;
+}
+
+#leftPanel {
+	padding: 10px;
+	vertical-align: top;
+	font-size: 90%;
+}
+
+#centrePanel{
+	vertical-align: top;
+}
+
+#rightPanel {
+	padding: 10px;
+	text-align: left;
+	vertical-align: top;
+	font-size: 90%;
+	width: 320px;
+}
+
+
+#mainMapPanel {
+	/*width:400px;
+	height:580px;*/
+	padding: 10px;
+}
+
+#Controls {
+	width: 400px;
+	height: 30px;
+}
+
+#ControlsHelp {
+	height: 4em;
+	width: 20em;
+}
+
+#LatLongDisplay {
+	height: 2em;
+}
+
+
+#MapTable 
+{
+	border:1px solid YellowGreen;
+	border-collapse: collapse; 
+	margin: 2%;
+}
+
+#LegendTable
+{	vertical-align:top;
+	padding-left:10px;
+	padding-top:10px;
+}
+
+#tempMap
+{
+	display: block;
+}
+
+
+#Map
+{
+	border:0px solid YellowGreen;
+}
+
+#Legend
+{
+	vertical-align:top;
+}
+
+
+.FootnoteNumber
+{
+	vertical-align: super; 
+	font-size:90%; 
+	color: YellowGreen;
+}
+
+.FootnoteText
+{
+	vertical-align: super; 
+	font-size:90%; 
+	color: White;
+}
+
+#xHairV
+{
+	position: absolute;
+	width: 0;
+	z-index: 1;
+	border-left: 1px dashed #7f7f7f;
+	border-top: 0px dashed #e0e0e0;
+	border-right: 0px dashed #e0e0e0; 
+}
+
+#xHairH
+{
+	position: absolute;
+	height: 0;
+	z-index: 2;
+	border-left: 0px dashed #e0e0e0;
+	border-top: 1px dashed #7f7f7f;
+	border-right: 0px dashed #e0e0e0; 
+}
+
+#rubberBand
+{
+	top: 0px;
+	left: 0px;
+	z-index:3;
+	visibility: hidden;
+	width: 0px; 
+	height: 0px;
+	border: 2px dashed #ff0000;
+	position: absolute;
+}
+
+
+#banner {
+	color: white;
+	clear: both;
+	background-color: #102039;
+	border: 0px black solid;
+	height: 44px;
+	color: white;
+	text-align: center;
+	
+}
+
+#footer {
+	clear: both;
+	color: white;
+	background-color: #102039;
+	padding: 2px;
+	margin-top: 10px;
+}
+
+/*ResultsList results styles */
+
+#LayoutTable
+{
+	width: 80%;
+	padding-top:2px;
+	padding-bottom:2px;
+}
+
+#LinksTable
+{
+	width: 25%;
+	font-size:12px;
+}
+
+#ResultsTable
+{
+	width:100%; 
+	border-collapse: collapse;
+	font-size:12px;
+	padding-top:1px;
+	padding-bottom:1px;
+}
+
+.ResultsListHeaderCell
+{
+	border:0px solid black;
+	text-align:center;
+	color:#FFFFE8;
+	background-color: #102039;
+	font-weight: bold;
+	/*padding: 4px 6px;*/
+	white-space: nowrap;
+}
+
+.ResultsListTextCellEven
+{
+	background-color: #FFFFFF;
+}
+
+.ResultsListCell
+{
+	border:1px solid #336699;
+	padding-left:5px;
+	padding-top:4px;
+	padding-bottom:4px;
+	padding-right:10px;
+	white-space: nowrap;
+}
+
+.ResultsListFatCell
+{
+	border:1px solid #336699;
+	padding-left:5px;
+	padding-top:4px;
+	padding-bottom:4px;
+	padding-right:10px;
+}
+
+.ResultsListHref
+{
+	color: #336699;
+	font-size: 110%;
+}
+
+#ResultsListText
+{
+	color: #336699;
+}
+
+#ResultsListHeaderCellImage
+{
+	vertical-align: top;
+}
+
+#ResultsListHeaderCellText
+{
+	vertical-align: top;
+	font-size:120%;
+	font-weight: 700;
+}
+
+#ResultsListCopyrightCell
+{
+	font-size: 60%; 
+	text-align: center;
+}

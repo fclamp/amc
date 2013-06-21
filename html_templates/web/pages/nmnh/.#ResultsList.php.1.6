@@ -1,0 +1,81 @@
+<? include "nmnh_mcs_header.html" ?
+<h4><font face="Arial" color="#013567"> <b>Search results </b> in our prototype 
+  display... <br>
+  <font face="Arial" color="#013567"><font size="2">Click on the Catalog Number 
+  for detailed record information</font></font>.<br>
+  </font><font face="Arial" color="#013567"><font size="2">Over time more data 
+  and images will be made available.</font></font></h4>
+<center>
+  <?php
+require_once('../../objects/nmnh/ResultsLists.php');
+
+$resultlist = new NmnhStandardResultsList;
+
+$resultlist->DisplayPage = array(
+		'ConditionField' => 'AdmWebCategories',
+
+		'Paleobiology' => 'paleo/Display.php',
+		'Paleobiology - Paleogeneral' => 'paleo/Display.php',
+		'Paleobiology - Invertebrate Paleontology' => 'paleo/Display.php',
+		'Paleobiology - Paleobotony' => 'paleo/Display.php',
+		'Paleobiology - Sediments' => 'paleo/Display.php',
+		'Paleobiology - Stratigraphy' => 'paleo/Display.php',
+		'Paleobiology - Vertebrate Paleontology' => 'paleo/Display.php',
+
+		'Systematic Biology' => 'iz/Display.php',
+		'Systematic Biology - Invertebrate Zoology' => 'iz/Display.php',
+
+		'Systematic Biology - Vertebrate Zoology' => 'vz/Display.php',
+		'Systematic Biology - Vertebrate Zoology - Amphibians & Reptiles' => 'vz/HerpDisplay.php',
+		'Systematic Biology - Vertebrate Zoology - Mammals' => 'vz/MamDisplay.php',
+		'Systematic Biology - Vertebrate Zoology - Fishes' => 'vz/FishDisplay.php',
+		'Systematic Biology - Vertebrate Zoology - Birds' => 'vz/BirdDisplay.php',
+
+		'Systematic Biology - Botany' => 'botany/Display.php',
+
+		'Mineral Sciences' => 'minsci/Display.php',
+		'Mineral Sciences - Gems & Minerals' => 'minsci/GemDisplay.php',
+		'Mineral Sciences - Meteorites' => 'minsci/MetDisplay.php',
+		'Mineral Sciences - Petrology & Volcanology' => 'minsci/PetDisplay.php',
+
+		'Anthropology' => 'anthro/Display.php',
+		'Anthropology - Archaeology' => 'anthro/Display.php',
+		'Anthropology - Ethnology' => 'anthro/Display.php',
+		'Anthropology - Physical Anthropology' => 'anthro/Display.php',
+
+		'Default' => 'Display.php',
+		);
+
+//$resultlist->DisplayPage = "Display.php";
+$resultlist->DisplayThumbnails = 0;
+$resultlist->ContactSheetPage = "ContactSheet.php";
+$resultlist->BodyColor = '#FFF3DE';
+$resultlist->Width = '82%';
+$resultlist->HighlightColor = '#FFFFFF';
+$resultlist->HighlightTextColor = '#DDDDDD';
+$resultlist->FontFace = 'Arial';
+$resultlist->FontSize = '2';
+$resultlist->TextColor = '#013567';
+$resultlist->HeaderColor = '#013567';
+$resultlist->BorderColor = '#013567';
+$resultlist->HeaderTextColor = '#FFFFFF';
+$resultlist->Show();
+?> 
+</center>
+
+
+
+
+
+
+
+
+<blockquote>
+<? include "nmnh_mcs_footer.html" ?>
+
+</blockquote>
+
+</body>
+
+</html>
+

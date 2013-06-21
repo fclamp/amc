@@ -1,0 +1,54 @@
+#logo {
+	background: #A0A52E;
+	/* url(../images/Leisure/logo.gif) top left no-repeat; */
+}
+
+#masthead1 {
+	background-color: #A0A52E !important;
+}
+
+#masthead2 {
+	background-color: #B3B840 !important;
+}
+
+#sectiontext {
+	width: 233px;
+	height: 50px;
+	/* background: scroll url(../images/Leisure/sectiontext.gif) top left no-repeat; */
+}
+
+#navimage {
+	background: scroll url(/images/navimage.gif) top left no-repeat;
+}
+
+#navigation .nav li.up {
+	background: scroll url(/images/arrow1.gif) top left no-repeat;
+}
+
+#navigation .nav li.this {
+	background: scroll url(/images/arrow2.gif) 0px 5px no-repeat;
+	border-color: #A0A52E;
+	color: #70731B;
+}
+
+#indexcontent h2, #links h2, #content h2.arrow {
+	background: scroll #A0A52E url(/images/arrow3.gif) top left no-repeat;
+}
+
+#content h1 {
+	color: #70731B;
+}
+
+/* Styles for the colours links and main section headings etc */
+
+.sectionhead1 {	
+	color: #fff;
+	background: scroll url(../images/Leisure/arrow3.gif) top left no-repeat;
+	background-color: #a0a52e;
+}
+
+.sectionhead2 {	
+	color: #fff;
+	background: scroll url(../images/Leisure/arrow3.gif) top left no-repeat;
+	background-color: #b3b840;
+}

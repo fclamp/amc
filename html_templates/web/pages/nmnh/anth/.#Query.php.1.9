@@ -1,0 +1,179 @@
+
+<script language="php"> 
+
+function rotate_images() 
+{ 
+	// open directory, images must be in a separate directory 
+	$dir_pointer = dir( "rotation" ); 
+
+	// make an array of filenames 
+	while( $entryName = $dir_pointer->read() ) 
+	{ 
+		// don't include parent/current directory listing /. /.. 
+		if( !ereg( "^\.", $entryName ) ) 
+		$file_array[] = $entryName; 
+
+		// could be done this way to simplify some code below 
+		# $file_array[] = "rotation/$entryName"; 
+	} 
+                                     
+	// close directory 
+	$dir_pointer->close(); 
+                                     
+	$count_array = count( $file_array ) - 1; 
+                                     
+	// intialize random seed 
+	srand( time() ); 
+                                     
+	// get a random index number to pull from array 
+	$random_no = rand( 0, $count_array ); 
+                                     
+	// make a file pointer 
+	$file_name = "rotation/$file_array[$random_no]"; 
+                                     
+	// or if directory added to array element 
+	#$file_name = $file_array[$random_no]; 
+                                     
+	// get image dimensions 
+	$image_size = getimagesize( $file_name ); 
+                                     
+	// create dynamic image tag 
+	$out = sprintf( '<img src="%s" %s border="2" vspace="2" hspace="6" align="left" alt="Anthropology Photo Galleries" />%s', $file_name, $image_size[3], "\n" ); 
+                                     
+	return $out; 
+} 
+</script> 
+
+<?php include "header-large.html" ?>
+
+<html>
+<head>
+	<title>Search the NMNH Department of Anthropology Collections</title>
+</head>
+
+<br>
+
+<table border="0" width="817" cellspacing="3" cellpadding="2" height="0">
+	<tr> 
+		<td colspan="1" valign=top rowspan="3"> 
+			<p>
+				<font color="#013567" size="2" face="Tahoma">
+					<a href="rotation_master.php"><?php print rotate_images(); ?></a> 
+				</font>
+			</p>
+		</td>
+		<td colspan="1" valign=top rowspan="3"> 
+			<p>
+				<font color="#013567" size="2" face="Tahoma">
+					<b>Anthropology Collection Search</b><br>
+					<br>
+					<br>
+					<b>Search the Anthropology Collections</b><br>
+					<br>
+					<br>
+				</font>
+			</p>
+			<p>
+				&nbsp;
+			</p>    
+		</td>
+
+		<td width="128" valign="middle" bgcolor="#003366" align="center" height="32"> 
+			<font size="2" face="Tahoma" color="#FFFFFF">
+				&nbsp;<b>Quick Browse</b>
+			</font> 
+			<br>
+		</td>
+	</tr>
+
+	<tr> 
+		<td width="128" valign="middle" bgcolor="#FFF3DE" align="center" height="7"> 
+			<div align="center">
+			<font face="Tahoma">
+				<a href="
+					<?php
+						require_once('../../../objects/common/PreConfiguredQuery.php');
+						$holidayset = new PreConfiguredQueryLink;
+						$holidayset->Where = "irn = 4004773";
+						$holidayset->ResultsListPage = 'ResultsList.php';
+						$holidayset->PrintRef();
+					?>
+	  			"><img src="images/sample_search_1.jpg" width="89" height="90"></a><br>
+			</font>
+			<font color="#336699" face="Tahoma" size="2">
+				Quick Search 1
+			</font>
+			<br>
+			</div>
+		</td>
+	</tr>
+	<tr> 
+		<td width="128" valign="middle" bgcolor="#FFF3DE" align="center" height="98"> 
+			<div align="center">
+			<font face="Tahoma">
+				<a href="
+					<?php
+						require_once('../../../objects/common/PreConfiguredQuery.php');
+						$holidayset = new PreConfiguredQueryLink;
+						$holidayset->Where = "irn = 4006309";
+						$holidayset->ResultsListPage = 'ResultsList.php';
+						$holidayset->PrintRef();
+					?>
+				"><img src="images/sample_search_2.jpg" width="87" height="90"></a><br>
+			</font>
+			<font face="Tahoma" color="#336699" size="2">
+				Quick Search 2
+			</font>
+			<br>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td height="111" colspan="2" valign=top>
+		<p>
+		<?php
+			require_once('../../../objects/nmnh/anth/QueryForms.php');
+			$queryform = new NmnhAnthBasicQueryForm;
+			$queryform->ResultsListPage = 'ResultsList.php';
+			$queryform->Title = 'Enter search term(s)...';
+			$queryform->FontFace = 'Arial';
+			$queryform->FontSize = '2';
+			$queryform->TitleTextColor = '#FFFFFF';
+			$queryform->BorderColor = '#013567';
+			$queryform->BodyColor = '#FFF3DE';
+			$queryform->Show();
+		?>
+		</p>
+		<p>
+			<font face="Tahoma" color="#0000FF" size=3>
+				<a href="DtlQuery.php"><b>Detailed Search</b></a>
+			</font>
+		</p>
+		</td> 
+		<td width="128" align="center" valign="middle" bgcolor="#FFF3DE"> 
+			<div align="center">
+			<font face="Tahoma">
+			<br>
+			<a href="
+				<?php
+					require_once('../../../objects/common/PreConfiguredQuery.php');
+					$holidayset = new PreConfiguredQueryLink;
+					$holidayset->Where = "irn = 4010995";
+					$holidayset->ResultsListPage = 'ResultsList.php';
+					$holidayset->PrintRef();
+				?>
+			"><img src="images/sample_search_3.jpg" width="93" height="90" border="2"></a><br>
+			</font>
+			<font face="Tahoma" color="#336699" size="2"> 
+				Quick Search 3
+			</font>
+			<br>
+			<br>
+			</div>
+		</td>
+	</tr>
+</table>
+<br>
+<?php include "footer.html" ?>
+</body>
+</html>

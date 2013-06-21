@@ -1,0 +1,194 @@
+/*
+*  Copyright (c) 1998-2012 KE Software Pty Ltd
+*/
+
+/* Centre the content on the page - used with div.centre tag
+*/
+body
+{
+	background-color: silver;
+	font-family: "Lucida Grande", Tahoma, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+/* Centres the content on the page - used with body tag
+*/
+div.PageShadow
+{
+	background-color: gray;
+	border: 1px solid gray;
+	margin: 0 auto;
+	position: relative;				
+	top:10px;					
+	width:85%;
+}				
+
+div.PageCentre
+{
+	background-color: silver;
+	border: 1px solid #000;
+	position: relative;
+	right: 5px;							
+	top:-5px;					
+	width:100%;
+}	
+
+div.PageHeader
+{
+	background-color: #e0e0e0;
+	border-bottom:solid;
+	border-color:#da2429;
+	border-width:2px;
+	color:black;
+	font-family: palatino linotype;
+	font-size:36px;
+	font-weight: bold;
+	margin-bottom: 0px;
+	margin-top: 0px;
+	padding-left: 15px;
+	text-align:left;
+}
+
+div.PageBanner
+{
+	background-color: #e0e0e0;
+	color:black;
+	font-size:36px;
+	font-weight: bold;
+	line-height:100px;
+	margin-bottom: 0px;
+	margin-top: 0px;
+	overflow:hidden;
+	text-align:left;
+	text-indent: 0px;
+	width:100%;
+}
+
+div.PageMenu
+{
+	background-color: #e0e0e0;
+	color:#000000;
+	font-family: "Lucida Grande", Tahoma, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight: bold;
+	line-height: 30px;
+	padding-bottom: 10px;
+	padding-top: 5px;
+	text-align:right;				
+	vertical-align: middle;
+	width:99%;
+}
+
+div.PageTitle
+{
+	clear: both;
+	font-size: 18px;
+	text-align: center;
+}
+
+div.footer
+{
+	color:black;
+	font-size:11px;
+	font-weight: bold;
+	margin-top: 10px;
+	padding-bottom:3px;
+	text-align:left;
+	text-indent: 15px;
+	width:100%;
+}
+
+div.copyright
+{
+	border-color:#e0e0e0;
+	border-top:solid;
+	border-width:2px;
+	color:black;
+	font-size:11px;
+	font-weight: bold;
+	padding-bottom:3px;
+	padding-top:5px;
+	text-align:center;
+}
+
+a
+{
+	color: blue;
+	font-size: 9px;
+	text-decoration:underline;
+}
+
+/* Text color in the right side panel
+*/
+td
+{
+	color  : #000000;
+	font-size: 9px;
+}
+
+.main
+{
+	font-family: "Lucida Grande", Tahoma, Helvetica, sans-serif;
+	background-color: #FFFFFF;
+}
+
+.description
+{
+	font-family: "Lucida Grande", Tahoma, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+/* Too be removed?
+*/
+.company
+{
+	font-family: "Lucida Grande", Tahoma, Helvetica, sans-serif;
+	font-size: 9px;
+	color:#000000;
+}
+
+/* Too be removed?
+*/
+.copyright
+{
+	font-family: "Lucida Grande", Tahoma, Helvetica, sans-serif;
+	font-size: 9px;
+	color:#000000;
+}
+
+.borders
+{
+	border-style: solid;
+	border-width: 1px;
+	border-color: black;
+	/*border-color: rgb(148,191,217);*/
+}
+
+.content
+{
+	background-color: gray;   
+}
+
+.contentLight
+{
+	background-color: silver;      
+}
+
+.error
+{
+background-color: gray;
+}
+
+.errorLight
+{
+background-color: silver;
+}
+
+.errorBorders
+{
+border-style: solid;
+border-width: 1px;
+border-color: black;
+}

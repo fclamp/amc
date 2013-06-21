@@ -1,0 +1,75 @@
+<?php
+$STRINGS = array(
+	"LANGUAGE"		=> "English",
+
+
+// Catalogue Field Names
+	'CONTACT_SHEET'         => 'View by Thumbnail',
+	"TitMainTitle"		=> "Title",
+	"TitMainTitle|TitSeriesTitle|TitCollectionTitle|TitAlternateTitles_tab"		=> "Title",
+	"TitObjectName"		=> "Object Name",
+	"TitSeriesTitle"	=> "Series Title",
+	"TitCollectionTitle"	=> "Collection Title",
+	"TitAlternateTitles_tab"=> "Alternate Titles",
+	"PhyDescription|TitObjectName|TitMainTitle|TitAlternateTitles_tab"	=> "Keyword",
+	"CreCreatorLocal:1"	=> "Creator",
+	"CreCreatorLocal_tab"	=> "Creator",
+	"CreCreatorRef_tab"	=> "Creator",
+	"CreCreatorRef_tab->eparties->SummaryData"		=> "Creator",
+	"LocCurrentLocationRef->elocations->SummaryData"	=> "Current Location",
+	"AccAccessionLotRef->eaccessionlots->SummaryData"	=> "Acquisition Information",
+	"TitTitleNotes"		=> "Title Notes",
+	"TitAccessionNo"	=> "Accession Number",
+	"CreSubjectClassification_tab"	=> "Subject Classification",
+	"TitAccessionDate"	=> "Accession Date",
+	"CreDateCreated"	=> "Creation Date",
+	"CreEarliestDate"	=> "Creation Date - Earliest",
+	"CreLatestDate"		=> "Creation Date - Latest",
+	"CreCreatorLocal"	=> "Creator",
+	"CreCulturalOrigin1|CreCulturalOrigin2|CreCulturalOrigin3|CreCulturalOrigin4|CreCulturalOrigin5"	=> "Cultural Origin",
+	"CreCulturalOriginSummary"	=> "Cultural Origin",
+	"CreCreationPlace1_tab"	=> "Creation Place",
+	"CreCreationPlace1:1"	=> "Creation Place",
+	"CreCreationPlace1_tab|CreCreationPlace2_tab|CreCreationPlace3_tab|CreCreationPlace4_tab|CreCreationPlace5_tab"	=> "Creation Place",
+	"CrePrimaryInscriptions"=> "Inscription",
+	"CrePrimaryInscriptions|CreOtherInscriptions" => "Inscription",
+	"CreTertiaryInscriptions"=> "Tertiary Inscription",
+	"CreSubjectClassification"=> "Subject Classification",
+	"PhyMedium_tab"		=> "Medium",
+	"PhyMaterial_tab"	=> "Material",
+	"PhyDescription"	=> "Description",
+	"CreOtherInscriptions"	=> "Other Inscriptions",
+	"PhySupport"		=> "Support",
+	"PhyTechnique"		=> "Technique",
+	"PhyTechnique_tab"	=> "Technique",
+	"PhyMediaCategory"	=> "Media Category",
+	"NotNotes"		=> "General Notes",
+	"CreCountry_tab"	=> "Created In",
+	"AdmPublishWebPassword"	=> "Publish on Internet",
+	"TitCollectionGroup_tab" => "Collection Group",
+	"AssOtherAssociationNotes0" => "Associated Creator",
+// Party Field Names
+	"NamTitle"		=> "Title",
+	"NamFirst"		=> "First Name",
+	"NamLast"		=> "Last Name",
+	"NamMiddle"		=> "Middle Name",
+	"BioBirthDate"		=> "Date of Birth",
+	"BioDeathDate"		=> "Date of Death",
+	"BioBirthPlace"		=> "Place of Birth",
+	"BioDeathPlace"		=> "Place of Death",
+	"BioEthnicity"		=> "Ethnicity",
+
+
+// Query Form Strings
+	"QUERY_OPTION_CREATOR"	=> "Creator",
+	"QUERY_OPTION_OBJECT"	=> "Object Name",
+	"QUERY_OPTION_TITLE"	=> "Title",
+//	"QUERY_OPTION_PLACE"	=> "Creation Place",
+	"NUMBER_OF_RECORDS"	=> "Records per page",
+	"ONLY_WITH_IMAGES"	=> "List works only with images",
+
+// Display Strings
+	"CREATOR"		=> "Creator",
+
+	);
+?>
