@@ -48,12 +48,15 @@ class ImuServiceProvider extends ServiceProvider
 			return new ImuSession();
 		});
 		
-		$this->app ['ImuModule'] = $this->app->share (function($app)
-		{
+		
+		$this->app->bind('ImuModule',function($app){
+			
 			$config = $app['config']['imu'];
 			$module = new ImuModule($config['module_table'],$app['ImuSession']);
-			return $module;
+			return $module;		
+			
 		});
+		
 	}
 	
 	/**

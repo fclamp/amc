@@ -22,7 +22,19 @@ class InformationController extends BaseController
 	 */
 	public function index($id = null)
 	{
+		$id = abs(intval($id));
+		
+		$search = new Search();
+		$result = $search->getNarrativeInfo($id);		
+		
+		$this->layout->dealForm = Input::get('dealForm')=='search' ? Input::get('dealForm') : NULL;
+		
 		$this->layout->title = 'Australian Museum Collections : Information';
-		$this->layout->content = View::make('pages.information');
+		
+		$data = array(
+			'results'=>$result,
+		);
+		
+		$this->layout->content = View::make('pages.information',$data);
 	}
 }

@@ -14,8 +14,11 @@ final class Search
 	protected $SearchHost = '203.22.224.29';
 	protected $SearchPort = 40000;
 	
-	protected $columns = NULL;
-	protected $narrativeColumns = NULL;
+	public $columns = NULL;
+	public $narrativeColumns = NULL;
+	public $ImageColumns = NULL;
+	public $defaultImage =NULL;
+	public $showImageUrl = NULL;
 	
 	public $error = NULL;
 	
@@ -28,6 +31,10 @@ final class Search
 	 */
 	public function __construct()
 	{
+		
+		$this->defaultImage = './images/100.jpg';
+		$this->showImageUrl = 'show-img/%s';
+		
 		/**
 		 * 
 		 * Object Columns
@@ -36,9 +43,11 @@ final class Search
 		$this->columns = array ('irn', 
 			'WebSummaryData', 
 			'SummaryData', 
-			'SumItemName', 
-			'MulHasMultiMedia', 
+			'SumItemName',
+			'image.resource', 
 			'CatRegNumber', 
+			'SumRegNum', 
+			'MulHasMultiMedia', 
 			'SumItemName', 
 			'ObjLabel', 
 			'SumArchSiteName', 
@@ -48,7 +57,6 @@ final class Search
 			'ProCollectionArea', 
 			'ProStateProvince_tab', 
 			'AcqRegDate', 
-			'SumRegNum', 
 			'SumCategory', 
 			'AdmWebMetadata' );
 		
@@ -60,11 +68,35 @@ final class Search
 		$this->narrativeColumns = array (
 			'irn', 
 			'NarTitle', 
-			'SummaryData', 
-			'image', 
+			'SummaryData',
+			'image',
 			'ObjObjectsRef_tab', //Related Objects
-			'AssAssociatedWithRef_tab', //Related Stories
+			'AssMasterNarrativeRef',//Related Stories
+			'AssAssociatedWithRef_tab', 
 			'NarNarrative' );
+		
+		/**
+		 * Image Columns
+		 * @var 
+		 */
+		$this->ImageColumns = array 
+		( 
+			'image.resource',
+			'DocHeight_tab',
+			'DocWidth_tab',
+			'DocIdentifier_tab',
+			'DocMimeType_tab',
+			'DocMimeFormat_tab',
+			'DocFileSize_tab',
+			'MulIdentifier',
+			'MulMimeType',
+			'MulMimeFormat',
+			'MulDocumentType',
+			'ChaImageWidth',
+			'ChaImageHeight',
+			
+		);
+		
 		
 		/**
 		 * Load Lib
@@ -90,27 +122,131 @@ final class Search
 	 * @return array $result
 	 * @access public
 	 */
-	public function lookup($searchData, $pageSize = 50)
+	public function lookup($searchData, $pageSize = 30)
 	{
-		$result = array ('total' => 0, 'natural_num' => 0, 'cultural_num' => 0, 'natural_list' => array (), 'cultural_list' => array () );
+		//Init
+		$result = array ('total' => 0, 
+			'natural_num' => 0, 
+			'cultural_num' => 0, 
+			'object_natural_list' => array (), 
+			'object_cultural_list' => array (),
+			'narrative_natural_list' => array (),
+			'narrative_cultural_list' => array (), 
+		);
 		try
 		{
 			//Narrative
-			$list = $this->getNarratives ( $searchData, $pageSize );
+			$narrative = $this->getNarratives ( $searchData, $pageSize );
 			
 			//Objects
 			$objects = $this->getObjects($searchData,$pageSize);
 			
-			$result['total'] = $list['total'] + $objects['total'];
+			$result['total'] = $narrative['cultural_num'] + $narrative['natural_num'] + $objects['natural_num'] + $objects['cultural_num'];
+			$result['natural_num'] = $narrative['natural_num']+ $objects['natural_num'];
+			$result['cultural_num'] = $narrative['cultural_num']+ $objects['cultural_num'];
+			
+			$result['object_natural_list'] = $objects['natural_list'];
+			$result['object_cultural_list'] = $objects['cultural_list'];
+			
+			$result['narrative_natural_list'] = $narrative['natural_list'];
+			$result['narrative_cultural_list'] = $narrative['cultural_list'];			
+			$narrative = $objects = NULL;
 		
 		} catch ( Exception $e )
 		{
 			$this->error = $e->getMessage ();
-			var_dump ( $e );
-		
+			var_dump($e);
 		}
+		
 		return $result;
 	}
+	
+	/**
+	 * 
+	 * Return Narrative Info
+	 */
+	public function getNarrativeInfo($id)
+	{
+		$result = array('title'=>'',
+			'content'=>'',
+			'main_object_list'=>array(),
+			'main_object_num'=>0,
+			'narrative_list'=>array(),
+			'related_objects'=>array(),
+		);
+		$narrative = $this->narrativesModule();
+		$hits = $narrative->findKey($id); 
+		$tpl = $narrative->fetch('start', 0, 1,$this->narrativeColumns); 
+		if(!empty($tpl->rows[0]))
+		{
+			$result['title'] = $tpl->rows[0]['NarTitle'];
+			if(!empty($tpl->rows[0]['ObjObjectsRef_tab']))
+			{
+				$result['main_object'] = $tpl->rows[0]['ObjObjectsRef_tab'];
+			}
+			if(!empty($tpl->rows[0]['AssAssociatedWithRef_tab']))
+			{
+				$result['narratives'] = $tpl->rows[0]['AssAssociatedWithRef_tab'];
+			}
+			if(!empty($tpl->rows[0]['AssMasterNarrativeRef']))
+			{
+				$result['narratives'][] =  $tpl->rows[0]['AssMasterNarrativeRef'];
+			}
+			
+			$result['content'] =  mb_convert_encoding ( $tpl->rows[0]['NarNarrative'], 'ISO-8859-10', 'UTF-8' );
+			
+			$tpl = NULL;
+			
+			//Main Object
+			if(!empty($result['main_object']))
+			{
+				$object = $this->ecatalogueModule();
+				$hits = $object->findKeys($result['main_object']);
+				$rows = $object->fetch ( 'start', 0,$hits, array_slice ( $this->columns, 0, 7 ) );
+				foreach ($rows->rows as $row)
+				{
+					$val = array('irn'=>$row['irn']);
+					$val['regNum'] = empty($row['SumRegNum']) ? $row['CatRegNumber'] : $row['SumRegNum'];
+					if(!empty($row['image']))
+					{
+						$val['imageIrn'] = $row['image']['irn'];
+					}else
+					{
+						$val['imageIrn'] = -1;
+					}
+					$u= sprintf($this->showImageUrl,$val['imageIrn']);
+					$val['getImageUrl'] = URL::to($u);					
+					$result['main_object_list'][] = $val;
+				}
+				$rows = NULL;
+				unset($result['main_object']);
+				$result['main_object_num'] = count($result['main_object_list']);
+				
+			}
+			
+			//Related narratives
+			if(!empty($result['narratives']))
+			{
+				$narrative = $this->narrativesModule();
+				$hits = $narrative->findKeys($result['narratives']);
+				$rows = $narrative->fetch ( 'start', 0,$hits, array_slice ( $this->narrativeColumns, 0, 2 ) );
+				
+				foreach ($rows->rows as $row)
+				{
+					$result['narrative_list'][] = $row;
+				}
+				unset($result['narratives']);
+				$rows = NULL;
+				
+			}			
+			
+			//Related objects
+						
+		}
+		return $result;		
+	}
+	
+	
 	
 	/**
 	 * 
@@ -122,13 +258,12 @@ final class Search
 	 */	
 	public function getObjects($searchData,$pageSize=19)
 	{
-		$result = array ('total' => 0, 'natural_num' => 0, 'cultural_num' => 0, 'natural_list' => array (), 'cultural_list' => array () );
+		$result = array ('natural_num' => 0, 'cultural_num' => 0, 'natural_list' => array (), 'cultural_list' => array () );
 		$ecatalogueModule = $this->ecatalogueModule ();
 		$query = $this->buildQuery ( $searchData );
 		if (! empty ( $query ))
 		{
 			$hits = $ecatalogueModule->findTerms ( $query );
-			$result ['total'] = $hits;
 			if (! empty ( $hits ))
 			{
 				
@@ -183,37 +318,51 @@ final class Search
 	 */
 	public function getNarratives($searchData, $pageSize = 19)
 	{
-		$narrative = array ('total'=>0,'list'=>array());
-		$narrativesModule = $this->narrativesModule ();
-		$query = $this->buildNarrativeQuery ( $searchData );
-		if (! empty ( $query ))
-		{
-			$hits = $narrativesModule->findTerms ( $query );
-			$f = $narrativesModule->fetch ( 'start', 0, $pageSize, array_slice ( $this->narrativeColumns, 0, 5 ) );
-			$narrative ['total'] = $f->hits;
-			
-			$ImageModule = $this->ImageModule();
-			var_dump($ImageModule);exit;
-			foreach ( $f->rows as $row )
-			{
-				if (! empty ( $row ['image'] ))
-				{
-					$ImageModule->findKey($row['image']['irn']); 
-					$columns = array 
-					( 
-					 'image.resource' 
-					); 
-					$result = $ImageModule->fetch('start', 0, 1, $columns);
-					$row ['image'] = $result[0]['image']['resource']['file']; 					
-				} else
-				{
-					$row ['image'] = HTML::image ( 'images/100.jpg' );
-				}
-				$narrative ['list'] [] = $row;
-			}
-		}
+		$narrative = array ('cultural_num'=>0,'cultural_list'=>array(),'natural_num'=>0,'natural_list'=>array());
+		//Cultural
+		$keyWords = array('keyWords'=>$searchData['keyWords'].' cultural');
+		$res = $this->getNarrativesList($keyWords);
+		$narrative['cultural_num'] = $res['num'];
+		$narrative['cultural_list'] = $res['list'];
+		
+		//Natural
+		$keyWords = array('keyWords'=>$searchData['keyWords'].' natural history');
+		$res = $this->getNarrativesList($keyWords);		
+		
+		$narrative['natural_num'] = $res['num'];
+		$narrative['natural_list'] = $res['list'];		
+		$res = NULL;
+		
 		return $narrative;
 	}
+	
+	
+	/**
+	 * 
+	 * Get Image
+	 * @param $size array(100,100)
+	 */
+	public function getImage($irn,$size=array(100,100))
+	{
+		if(!is_numeric($irn) or $irn<0)
+		{
+			echo file_get_contents($this->defaultImage,'rb');
+			exit;
+		}
+		$ImageModule = $this->ImageModule();
+		$ImageModule->findKey($irn);  
+		$result = $ImageModule->fetch('start', 0, 1, $this->ImageColumns);
+		//echo '<Pre>';
+		//print_r($result);exit;
+		$imgName = $result->rows[0]['DocIdentifier_tab']['1'];
+		$result =NULL;
+
+		//Can't got Server Image, So return defalut image
+		echo file_get_contents($this->defaultImage,'rb');
+		//return $this->defaultImage;
+	}
+	
+
 	
 	/**
 	 * 
@@ -231,7 +380,6 @@ final class Search
 	 */
 	public function ImageModule()
 	{
-		App::instance('ImuModule','');
 		Config::set ( 'imu.module_table', 'emultimedia' );
 		return App::make ( 'ImuModule' );
 	}
@@ -247,6 +395,45 @@ final class Search
 		return App::make ( 'ImuModule' );
 	}
 	
+	
+	/**
+	 * 
+	 * Get Narratives List
+	 * @param $searchData array
+	 */
+	private function getNarrativesList($searchData)
+	{
+		$res = array('num'=>0,'list'=>array());
+		$query = $this->buildNarrativeQuery ( $searchData );
+		if (! empty ( $query ))
+		{
+			$narrativesModule = $this->narrativesModule ();
+			$hits = $narrativesModule->findTerms ( $query );
+			$f = $narrativesModule->fetch ( 'start', 0,$hits, array_slice ( $this->narrativeColumns, 0, 5 ) );
+			$res ['num'] = $f->hits;
+			
+			foreach ( $f->rows as $row )
+			{
+				$row['NarTitle'] = mb_convert_encoding ( $row['NarTitle'], 'ISO-8859-10', 'UTF-8' );
+				$row['SummaryData'] = mb_convert_encoding ( $row['SummaryData'], 'ISO-8859-10', 'UTF-8' );
+				if(!empty($row['image']))
+				{
+					$row['imageIrn'] = $row['image']['irn'];
+				}else
+				{
+					$row['imageIrn'] = -1;
+				}
+				$u= sprintf($this->showImageUrl,$row['imageIrn']);
+				$row['getImageUrl'] = URL::to($u);
+				
+				unset($row['image']);
+				$res ['list'] [] = $row;
+			}
+		}
+		return $res;		
+	}
+		
+	
 	/**
 	 * 
 	 * Build Narrative Query
@@ -256,7 +443,6 @@ final class Search
 	 */
 	private function buildNarrativeQuery($searchData = array())
 	{
-		
 		$terms = array ();
 		if (! empty ( $searchData ['keyWords'] ))
 		{

@@ -14,8 +14,16 @@
 // Our intial routes.
 Route::get('/', 'HomeController@index');
 Route::get('search/results', 'SearchController@results');
-Route::get('info', 'InformationController@index');
-Route::get('object', 'ObjectController@index');
+Route::get('info/{id}', 'InformationController@index');
+Route::get('object/{id}', 'ObjectController@index');
+
+//Show Image
+Route::get('show-img/{irn}',function($irn){
+
+	$search = new Search();
+	$search->getImage($irn);
+	
+});
 
 // IMu test.
 Route::get ('imu-test', function ()

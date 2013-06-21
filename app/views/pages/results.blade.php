@@ -27,18 +27,25 @@
                 <h4>
                     Information Sheets
                 </h4>
+                
+                @if ($results['narrative_natural_list'])
+                @foreach ($results['narrative_natural_list'] as $val)
                 <div class="box">
-                    {{ HTML::image('images/emu_thumb.jpg'); }}
+                    <img src="{{$val['getImageUrl']}}">
 
                     <div class="box-body">
                         <p class="box-heading">
-                            <a href="#">Emu, Dromaius novaehollandiae</a>
+                            <a href="/info/{{$val['irn']}}">{{$val['NarTitle']}}</a>
                         </p>
                         <p>
-                            Adult Emus are covered with shaggy grey-brown feathers except for the neck and head, which are largely naked and bluish-black.
+                            {{$val['SummaryData']}}
                         </p>
                     </div>
                 </div> <!-- Box closed -->
+                @endforeach
+               @endif 
+                
+                
             </div>
             <div class="w-2col m-2col w-last m-last bb-grey paddingBottom">
                 <h3 class="marginBottomHalf marginTopHalf font28 normal">
@@ -47,45 +54,51 @@
                 <h4>
                     Information Sheets
                 </h4>
+ 
+                @if ($results['narrative_cultural_list'])
+                @foreach ($results['narrative_cultural_list'] as $val)                
                 <div class="box">
 
-                    <img src="images/emu_egg_thumb.jpg" alt="Emu Egg Thumb" class="box-item" />
+                    <img src="{{$val['getImageUrl']}}">
 
                     <div class="box-body">
                         <p class="box-heading">
-                            <a href="#">Carved Emu Egg</a>
+                             <a href="/info/{{$val['irn']}}">{{$val['NarTitle']}}</a>
                         </p>
                         <p>
-                            This egg illustrates traditional hunting practices by showing a hunter with a spear waiting on one side, and the other, a kangaroo.
+                             {{$val['SummaryData']}}
                         </p>
                     </div>
                 </div>
+               @endforeach
+               @endif 
+                
             </div> <!-- w-2col closed -->
         </div> <!-- row closed -->
         <div class="row">
         
-        	@if ($results['natural_list'])
+        	@if ($results['object_natural_list'])
         
             <div class="w-2col m-2col marginBottomDouble paddingBottom">
                 <h4>
                     Objects
                 </h4>
                 <ul class="objectList">
-                	@foreach ($results['natural_list'] as $val)
-                    <li><a href="?irn={{$val['irn']}}">{{$val['WebSummaryData']}}</a></li>
+                	@foreach ($results['object_natural_list'] as $val)
+                    <li><a href="/object/{{$val['irn']}}">{{$val['WebSummaryData']}}</a></li>
                 	@endforeach
                 </ul>
             </div>
        	   @endif     
            
-           @if ($results['cultural_list']) 
+           @if ($results['object_cultural_list']) 
             <div class="w-2col m-2col w-last m-last marginBottomDouble paddingBottom">
                 <h4>
                     Objects
                 </h4>
                 <ul class="objectList">
-                	@foreach ($results['cultural_list'] as $val)
-                    <li><a href="?irn={{$val['irn']}}">{{$val['WebSummaryData']}}</a></li>
+                	@foreach ($results['object_cultural_list'] as $val)
+                    <li><a href="/object/{{$val['irn']}}">{{$val['WebSummaryData']}}</a></li>
                     @endforeach
                 </ul>
             </div>
