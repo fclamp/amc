@@ -47,8 +47,7 @@ final class Search
 			'image.resource', 
 			'CatRegNumber', 
 			'SumRegNum', 
-			'MulHasMultiMedia', 
-			'SumItemName', 
+			'MulHasMultiMedia',
 			'ObjLabel', 
 			'SumArchSiteName', 
 			'ProPlace', 
@@ -58,7 +57,13 @@ final class Search
 			'ProStateProvince_tab', 
 			'AcqRegDate', 
 			'SumCategory', 
-			'AdmWebMetadata' );
+			'AdmWebMetadata',
+			'ObjIndigenousName',
+			'ObjDescription',
+			'images',
+			'AdmInsertedBy',//author
+			'SumCategory'//type
+		);
 		
 		/**
 		 * 
@@ -73,7 +78,9 @@ final class Search
 			'ObjObjectsRef_tab', //Related Objects
 			'AssMasterNarrativeRef',//Related Stories
 			'AssAssociatedWithRef_tab', 
-			'NarNarrative' );
+			'NarNarrative',
+			'AdmInsertedBy',
+			);
 		
 		/**
 		 * Image Columns
@@ -94,9 +101,14 @@ final class Search
 			'MulDocumentType',
 			'ChaImageWidth',
 			'ChaImageHeight',
+			'MulTitle',
+			'MulCreator_tab',
+			'MulDescription',
+			'DetPublisher',
+			'DetRights',
+			'irn',		
 			
 		);
-		
 		
 		/**
 		 * Load Lib
@@ -155,7 +167,7 @@ final class Search
 		} catch ( Exception $e )
 		{
 			$this->error = $e->getMessage ();
-			var_dump($e);
+			
 		}
 		
 		return $result;
@@ -169,85 +181,223 @@ final class Search
 	{
 		$result = array('title'=>'',
 			'content'=>'',
-			'main_object_list'=>array(),
-			'main_object_num'=>0,
-			'narrative_list'=>array(),
-			'related_objects'=>array(),
+			'mainObjectList'=>array(),
+			'mainObjectNum'=>0,
+			'narrativeList'=>array(),
+			'relatedObjects'=>array(),
 		);
-		$narrative = $this->narrativesModule();
-		$hits = $narrative->findKey($id); 
-		$tpl = $narrative->fetch('start', 0, 1,$this->narrativeColumns); 
-		if(!empty($tpl->rows[0]))
+		
+		try
 		{
-			$result['title'] = $tpl->rows[0]['NarTitle'];
-			if(!empty($tpl->rows[0]['ObjObjectsRef_tab']))
+			$narrative = $this->narrativesModule();
+			$hits = $narrative->findKey($id); 
+			$tpl = $narrative->fetch('start', 0, 1,$this->narrativeColumns); 
+			if(!empty($tpl->rows[0]))
 			{
-				$result['main_object'] = $tpl->rows[0]['ObjObjectsRef_tab'];
-			}
-			if(!empty($tpl->rows[0]['AssAssociatedWithRef_tab']))
-			{
-				$result['narratives'] = $tpl->rows[0]['AssAssociatedWithRef_tab'];
-			}
-			if(!empty($tpl->rows[0]['AssMasterNarrativeRef']))
-			{
-				$result['narratives'][] =  $tpl->rows[0]['AssMasterNarrativeRef'];
-			}
-			
-			$result['content'] =  mb_convert_encoding ( $tpl->rows[0]['NarNarrative'], 'ISO-8859-10', 'UTF-8' );
-			
-			$tpl = NULL;
-			
-			//Main Object
-			if(!empty($result['main_object']))
-			{
-				$object = $this->ecatalogueModule();
-				$hits = $object->findKeys($result['main_object']);
-				$rows = $object->fetch ( 'start', 0,$hits, array_slice ( $this->columns, 0, 7 ) );
-				foreach ($rows->rows as $row)
+				$result['title'] = $tpl->rows[0]['NarTitle'];
+				if(!empty($tpl->rows[0]['ObjObjectsRef_tab']))
 				{
-					$val = array('irn'=>$row['irn']);
-					$val['regNum'] = empty($row['SumRegNum']) ? $row['CatRegNumber'] : $row['SumRegNum'];
-					if(!empty($row['image']))
-					{
-						$val['imageIrn'] = $row['image']['irn'];
-					}else
-					{
-						$val['imageIrn'] = -1;
-					}
-					$u= sprintf($this->showImageUrl,$val['imageIrn']);
-					$val['getImageUrl'] = URL::to($u);					
-					$result['main_object_list'][] = $val;
+					$result['main_object'] = $tpl->rows[0]['ObjObjectsRef_tab'];
 				}
-				$rows = NULL;
-				unset($result['main_object']);
-				$result['main_object_num'] = count($result['main_object_list']);
-				
-			}
-			
-			//Related narratives
-			if(!empty($result['narratives']))
-			{
-				$narrative = $this->narrativesModule();
-				$hits = $narrative->findKeys($result['narratives']);
-				$rows = $narrative->fetch ( 'start', 0,$hits, array_slice ( $this->narrativeColumns, 0, 2 ) );
-				
-				foreach ($rows->rows as $row)
+				if(!empty($tpl->rows[0]['AssAssociatedWithRef_tab']))
 				{
-					$result['narrative_list'][] = $row;
+					$result['narratives'] = $tpl->rows[0]['AssAssociatedWithRef_tab'];
 				}
-				unset($result['narratives']);
-				$rows = NULL;
+				if(!empty($tpl->rows[0]['AssMasterNarrativeRef']))
+				{
+					$result['narratives'][] =  $tpl->rows[0]['AssMasterNarrativeRef'];
+				}
 				
-			}			
+				$result['content'] =  mb_convert_encoding ( $tpl->rows[0]['NarNarrative'], 'ISO-8859-10', 'UTF-8' );
+				
+				//Main Object
+				if(!empty($result['main_object']))
+				{
+					$object = $this->ecatalogueModule();
+					$hits = $object->findKeys($result['main_object']);
+					$col = array_slice ( $this->columns, 0, 7 );
+					$col = array_merge($col,array('SumCategory','ProPlace','ProStateProvince_tab','ProCountry_tab','AdmInsertedBy'));
 			
-			//Related objects
+					$rows = $object->fetch ( 'start', 0,$hits,$col);
+					foreach ($rows->rows as $row)
+					{
+						$val = array('irn'=>$row['irn'],
+							'SumCategory'=>$row['SumCategory'],
+							'ProPlace'=>$row['ProPlace'],
+							'ProStateProvince_tab'=>$row['ProStateProvince_tab'],
+							'ProCountry_tab'=>$row['ProCountry_tab'],
+							'AdmInsertedBy'=>$row['AdmInsertedBy']
+						);
 						
+						$val['regNum'] = empty($row['SumRegNum']) ? $row['CatRegNumber'] : $row['SumRegNum'];
+						$val['regNum'] = substr($val['regNum'], 0,8);
+						if(!empty($row['image']))
+						{
+							$val['imageIrn'] = $row['image']['irn'];
+						}else
+						{
+							$val['imageIrn'] = -1;
+						}
+						$u= sprintf($this->showImageUrl,$val['imageIrn']);
+						$val['getImageUrl'] = URL::to($u);					
+						$result['mainObjectList'][] = $val;
+					}
+					$rows = NULL;
+					unset($result['main_object']);
+					$result['mainObjectNum'] = count($result['mainObjectList']);
+					
+				}
+				
+				//Related narratives
+				if(!empty($result['narratives']))
+				{
+					$narrative = $this->narrativesModule();
+					$hits = $narrative->findKeys($result['narratives']);
+					$rows = $narrative->fetch ( 'start', 0,$hits, array_slice ( $this->narrativeColumns, 0, 2 ) );
+					
+					foreach ($rows->rows as $row)
+					{
+						$result['narrativeList'][] = $row;
+					}
+					unset($result['narratives']);
+					$rows = NULL;
+					
+				}			
+				
+				//Related objects
+				if(!empty($result['mainObjectList']))
+				{
+					$object = reset($result['mainObjectList']);
+					$rules = array(
+						'objectType'=>$object['SumCategory'],
+						'provenance'=>array('place'=>$object['ProPlace'],
+							'city'=>reset($object['ProStateProvince_tab']),
+							'country'=>reset($object['ProCountry_tab'])),
+						'author'=>$object['AdmInsertedBy']
+					);
+					
+	
+					$result['relatedObjects'] = $this->getRelatedObjects($rules);					
+				}
+								
+			}			
+		}catch (Exception $e)
+		{
+			$this->error = $e->getMessage();
 		}
 		return $result;		
 	}
+
+	/**
+	 * Get object info
+	 *
+	 * @param int $id
+	 * @param int $imgId
+	 * @return array
+	 */
+	public function getObjectInfo($id,$imgId=0)
+	{
+		$result = array(
+			'irn'=>'',
+			'title'=>'',
+			'images'=>array(),
+			'content'=>'',
+			'objectId'=>'',
+			'objectName'=>'',
+			'photoCopy'=>'',
+			'photoGrapher'=>'',
+			'firstImage'=>'',
+			'relatedNarratives'=>array(),
+			'relatedObjects'=>array(),
+		);
+		
+		try
+		{
+			$ecatalog = $this->ecatalogueModule();
+			$ecatalog->findKey($id);
+			$tpl = $ecatalog->fetch('start', 0, 1, $this->columns);
+			if(!empty($tpl->rows[0]))
+			{
+				$object = $tpl->rows[0];
+				$result['irn'] = $object['irn'];
+				$tpl = NULL;
+				
+				$result['title']= $object['WebSummaryData'];
+				$ImageModule = $this->ImageModule();
+				$photoCopy = 'Australian Museum.';
+				foreach ($object['images'] as $row)
+				{
+					$u= sprintf($this->showImageUrl,$row['irn']);
+					$row['getImageUrl'] = URL::to($u);
+					
+					//Get Image Info
+					$ImageModule->findKey($row['irn']);  
+					$imgInfo = $ImageModule->fetch('start', 0, 1, $this->ImageColumns);				
+					$imgInfo = $imgInfo->rows[0];
+					$row['photoCopy'] = !empty($imgInfo['DetRights']) ? mb_convert_encoding ( $imgInfo['DetRights'], 'ISO-8859-10', 'UTF-8' ) : $photoCopy;
+					$row['photoGrapher'] = reset($imgInfo['MulCreator_tab']);
+					
+					$result['images'][$imgInfo['irn']] = $row;
+				}
 	
-	
-	
+				if(!isset($result['images'][$imgId]))
+				{
+					$img = reset($result['images']);
+					$result['photoCopy'] = $img['photoCopy'];
+					$result['photoGrapher'] = $img['photoGrapher'];
+					$result['firstImage'] = $img['getImageUrl'];
+				}else
+				{
+					$result['photoCopy'] = $result['images'][$imgId]['photoCopy'];
+					$result['photoGrapher'] = $result['images'][$imgId]['photoGrapher'];
+					$result['firstImage'] = $result['images'][$imgId]['getImageUrl'];
+				}
+				
+				
+				$result['content'] = $object['ObjDescription'];
+				$result['objectId'] = empty($object['SumRegNum']) ? $object['CatRegNumber'] : $object['SumRegNum'];
+				$result['objectName'] = $object['SumItemName'];
+				
+				//Related information sheets
+				$narratives = array();
+				$narrativesModule = $this->narrativesModule();
+				$col = array('SummaryData','irn');
+				$query = array('ObjObjectsRef_tab',$id);
+				$hits =$narrativesModule->findTerms($query);
+				$tpl = $narrativesModule->fetch('start', 0, $hits,$col);
+				foreach ($tpl->rows as $row)
+				{
+					$val['irn'] = $row['irn'];
+					$val['title'] = $row['SummaryData'];
+					$result['relatedNarratives'][] = $val;
+				}
+				$tpl = NULL;
+				
+				//Related Object
+				$rules = array(
+					'objectType'=>$object['SumCategory'],
+					'provenance'=>array('place'=>$object['ProPlace'],
+						'city'=>reset($object['ProStateProvince_tab']),
+						'country'=>reset($object['ProCountry_tab'])),
+					'author'=>$object['AdmInsertedBy']
+				);
+
+				$result['relatedObjects'] = $this->getRelatedObjects($rules);
+				if(isset($result['relatedObjects'][$id]))
+				{
+					unset($result['relatedObjects'][$id]);
+				}
+			}
+			
+			
+		}catch (Exception $e)
+		{
+			
+			$this->error = $e->getMessage();
+		}
+		return $result;
+	}
+
 	/**
 	 * 
 	 * Get Objects list
@@ -256,9 +406,15 @@ final class Search
 	 * @return $result
 	 * 
 	 */	
-	public function getObjects($searchData,$pageSize=19)
+	public function getObjects($searchData,$pageSize=19,$columns=array())
 	{
 		$result = array ('natural_num' => 0, 'cultural_num' => 0, 'natural_list' => array (), 'cultural_list' => array () );
+		if(empty($columns))
+		{
+			$columns = array_slice ( $this->columns, 0, 2 );
+		}
+		
+		
 		$ecatalogueModule = $this->ecatalogueModule ();
 		$query = $this->buildQuery ( $searchData );
 		if (! empty ( $query ))
@@ -275,7 +431,7 @@ final class Search
 					$query = $this->buildQuery ( $searchData );
 					$natural_hits = $ecatalogueModule->findTerms ( $query );
 					$result ['natural_num'] = $natural_hits;
-					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize, array_slice ( $this->columns, 0, 2 ) );
+					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize,$columns);
 					foreach ( $tpl->rows as $row )
 					{
 						$row ['WebSummaryData'] = mb_convert_encoding ( $row ['WebSummaryData'], 'ISO-8859-10', 'UTF-8' );
@@ -286,7 +442,7 @@ final class Search
 					$query = $this->buildQuery ( $searchData );
 					$cultural_hits = $ecatalogueModule->findTerms ( $query );
 					$result ['cultural_num'] = $cultural_hits;
-					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize, array_slice ( $this->columns, 0, 2 ) );
+					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize, $columns );
 					foreach ( $tpl->rows as $row )
 					{
 						$row ['WebSummaryData'] = mb_convert_encoding ( $row ['WebSummaryData'], 'ISO-8859-10', 'UTF-8' );
@@ -296,7 +452,7 @@ final class Search
 				} else
 				{
 					$result [$searchData ['collection'] . '_num'] = $hits;
-					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize, array_slice ( $this->columns, 0, 2 ) );
+					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize, $columns );
 					foreach ( $tpl->rows as $row )
 					{
 						$row ['WebSummaryData'] = mb_convert_encoding ( $row ['WebSummaryData'], 'ISO-8859-10', 'UTF-8' );
@@ -308,6 +464,100 @@ final class Search
 		return $result;
 	}
 	
+	
+	/**
+	 * 
+	 * GET Related Object
+	 * @param array $rules array('objectType','provenance','author')
+	 * @internal
+	 * 				$rules = array(
+					'objectType'=>$object['SumCategory'],
+					'provenance'=>array('place'=>$object['ProPlace'],
+						'city'=>reset($object['ProStateProvince_tab']),
+						'country'=>reset($object['ProCountry_tab'])),
+					'author'=>$object['AdmInsertedBy']
+				);
+	 */
+	public function getRelatedObjects($rules=array(),$pageSize=0)
+	{
+		$list = array();
+		if(!isset($rules['objectType']) or !isset($rules['provenance']) or !isset($rules['author']))
+		{
+			return $list;
+		}		
+		try 
+		{
+			
+			$terms = array();
+			$object = $this->ecatalogueModule();
+			$col = array('irn','SumRegNum','CatRegNumber','image');
+			//A = Object type
+			if(!empty($rules['objectType']))
+			{
+				$queryField = 'SumCategory';
+				$object->addSearchAlias ( 'objectType', $queryField );
+				$terms [] = array ('objectType',$rules['objectType']);				
+			}
+			//C = Author
+			if(!empty($rules['author']))
+			{
+				$queryField = 'AdmInsertedBy';
+				$object->addSearchAlias ( 'author', $queryField );
+				$terms [] = array ('author',$rules['author']);				
+			}
+			
+			//Query
+			if(!empty($terms))
+			{
+				$search = array('and',$terms);
+				$hits = $object->findTerms ( $search );
+				$f = $object->fetch ( 'start', 0,$hits, $col);
+				if(!empty($f->rows))
+				{
+					$list = $this->parseList($f->rows);
+				}				
+			}		
+			
+			//B = Provenance
+			$placeList = array();
+			if(!empty($rules['provenance']['place']))
+			{
+				$hits = $object->findTerms ( array('ProPlace',$rules['provenance']['place']) );
+				$f = $object->fetch ( 'start', 0,$hits, $col);
+				if(!empty($f->rows))
+				{
+					$placeList = $this->parseList($f->rows);
+				}				
+			}
+			if(!empty($rules['provenance']['city']) and empty($placeList))
+			{
+				$hits = $object->findTerms ( array('ProStateProvince_tab',$rules['provenance']['city']) );
+				$f = $object->fetch ( 'start', 0,$hits, $col);
+				if(!empty($f->rows))
+				{
+					$placeList = $this->parseList($f->rows);
+				}				
+			}
+			if(!empty($rules['provenance']['country']) and empty($placeList))
+			{
+				$hits = $object->findTerms ( array('ProCountry_tab',$rules['provenance']['country']) );
+				$f = $object->fetch ( 'start', 0,$hits, $col);
+				if(!empty($f->rows))
+				{
+					$placeList = $this->parseList($f->rows);
+				}				
+			}			
+			$f = NULL;
+			$list = $list+$placeList;
+			
+		}catch (Exception $e)
+		{
+			$this->error = $e->getMessage();
+		}
+		return $list;		
+	}
+	
+	
 	/**
 	 * 
 	 * Get narratives list
@@ -316,18 +566,18 @@ final class Search
 	 * @return $narrative
 	 * 
 	 */
-	public function getNarratives($searchData, $pageSize = 19)
+	public function getNarratives($searchData, $pageSize = 0)
 	{
 		$narrative = array ('cultural_num'=>0,'cultural_list'=>array(),'natural_num'=>0,'natural_list'=>array());
 		//Cultural
 		$keyWords = array('keyWords'=>$searchData['keyWords'].' cultural');
-		$res = $this->getNarrativesList($keyWords);
+		$res = $this->getNarrativesList($keyWords,$pageSize);
 		$narrative['cultural_num'] = $res['num'];
 		$narrative['cultural_list'] = $res['list'];
 		
 		//Natural
-		$keyWords = array('keyWords'=>$searchData['keyWords'].' natural history');
-		$res = $this->getNarrativesList($keyWords);		
+		$keyWords = array('keyWords'=>$searchData['keyWords'].' natural');
+		$res = $this->getNarrativesList($keyWords,$pageSize);
 		
 		$narrative['natural_num'] = $res['num'];
 		$narrative['natural_list'] = $res['list'];		
@@ -398,10 +648,40 @@ final class Search
 	
 	/**
 	 * 
+	 *  Parse List
+	 * @param array $inputList
+	 * @return array $outList
+	 */
+	private function parseList($inputList)
+	{
+		$outList = array();
+		foreach ($inputList as $row)
+		{
+			if(!empty($row['image']))
+			{
+				$row['imageIrn'] = $row['image']['irn'];
+			}else
+			{
+				$row['imageIrn'] = -1;
+			}
+			$u= sprintf($this->showImageUrl,$row['imageIrn']);
+			$row['getImageUrl'] = URL::to($u);
+			
+			$row['SumRegNum'] = !empty($row['SumRegNum']) ? $row['SumRegNum'] : $row['CatRegNumber'];
+			$row['SumRegNum'] = substr($row['SumRegNum'],0,8);
+			
+			unset($row['image'],$row['CatRegNumber']);						
+			$outList[$row['irn']] = $row;
+		}
+		return $outList;		
+	}
+	
+	/**
+	 * 
 	 * Get Narratives List
 	 * @param $searchData array
 	 */
-	private function getNarrativesList($searchData)
+	private function getNarrativesList($searchData,$pageSize=0)
 	{
 		$res = array('num'=>0,'list'=>array());
 		$query = $this->buildNarrativeQuery ( $searchData );
@@ -409,7 +689,12 @@ final class Search
 		{
 			$narrativesModule = $this->narrativesModule ();
 			$hits = $narrativesModule->findTerms ( $query );
-			$f = $narrativesModule->fetch ( 'start', 0,$hits, array_slice ( $this->narrativeColumns, 0, 5 ) );
+			if(empty($pageSize))
+			{
+				$pageSize = $hits;
+			}
+			
+			$f = $narrativesModule->fetch ( 'start', 0,$pageSize, array_slice ( $this->narrativeColumns, 0, 5 ) );
 			$res ['num'] = $f->hits;
 			
 			foreach ( $f->rows as $row )

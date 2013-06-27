@@ -26,39 +26,12 @@
                         <span class="dBFont bold">Natural History</span> Collection
                     </h2>
 
+                    @foreach ($results['natural_list'] as $val)
                     <div class="box-wrap">
-	                    {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
+                        <img src="{{$val['getImageUrl']}}">
+                        <p><a href="/info/{{$val['irn']}}"><?php echo substr($val['NarTitle'],0,10);?></a></p>
                     </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
+                    @endforeach
 
                 </div>
 
@@ -66,44 +39,17 @@
                     <h2 class="normal marginBottomHalf">
                         <span class="dBFont bold">Cultural</span> Collection
                     </h2>
+                    @foreach ($results['cultural_list'] as $val)
                     <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
+                        <img src="{{$val['getImageUrl']}}">
+                        <p><a href="/info/{{$val['irn']}}"><?php echo substr($val['NarTitle'],0,10);?></a></p>
                     </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-                    <div class="box-wrap">
-                        {{ HTML::image('images/100.jpg'); }}
-                        <p><a href="#">Image title</a></p>
-                    </div>
-
+                    @endforeach
                 </div>
             </div>
         </div><!-- explore wrap closed -->
 
+        <a name="search"/>
         <div class="form-wrap">
             <div class="row">
                 <div class="ful-box w-last m-last">

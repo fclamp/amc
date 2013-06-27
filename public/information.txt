@@ -32,7 +32,7 @@
             ?>
             
             <div class="w-feature-6 s3-feature <?php echo $class;?>">
-                  <img src="<?php echo $val['getImageUrl'];?>">
+                <img src="<?php echo $val['getImageUrl'];?>">
                 <p>
                     <a href="/object/<?php echo $val['irn'];?>"><?php echo $val['regNum'];?></a>
                 </p>
@@ -96,7 +96,7 @@
 						            ?>
 						            
 			                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature <?php echo $class;?>">
-			                            <img src="<?php echo $val['getImageUrl'];?>">
+			                           <img src="<?php echo $val['getImageUrl'];?>">
 			                            <p>
 			                                <a href="/object/{{$val['irn']}}"><?php echo $val['SumRegNum'];?></a>
 			                            </p>
@@ -223,6 +223,7 @@ $(function(){
 });	
 
 </script>
+
 
 </div>	 <!-- container -->
 </div>	<!-- whiteGrad -->

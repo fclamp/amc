@@ -23,7 +23,7 @@
 				$('.form-wrap').hide();
 			@endif
             
-            $("#search").click(function () {
+            $("#search, #footer-search").click(function () {
                 $(".form-wrap").fadeIn(200);
                 $('.explore-wrap').hide();
             });
@@ -31,7 +31,7 @@
                 $(".form-wrap").fadeIn(200);
                 $('.explore-wrap').hide();
             });
-            $("#explore").click(function () {
+            $("#explore, #footer-explore").click(function () {
                 $(".explore-wrap").fadeIn(200);
                 $('.form-wrap').hide();
             });

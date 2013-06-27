@@ -5,55 +5,73 @@
         <div class="row">
             <div class="w-content m-content sm-content s-content marginTopDouble marginBottom">
                 <h2 class="font30 marginBottomHalf">
-                    <span class="font10 dFont uppercase block">Information Sheet</span>
-                    <span class=" dBFont"> Fishing Spears</span>
+                    <span class="font10 dFont uppercase block">Registration Number</span>
+                    <span class=" dBFont"> {{$results['objectId']}} </span>
                 </h2>
-                {{ HTML::image('images/main.jpg'); }}
-                <div class="row">
+                <img id="fristImageShow"src="{{$results['firstImage']}}">
+                
 
-                    <div class="w-feature-gutter s3-feature-gutter arrow-left"><a href="#">  {{ HTML::image('images/arrow_left.png'); }} </a> </div>
-                    <div class="w-feature-wrap s3-feature-wrap">
-                        <div class="w-feature-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
+                    <div class="w-feature-gutter s3-feature-gutter arrow-left"><a href="javascript:void(0);" class="main_left_arrow">  @if($results['images']){{ HTML::image('images/arrow_left.png'); }} @endif</a> </div>
+			        <div class="my-list-thumb">
+			        <div class="my-really-thumb" style="width:3000px;position:relative;">
 
-                        </div>
-                        <div class="w-feature-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
 
-                        </div>
-                        <div class="w-feature-6 s3-feature s3-last">
-                            {{ HTML::image('images/100.jpg'); }}
+						<div class="my-really-thumbbox">
+			           <?php $class='';$i=0;$j=0;$num=count($results['images'])-1;?>
+			            <?php foreach ($results['images'] as $k=>$val){?>
+			            
+			            
+			            <?php 
+			            $i++;$j++;
+			            if($i==6){
+			            	$class='s3-last w-last m-last sm-last s-last';
+			            	$i=0;
+			            }else
+			            {
+			            	$class = '';
+			            }
+			            ?>
+			            
+			            <div class="w-feature-6 s3-feature <?php echo $class;?>">
+			                <a href="javascript:void(0);" class="selectImageClick" data-src="<?php echo $val['getImageUrl'];?>"><img data-photoCopy="<?php echo $val['photoCopy'];?>" data-photoGrapher="<?php echo $val['photoGrapher'];?>" src="<?php echo $val['getImageUrl'];?>"></a>
+			             </div>
+			             <?php 
+			                 if($j==6 and $num !=$k)
+			                  {
+			                     	$j=0;
+			              ?>
+			               </div>
+			               <div class="my-really-thumbbox">
+			               <?php }elseif($num==$k){?>
+			               </div>
+			             <?php }?>			             
+			             
+			             
+			             
+			             
+			            <?php }?>
+			            
+			            
+			            
+			            
+			            
+			            
 
-                        </div>
-                        <div class="w-feature-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-
-                        </div>
-                        <div class="w-feature-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-
-                        </div>
-                        <div class="w-feature-6 s3-feature s3-last w-last m-last sm-last s-last">
-                            {{ HTML::image('images/100.jpg'); }}
-
-                        </div>
-
+					</div>
                     </div>
-                    <div class="w-feature-gutter s3-feature-gutter arrow-right"><a href="#"> <img src="images/arrow_right.png" alt="Arrow Right" /></a>  </div>
-                </div>
+                    <div class="w-feature-gutter s3-feature-gutter arrow-right"><a href="javascript:void(0);" class="main_right_arrow"> @if($results['images']){{ HTML::image('images/arrow_right.png'); }}@endif</a>  </div>
+                
+                
+                
+                
+                
                 <div class="row marginTopDouble">
-                    <p>
-                        Spears were used by the men of the eastern and northern coastal areas of Australia when fishing from canoes or rock platforms or in shallow water. Multipronged spears were especially useful with fast-moving fish and those that present a narrow profile when seen from above.
-                    </p>
-                    <p>
-                        The points and barbs of fishing spears were made from pieces of bird or mammal bone, stingray spines, shell, fish teeth or hardwood.
-                    </p>
-                    <p>
-                        These four prongs are typical of those found in multipronged spears used on the eastern and northern coasts of Australia. Although this example was collected in the north of what is now Queensland, early British colonists observed fishing spears such as this one in use in the Sydney area and called them 'fizz-gigs'. They reported that spears could reach up to 6 m in length. The length of such spears depended on the depth of the water in which they were to be used.
-                    </p>
-                    <p>
-                        The points and barbs of fishing spears were generally made from pieces of bird or mammal bone, stingray spines, shell, fish teeth or hardwood. Here they are made from local bird bone, which was easily replaceable if the point were broken. A piece of rib, leg or wing bone was sharpened at both ends and fixed to the prong, leaving both ends exposed.
-                    </p>
+	                <h2><span class="font10 dFont block">Object ID: <span style="font-weight:normal;">{{ $results['objectId'] }}</span> </span></h2>
+                    <h2><span class="font10 dFont block">Object Name: <span style="font-weight:normal;">{{ $results['objectName'] }}</span></span> </h2>
+                    <h2><span class="font10 dFont block">Photograph Copyright: <span style="font-weight:normal;">{{ $results['photoCopy'] }}</span></span></h2>
+                    <h2><span class="font10 dFont block">Photographer: <span style="font-weight:normal;">{{ $results['photoGrapher'] }}</span></span></h2>
+
+                    <p> {{ $results['content'] }} </p>
                 </div>
             </div>
 
@@ -61,96 +79,70 @@
                 <h2 class="normal marginLeftSpec marginBottomHalf">
                     <span class="bold dBFont">Browse</span> related objects
                 </h2>
-                <div class="row">
-                    <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-left"><a href="#"> <img src="images/arrow_left.png" alt="Arrow left" /></a>  </div>
-                    <div class="w-related-wrap m-related-wrap sm-related-wrap s-related-wrap s3-feature-wrap">
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 sm-last s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 m-last s3-feature s3-last">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 w-last sm-last s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <!-- Row aside -->
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 m-last sm-last s-last s3-feature s3-last">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 w-last sm-last s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <!-- Row aside -->
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 m-last s3-feature s3-last">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 sm-last s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 w-last m-last sm-last s-last s3-feature s3-last">
-                            {{ HTML::image('images/100.jpg'); }}
-                            <p>
-                                <a href="#">E.92449</a>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-right"> <a href="#"> <img src="images/arrow_right.png" alt="ArrowRight" /></a>  </div>
-                </div> <!-- Row closed -->
+                
+                	@if($results['relatedObjects'])
+                    <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-left">@if($results['relatedObjects'])<a href="javascript:void(0);" class="related_left_arrow"> {{ HTML::image('images/arrow_left.png'); }}</a>@endif  </div>
+			        <div class="my-list-related">
+			        <div class="my-really-related" style="width:3000px;position:relative;">
+								
+								<div class="my-related-conter">
+						            <?php $class='';$i=0;$j=0;$num=count($results['relatedObjects'])-1;?>
+						            <?php foreach ($results['relatedObjects'] as $k=>$val){?>
+						            
+						            
+						            <?php 
+						            $i++;$j++;
+						            if($i==4){
+						            	$class='w-last sm-last';
+						            	$i=0;
+						            }else
+						            {
+						            	$class = '';
+						            }
+						            ?>
+						            
+			                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature <?php echo $class;?>">
+			                          <img src="<?php echo $val['getImageUrl'];?>">
+			                            <p>
+			                                <a href="/object/{{$val['irn']}}"><?php echo $val['SumRegNum'];?></a>
+			                            </p>
+			                        </div>
+			                        
+			                        <?php 
+			                        	if($j==12 and $num !=$k)
+			                        	{
+			                     			$j=0;
+			                        ?>
+			                        </div>
+			                        <div class="my-related-conter">
+			                        <?php }elseif($num==$k){?>
+			                        </div>
+			                        <?php }?>
+			                        
+			                        
+			                        
+						            <?php }?>								
+								
+								
+												
+								
+						                       
+					</div>
+			        </div>
+                    <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-right"> @if($results['relatedObjects'])<a href="javascript:void(0)" class="related_right_arrow"> {{ HTML::image('images/arrow_right.png'); }}</a>@endif  </div>
+                	@endif
+                	
+                	
+                	
+                
                 <div class="marginLeftSpec">
                     <h3 class="marginBottomHalf normal">
                         <span class="bold dBFont">Related</span> information sheets
                     </h3>
                     <ul class="infosheetsList bold">
-                        <li><a href="#">Western Desert</a></li>
-                        <li><a href="#">Kimberly Points</a></li>
-                        <li><a href="#">Kalti Paarti: Introduction</a></li>
-                        <li><a href="#">Sydney Shield</a></li>
-                        <li><a href="#">String Figures of Yirrkala</a></li>
+                    @foreach ($results['relatedNarratives'] as $val)
+                        <li><a href="/info/{{$val['irn']}}">{{$val['title']}}</a></li>
+                    @endforeach
                     </ul>
                 </div>
             </div>
@@ -158,4 +150,112 @@
 
     </div>	 <!-- container -->
 </div>	<!-- whiteGrad -->
+
+<script>
+
+$(function(){
+
+
+	/**
+	* Show Big Image
+	*
+	*
+	**/
+	$(".selectImageClick").live('click',function(){
+	 	var url = $(this).attr('data-src');
+	 	$('#fristImageShow').attr('src',url);					 	
+		return false;
+	});		
+	
+	
+
+	/**
+	*Information Sheet Main Objects
+	*
+	*/
+	var MainCurPage = 1;
+	var MainPageSize = 6;
+	var MaindNum = $('.w-feature-6').length;
+
+	var MainPages = Math.ceil(MaindNum / MainPageSize);
+	var MainShowBox = $('.my-really-thumb');
+	
+	$('.main_right_arrow').click(function(){
+	    if (!MainShowBox.is(':animated')) { 
+
+			if(MainCurPage==MainPages)
+			{
+				return false;
+			}
+			
+			MainShowBox.animate({
+	            left: '-=' + 631
+	        }, 500);
+			MainCurPage++;
+		}	
+	});
+
+	$('.main_left_arrow').click(function(){
+	    if (!MainShowBox.is(':animated')) { 
+
+			if(MainCurPage==1)
+			{
+				return false;
+			}
+			
+			MainShowBox.animate({
+	            left: '+=' + 631
+	        }, 500);
+			MainCurPage--;
+		}	
+	});
+
+	
+
+
+	
+
+	/**
+	*Information Sheet Related Objects
+	*
+	*/
+	var RelatedCurPage = 1;
+	var RelatedPageSize = 12;
+	var RelatedNum = $('.w-related-4').length;
+
+	var RelatedPages = Math.ceil(RelatedNum / RelatedPageSize);
+	var RelatedShowBox = $('.my-really-related');
+	
+	$('.related_right_arrow').click(function(){
+	    if (!RelatedShowBox.is(':animated')) { 
+
+			if(RelatedCurPage==RelatedPages)
+			{
+				return false;
+			}
+			
+			RelatedShowBox.animate({
+	            left: '-=' + 351
+	        }, 500);
+			RelatedCurPage++;
+		}	
+	});
+
+	$('.related_left_arrow').click(function(){
+	    if (!RelatedShowBox.is(':animated')) { 
+
+			if(RelatedCurPage==1)
+			{
+				return false;
+			}
+			
+			RelatedShowBox.animate({
+	            left: '+=' + 351
+	        }, 500);
+			RelatedCurPage--;
+		}	
+	});
+});	
+
+</script>
 @endsection

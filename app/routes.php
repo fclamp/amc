@@ -34,13 +34,32 @@ Route::get ('imu-test', function ()
 		$mySession->host = '203.22.224.29';
 		$mySession->port = 40000;
 		$mySession->connect ();
-		Config::set ( 'imu.module_table', 'eparties' );
+		Config::set ( 'imu.module_table', 'ecatalogue' );
 		$parties = App::make ( 'ImuModule' );
-		$search = array ('NamLast', 'Smith' );
-		$hits = $parties->findTerms ( $search );
-		$columns = array ('irn', 'NamFirst', 'NamLast' );
+		
+		$hits = $parties->findKey(18409);
+		$columns = array ('irn', 
+			'SummaryData', 
+			'MulMultiMediaRef_tab',
+			'image.resource'
+		);
 		$result = $parties->fetch ( 'start', 0, 3, $columns );
+		echo '<pre>';
 		print_r( $result );
+		
+		
+		Config::set ( 'imu.module_table', 'emultimedia' );
+		$parties = App::make ( 'ImuModule' );
+		
+		$hits = $parties->findKey(8171);
+		$columns = array ('irn', 
+			'resource',
+		);
+		$result = $parties->fetch ( 'start', 0, 3, $columns );		
+		print_r( $result );
+		
+		
+		
 	}
 	catch ( Exception $e )
 	{

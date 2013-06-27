@@ -25,6 +25,7 @@ class InformationController extends BaseController
 		$id = abs(intval($id));
 		
 		$search = new Search();
+
 		$result = $search->getNarrativeInfo($id);		
 		
 		$this->layout->dealForm = Input::get('dealForm')=='search' ? Input::get('dealForm') : NULL;

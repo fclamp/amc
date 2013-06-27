@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Information controller.
+ * Object controller.
  *
  * @author BMCD AP
  * @version 0.1
@@ -20,9 +20,22 @@ class ObjectController extends BaseController
 	 * @return \Response
 	 * @access public
 	 */
-	public function index($id = null)
+	public function index($id = null,$imgId=null)
 	{
-		$this->layout->title = 'Australian Museum Collections : Object';
-		$this->layout->content = View::make('pages.object');
+		$id = abs(intval($id));
+		$imgId = abs(intval($imgId));
+
+		$search = new Search();
+		$result = $search->getObjectInfo($id,$imgId);
+		
+		$this->layout->dealForm = Input::get('dealForm')=='search' ? Input::get('dealForm') : NULL;
+
+		$this->layout->title = 'Australian Museum Collections : Object : ' . $id;
+
+		$data = array(
+			'results'=>$result,
+		);
+
+		$this->layout->content = View::make('pages.object', $data);
 	}
 }
