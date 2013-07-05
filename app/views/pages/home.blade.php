@@ -28,7 +28,7 @@
 
                     @foreach ($results['natural_list'] as $val)
                     <div class="box-wrap">
-                        <img src="{{$val['getImageUrl']}}">
+                        <img src="{{$val['getImageUrl']}}" class="my-show-image-thumb">
                         <p><a href="/info/{{$val['irn']}}"><?php echo substr($val['NarTitle'],0,10);?></a></p>
                     </div>
                     @endforeach
@@ -41,7 +41,7 @@
                     </h2>
                     @foreach ($results['cultural_list'] as $val)
                     <div class="box-wrap">
-                        <img src="{{$val['getImageUrl']}}">
+                        <img src="{{$val['getImageUrl']}}" class="my-show-image-thumb">
                         <p><a href="/info/{{$val['irn']}}"><?php echo substr($val['NarTitle'],0,10);?></a></p>
                     </div>
                     @endforeach

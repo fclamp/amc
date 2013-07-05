@@ -37,12 +37,12 @@ class HomeController extends BaseController
 
 	    $data = array(
 		                'results'       => $results,
-	                    'KeyWords'      => Input::get('KeyWords'),
-	                    'Date'          => Input::get('Date'),
-	                    'Location'      => Input::get('Location'),
-		                'Registration'  => Input::get('Registration'),
-	                    'Collection'    => Input::get('Collection'),
-	                    'ImagesOnly'    => Input::get('ImagesOnly'));
+	                    'KeyWords'      => Input::get('keyWords'),
+	                    'Date'          => Input::get('date'),
+	                    'Location'      => Input::get('location'),
+		                'Registration'  => Input::get('registration'),
+	                    'Collection'    => Input::get('collection'),
+	                    'ImagesOnly'    => Input::get('imagesOnly'));
 
 		//show form
 		$this->layout->dealForm = Input::get('dealForm')=='search' ? Input::get('dealForm') : NULL;

@@ -14,14 +14,16 @@
 // Our intial routes.
 Route::get('/', 'HomeController@index');
 Route::get('search/results', 'SearchController@results');
+Route::post('search/ajaxsearch', 'SearchController@ajaxsearch');
 Route::get('info/{id}', 'InformationController@index');
 Route::get('object/{id}', 'ObjectController@index');
 
 //Show Image
-Route::get('show-img/{irn}',function($irn){
+Route::get('show-img/{irn}/{size?}',function($irn,$size='100,100'){
 
 	$search = new Search();
-	$search->getImage($irn);
+	$size = explode(',',$size);
+	$search->getImage($irn,$size);
 	
 });
 

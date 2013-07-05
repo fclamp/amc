@@ -8,21 +8,21 @@
                     <span class="font10 dFont uppercase block">Registration Number</span>
                     <span class=" dBFont"> {{$results['objectId']}} </span>
                 </h2>
-                <img id="fristImageShow"src="{{$results['firstImage']}}">
+                <img id="fristImageShow"src="{{$results['firstImage']}}/500,500">
                 
 
                     <div class="w-feature-gutter s3-feature-gutter arrow-left"><a href="javascript:void(0);" class="main_left_arrow">  @if($results['images']){{ HTML::image('images/arrow_left.png'); }} @endif</a> </div>
 			        <div class="my-list-thumb">
-			        <div class="my-really-thumb" style="width:3000px;position:relative;">
+			        <div class="my-really-thumb" style="width:30000px;position:relative;">
 
 
 						<div class="my-really-thumbbox">
-			           <?php $class='';$i=0;$j=0;$num=count($results['images'])-1;?>
-			            <?php foreach ($results['images'] as $k=>$val){?>
+			           <?php $class='';$i=0;$j=0;$k=0;$num=count($results['images']);?>
+			            <?php foreach ($results['images'] as $val){?>
 			            
 			            
 			            <?php 
-			            $i++;$j++;
+			            $i++;$j++;$k++;
 			            if($i==6){
 			            	$class='s3-last w-last m-last sm-last s-last';
 			            	$i=0;
@@ -33,7 +33,7 @@
 			            ?>
 			            
 			            <div class="w-feature-6 s3-feature <?php echo $class;?>">
-			                <a href="javascript:void(0);" class="selectImageClick" data-src="<?php echo $val['getImageUrl'];?>"><img data-photoCopy="<?php echo $val['photoCopy'];?>" data-photoGrapher="<?php echo $val['photoGrapher'];?>" src="<?php echo $val['getImageUrl'];?>"></a>
+			                <a href="javascript:void(0);" class="selectImageClick" data-src="<?php echo $val['getImageUrl'];?>"><img  class="my-info-image-thumb" data-photoCopy="<?php echo $val['photoCopy'];?>" data-photoGrapher="<?php echo $val['photoGrapher'];?>" src="<?php echo $val['getImageUrl'];?>"></a>
 			             </div>
 			             <?php 
 			                 if($j==6 and $num !=$k)
@@ -83,15 +83,15 @@
                 	@if($results['relatedObjects'])
                     <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-left">@if($results['relatedObjects'])<a href="javascript:void(0);" class="related_left_arrow"> {{ HTML::image('images/arrow_left.png'); }}</a>@endif  </div>
 			        <div class="my-list-related">
-			        <div class="my-really-related" style="width:3000px;position:relative;">
+			        <div class="my-really-related" style="width:30000px;position:relative;">
 								
 								<div class="my-related-conter">
-						            <?php $class='';$i=0;$j=0;$num=count($results['relatedObjects'])-1;?>
-						            <?php foreach ($results['relatedObjects'] as $k=>$val){?>
+						            <?php $class='';$i=0;$j=0;$k=0;$num=count($results['relatedObjects']);?>
+						            <?php foreach ($results['relatedObjects'] as $val){?>
 						            
 						            
 						            <?php 
-						            $i++;$j++;
+						            $i++;$j++;$k++;
 						            if($i==4){
 						            	$class='w-last sm-last';
 						            	$i=0;
@@ -102,7 +102,7 @@
 						            ?>
 						            
 			                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature <?php echo $class;?>">
-			                          <img src="<?php echo $val['getImageUrl'];?>">
+			                          <img src="<?php echo $val['getImageUrl'];?>" class="my-info-image-thumb">
 			                            <p>
 			                                <a href="/object/{{$val['irn']}}"><?php echo $val['SumRegNum'];?></a>
 			                            </p>
@@ -127,8 +127,9 @@
 												
 								
 						                       
-					</div>
+					
 			        </div>
+	                </div>
                     <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-right"> @if($results['relatedObjects'])<a href="javascript:void(0)" class="related_right_arrow"> {{ HTML::image('images/arrow_right.png'); }}</a>@endif  </div>
                 	@endif
                 	

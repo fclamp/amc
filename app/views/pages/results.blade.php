@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="w-2col m-2col bb-grey paddingBottom">
+            <div class="w-2col m-2col bb-grey paddingBottom naturalCollectionList">
                 <h3 class="marginBottomHalf marginTopHalf font28 normal">
                     <span class="bold dBFont">Natural History</span> Collection
                 </h3>
@@ -31,7 +31,7 @@
                 @if ($results['narrative_natural_list'])
                 @foreach ($results['narrative_natural_list'] as $val)
                 <div class="box">
-                    <img src="{{$val['getImageUrl']}}">
+                    <img src="{{$val['getImageUrl']}}" class="my-show-image-thumb">
 
                     <div class="box-body">
                         <p class="box-heading">
@@ -47,7 +47,7 @@
                 
                 
             </div>
-            <div class="w-2col m-2col w-last m-last bb-grey paddingBottom">
+            <div class="w-2col m-2col w-last m-last bb-grey paddingBottom culturalCollectionList">
                 <h3 class="marginBottomHalf marginTopHalf font28 normal">
                     <span class="bold dBFont">Cultural</span> Collection
                 </h3>
@@ -59,7 +59,7 @@
                 @foreach ($results['narrative_cultural_list'] as $val)                
                 <div class="box">
 
-                    <img src="{{$val['getImageUrl']}}">
+                    <img src="{{$val['getImageUrl']}}" class="my-show-image-thumb">
 
                     <div class="box-body">
                         <p class="box-heading">
@@ -83,7 +83,7 @@
                 <h4>
                     Objects
                 </h4>
-                <ul class="objectList">
+                <ul id="objectNaturalList" class="objectList">
                 	@foreach ($results['object_natural_list'] as $val)
                     <li><a href="/object/{{$val['irn']}}">{{$val['WebSummaryData']}}</a></li>
                 	@endforeach
@@ -96,7 +96,7 @@
                 <h4>
                     Objects
                 </h4>
-                <ul class="objectList">
+                <ul id="objectCulturalList" class="objectList">
                 	@foreach ($results['object_cultural_list'] as $val)
                     <li><a href="/object/{{$val['irn']}}">{{$val['WebSummaryData']}}</a></li>
                     @endforeach
@@ -107,4 +107,44 @@
 
     </div>	 <!-- container -->
 </div>	<!-- whiteGrad -->
+<script>
+
+$(document).ready(function() {
+    var endOfTheLine = 1;
+
+    $(window).scroll(function () {
+
+        if(endOfTheLine == 1)
+        {
+            if ($(window).height() + $(window).scrollTop() >= ($(document).height()-400)) {
+                endOfTheLine = 0;
+                $.ajax({
+                    type: "POST",
+                    url: "/search/ajaxsearch",
+                    data: { 'qs': location.search },
+                    cache: false,
+                    success: function(data){
+                        // natural list
+                        for (i in data.natural_list) {
+                            $('.naturalCollectionList').append('<div class="box"><img src="'+data.natural_list[i].getImageUrl+'" class="my-show-image-thumb"><div class="box-body"><p class="box-heading"><a href="/info/'+data.natural_list[i].irn+'">'+data.natural_list[i].NarTitle+'</a></p><p>'+data.natural_list[i].SummaryData+'</p></div></div>');
+                        }
+
+	                    // cultural list
+	                    for (j in data.cultural_list) {
+		                    $('.culturalCollectionList').append('<div class="box"><img src="'+data.cultural_list[j].getImageUrl+'" class="my-show-image-thumb"><div class="box-body"><p class="box-heading"><a href="/info/'+data.cultural_list[j].irn+'">'+data.cultural_list[j].NarTitle+'</a></p><p>'+data.cultural_list[j].SummaryData+'</p></div></div>');
+	                    }
+
+	                    // reset the pointer
+	                    if (j > 0 || i > 0) {
+                            endOfTheLine = 1;
+	                    }
+                    },
+	                dataType: 'JSON'
+                });
+            }
+        }
+    });
+});
+
+</script>
 @endsection

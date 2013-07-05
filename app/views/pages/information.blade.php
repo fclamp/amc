@@ -11,17 +11,17 @@
     
         <div class="w-feature-gutter s3-feature-gutter arrow-left"> @if($results['mainObjectList'])<a href="javascript:void(0);" class="main_left"> {{ HTML::image('images/arrow_left.png'); }}</a>@endif </div>
         <div class="my-list-conter">
-        <div class="my-really" style="position:relative;width:3000px;">
+        <div class="my-really" style="position:relative;width:30000px;">
           
           <div class="my-contener">
             <!-- Row -->
             
-            <?php $class='';$i=0;$j=0;$num=count($results['mainObjectList'])-1;?>
-            <?php foreach ($results['mainObjectList'] as $k=>$val){?>
+            <?php $class='';$i=0;$j=0;$k=0;$num=count($results['mainObjectList']);?>
+            <?php foreach ($results['mainObjectList'] as $val){?>
             
             
             <?php 
-            $i++;$j++;
+            $i++;$j++;$k++;
             if($i==6){
             	$class='s3-last w-last m-last sm-last s-last';
             	$i=0;
@@ -32,7 +32,7 @@
             ?>
             
             <div class="w-feature-6 s3-feature <?php echo $class;?>">
-                  <img src="<?php echo $val['getImageUrl'];?>">
+                  <img src="<?php echo $val['getImageUrl'];?>" class="my-info-image-thumb">
                 <p>
                     <a href="/object/<?php echo $val['irn'];?>"><?php echo $val['regNum'];?></a>
                 </p>
@@ -77,15 +77,15 @@
     
         <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-left"> @if($results['relatedObjects'])<a href="javascript:void(0);" class="related_left_arrow"> {{ HTML::image('images/arrow_left.png'); }}</a>@endif  </div>
         <div class="my-list-related">
-        <div class="my-really-related" style="width:3000px;position:relative;">
+        <div class="my-really-related" style="width:30000px;position:relative;">
 					
 								<div class="my-related-conter">
-						            <?php $class='';$i=0;$j=0;$num=count($results['relatedObjects'])-1;?>
-						            <?php foreach ($results['relatedObjects'] as $k=>$val){?>
+						            <?php $class='';$i=0;$j=0;$k=0;$num=count($results['relatedObjects']);?>
+						            <?php foreach ($results['relatedObjects'] as $val){?>
 						            
 						            
 						            <?php 
-						            $i++;$j++;
+						            $i++;$j++;$k++;
 						            if($i==4){
 						            	$class='w-last sm-last';
 						            	$i=0;
@@ -96,7 +96,7 @@
 						            ?>
 						            
 			                        <div class="w-related-4 m-related-3 sm-related-2 s-related-6 s3-feature <?php echo $class;?>">
-			                            <img src="<?php echo $val['getImageUrl'];?>">
+			                            <img src="<?php echo $val['getImageUrl'];?>" class="my-info-image-thumb">
 			                            <p>
 			                                <a href="/object/{{$val['irn']}}"><?php echo $val['SumRegNum'];?></a>
 			                            </p>
@@ -113,14 +113,12 @@
 			                        </div>
 			                        <?php }?>
 			                        
-			                        
-			                        
 						            <?php }?>	
 			
 
                        
-		</div>
         </div>
+		</div>
         <div class="w-related-gutter m-related-gutter sm-related-gutter s-related-gutter s3-feature-gutter arrow-right"> @if($results['relatedObjects'])<a href="javascript:void(0)" class="related_right_arrow"> {{ HTML::image('images/arrow_right.png'); }}</a>@endif </div>
     
     <div class="marginLeftSpec">

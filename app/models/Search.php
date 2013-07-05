@@ -80,6 +80,7 @@ final class Search
 			'AssAssociatedWithRef_tab', 
 			'NarNarrative',
 			'AdmInsertedBy',
+			//'resource{resource:only, width:520}'
 			);
 		
 		/**
@@ -134,7 +135,7 @@ final class Search
 	 * @return array $result
 	 * @access public
 	 */
-	public function lookup($searchData, $pageSize = 30)
+	public function lookup($searchData, $pageSize = 30, $offset = 0)
 	{
 		//Init
 		$result = array ('total' => 0, 
@@ -148,10 +149,10 @@ final class Search
 		try
 		{
 			//Narrative
-			$narrative = $this->getNarratives ( $searchData, $pageSize );
+			$narrative = $this->getNarratives ($searchData, $pageSize,$offset);
 			
 			//Objects
-			$objects = $this->getObjects($searchData,$pageSize);
+			$objects = $this->getObjects($searchData, $pageSize, array(), $offset);
 			
 			$result['total'] = $narrative['cultural_num'] + $narrative['natural_num'] + $objects['natural_num'] + $objects['cultural_num'];
 			$result['natural_num'] = $narrative['natural_num']+ $objects['natural_num'];
@@ -191,7 +192,7 @@ final class Search
 		{
 			$narrative = $this->narrativesModule();
 			$hits = $narrative->findKey($id); 
-			$tpl = $narrative->fetch('start', 0, 1,$this->narrativeColumns); 
+			$tpl = $narrative->fetch('start', 0, 1, $this->narrativeColumns);
 			if(!empty($tpl->rows[0]))
 			{
 				$result['title'] = $tpl->rows[0]['NarTitle'];
@@ -323,7 +324,7 @@ final class Search
 				$tpl = NULL;
 				
 				$result['title']= $object['WebSummaryData'];
-				$ImageModule = $this->ImageModule();
+				$ImageModule = $this->imageModule();
 				$photoCopy = 'Australian Museum.';
 				foreach ($object['images'] as $row)
 				{
@@ -339,7 +340,12 @@ final class Search
 					
 					$result['images'][$imgInfo['irn']] = $row;
 				}
-	
+				if(empty($result['images']))
+				{
+					$result['images'][] = array('photoCopy'=>'','photoGrapher'=>'','getImageUrl'=>'/show-img/-1');
+				}
+				
+				
 				if(!isset($result['images'][$imgId]))
 				{
 					$img = reset($result['images']);
@@ -403,10 +409,12 @@ final class Search
 	 * Get Objects list
 	 * @param $searchData array
 	 * @param $pageSize int
+	 * @param array $columns
+	 * @param int $offset
 	 * @return $result
 	 * 
 	 */	
-	public function getObjects($searchData,$pageSize=19,$columns=array())
+	public function getObjects($searchData, $pageSize=19, $columns=array(), $offset = 0)
 	{
 		$result = array ('natural_num' => 0, 'cultural_num' => 0, 'natural_list' => array (), 'cultural_list' => array () );
 		if(empty($columns))
@@ -431,7 +439,7 @@ final class Search
 					$query = $this->buildQuery ( $searchData );
 					$natural_hits = $ecatalogueModule->findTerms ( $query );
 					$result ['natural_num'] = $natural_hits;
-					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize,$columns);
+					$tpl = $ecatalogueModule->fetch ('start', $offset, $pageSize, $columns);
 					foreach ( $tpl->rows as $row )
 					{
 						$row ['WebSummaryData'] = mb_convert_encoding ( $row ['WebSummaryData'], 'ISO-8859-10', 'UTF-8' );
@@ -442,7 +450,7 @@ final class Search
 					$query = $this->buildQuery ( $searchData );
 					$cultural_hits = $ecatalogueModule->findTerms ( $query );
 					$result ['cultural_num'] = $cultural_hits;
-					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize, $columns );
+					$tpl = $ecatalogueModule->fetch ('start', $offset, $pageSize, $columns );
 					foreach ( $tpl->rows as $row )
 					{
 						$row ['WebSummaryData'] = mb_convert_encoding ( $row ['WebSummaryData'], 'ISO-8859-10', 'UTF-8' );
@@ -452,7 +460,7 @@ final class Search
 				} else
 				{
 					$result [$searchData ['collection'] . '_num'] = $hits;
-					$tpl = $ecatalogueModule->fetch ( 'start', 0, $pageSize, $columns );
+					$tpl = $ecatalogueModule->fetch ( 'start', $offset, $pageSize, $columns );
 					foreach ( $tpl->rows as $row )
 					{
 						$row ['WebSummaryData'] = mb_convert_encoding ( $row ['WebSummaryData'], 'ISO-8859-10', 'UTF-8' );
@@ -463,8 +471,7 @@ final class Search
 		}
 		return $result;
 	}
-	
-	
+
 	/**
 	 * 
 	 * GET Related Object
@@ -566,18 +573,18 @@ final class Search
 	 * @return $narrative
 	 * 
 	 */
-	public function getNarratives($searchData, $pageSize = 0)
+	public function getNarratives($searchData, $pageSize = 30,$offset=0)
 	{
 		$narrative = array ('cultural_num'=>0,'cultural_list'=>array(),'natural_num'=>0,'natural_list'=>array());
 		//Cultural
 		$keyWords = array('keyWords'=>$searchData['keyWords'].' cultural');
-		$res = $this->getNarrativesList($keyWords,$pageSize);
+		$res = $this->getNarrativesList($keyWords,$pageSize,$offset);
 		$narrative['cultural_num'] = $res['num'];
 		$narrative['cultural_list'] = $res['list'];
 		
 		//Natural
 		$keyWords = array('keyWords'=>$searchData['keyWords'].' natural');
-		$res = $this->getNarrativesList($keyWords,$pageSize);
+		$res = $this->getNarrativesList($keyWords,$pageSize,$offset);
 		
 		$narrative['natural_num'] = $res['num'];
 		$narrative['natural_list'] = $res['list'];		
@@ -592,24 +599,48 @@ final class Search
 	 * Get Image
 	 * @param $size array(100,100)
 	 */
-	public function getImage($irn,$size=array(100,100))
+	public function getImage($irn, $size=array(100,100))
 	{
 		if(!is_numeric($irn) or $irn<0)
 		{
 			echo file_get_contents($this->defaultImage,'rb');
 			exit;
 		}
-		$ImageModule = $this->ImageModule();
+		
+		if(empty($size[0]) or !is_numeric($size[0]))
+		{
+			$size[0] = 100;
+		}
+		if(empty($size[1]) or !is_numeric($size[1]))
+		{
+			$size[1] = 100;
+		}		
+		
+		$ImageModule = $this->imageModule();
 		$ImageModule->findKey($irn);  
-		$result = $ImageModule->fetch('start', 0, 1, $this->ImageColumns);
-		//echo '<Pre>';
-		//print_r($result);exit;
-		$imgName = $result->rows[0]['DocIdentifier_tab']['1'];
-		$result =NULL;
-
-		//Can't got Server Image, So return defalut image
-		echo file_get_contents($this->defaultImage,'rb');
-		//return $this->defaultImage;
+		$result = $ImageModule->fetch('start', 0, 1, 
+			array('irn', 
+				'SummaryData', 
+				"resource{resource:only,width:$size[0],height:$size[1]}"
+			)
+		);
+		
+		if(!empty($result->rows[0]['resource']['file']))
+		{
+			$file = $result->rows[0]['resource']['file'];
+			header('Content-type: image/' . $result->rows[0]['resource']['mimeFormat']);
+		    while(true)
+        	{
+                $data = fread($file, 4096);
+                if ($data === false || strlen($data) == 0)
+                        break;
+                print $data;
+        	}			
+		}else
+		{
+			echo file_get_contents($this->defaultImage,'rb');	
+		}
+		exit;
 	}
 	
 
@@ -628,7 +659,7 @@ final class Search
 	 * 
 	 * Return Image Module
 	 */
-	public function ImageModule()
+	public function imageModule()
 	{
 		Config::set ( 'imu.module_table', 'emultimedia' );
 		return App::make ( 'ImuModule' );
@@ -681,7 +712,7 @@ final class Search
 	 * Get Narratives List
 	 * @param $searchData array
 	 */
-	private function getNarrativesList($searchData,$pageSize=0)
+	private function getNarrativesList($searchData,$pageSize=0,$offset=0)
 	{
 		$res = array('num'=>0,'list'=>array());
 		$query = $this->buildNarrativeQuery ( $searchData );
@@ -694,7 +725,7 @@ final class Search
 				$pageSize = $hits;
 			}
 			
-			$f = $narrativesModule->fetch ( 'start', 0,$pageSize, array_slice ( $this->narrativeColumns, 0, 5 ) );
+			$f = $narrativesModule->fetch ( 'start',$offset,$pageSize, array_slice ( $this->narrativeColumns, 0, 5 ) );
 			$res ['num'] = $f->hits;
 			
 			foreach ( $f->rows as $row )
